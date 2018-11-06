@@ -4,11 +4,22 @@ const createLambda = require("./createLambda.js");
 const fs = require('fs');
 const readline = require('readline');
 const { promisify } = require('util');
+const { homedir } = require('os');
+const config = {};
 
-if (args[0] === "init") {
+const getRegion = () => {
+  const configStr = fs.readFileSync(homedir() + '/.aws/config', 'utf8');
+  const defaultProfile = configStr.split('[').find(el => el.match('default'));
+  const regionLine = defaultProfile.split('\n').find(el => el.match('region'));
+  const region = regionLine.split('= ')[1];
+  config.region = region;
+};
+
+getRegion();
+
+ if (args[0] === "init") {
   // creates bam directory within current directory
   const dir = './bam';
-  const config = {};
 
   if (!fs.existsSync(dir)){
       fs.mkdirSync(dir);
@@ -23,41 +34,35 @@ if (args[0] === "init") {
     output: process.stdout
   });
 
-  rl.question[promisify.custom] = (arg) => {
-    return new Promise((resolve) => {
-      rl.question(arg, resolve);
-    });
-  };
+  // overwrites return value of promisify
+  rl.question[promisify.custom] = (prompt, defaultValue) => (
+    new Promise((resolve) => {
+      rl.question(prompt, resolve);
+      rl.write(defaultValue);
+    })
+  );
 
   const asyncQuestion = promisify(rl.question);
 
   const getUserDefaults = async () => {
     try {
-      await asyncQuestion('Please provide your AWS account number: ', (answer) => {
-        rl.close();
-        config['acctId'] = answer;
-      });
-      await asyncQuestion('Please provide your default region: ', (answer) => {
-        rl.close();
-        config['region'] = answer // || getRegion() || 'us-east-1';
-      });
-      await asyncQuestion('Please provide your default role (if you do not provide one, one will be created for you): ', (answer) => {
-        rl.close();
-        config['role'] = answer || 'defaultBamRole';
-      });
-
-
-      const configStr = JSON.stringify(config);
-      fs.writeFileSync('config.json', configStr);
-      process.exit();
+      config.accountNumber = await asyncQuestion('Please provide your AWS account number: ', '');
+      config.region = await asyncQuestion('Please provide your default region: ', config.region);
+      config.role = await asyncQuestion('Please provide your default role (if you do not provide one, one will be created for you): ', 'bamDefaultRole');
     } catch (err) {
       console.log(err, err.stack);
     }
-  }
+  };
 
-  getUserDefaults();
+  const seeConfig = async () => {
+    await getUserDefaults();
+    const configStr = JSON.stringify(config);
+    fs.writeFileSync('config.json', configStr);
+    process.exit();
+  };
+
+  seeConfig();
   // TODO: create policy template --> createPolicy, createRole --> add name of role to config
-  // TODO: get region from config file on local machine --> add to config
 } else if (args.slice(0,2).join(" ") === "create lambda") {
   createLambda(args[2]);
 } else {

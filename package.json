@@ -1,0 +1,29 @@
+{
+  "name": "bam-lambda",
+  "version": "1.0.2",
+  "main": "index.js",
+  "repository": "https://github.com/bam-lambda/bam.git",
+  "author": "bam-lambda",
+  "contributors": [
+    {
+      "name": "Jocie Moore",
+      "email": "hello@jociemoore.com"
+    },
+    {
+      "name": "Tak Sampson",
+      "email": "tak.sampson@gmail.com"
+    },
+    {
+      "name": "Jason Overby",
+      "email": "j@jasonoverby.com"
+    }
+  ],
+  "license": "MIT",
+  "bin": {
+    "bam": "./cli.js"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.348.0",
+    "uuid": "^3.3.2"
+  }
+}

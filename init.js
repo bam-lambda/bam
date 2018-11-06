@@ -2,6 +2,7 @@ const fs = require('fs');
 const readline = require('readline');
 const { promisify } = require('util');
 const { homedir } = require('os');
+const createRole = require('./createRole.js');
 
 const config = {};
 
@@ -52,13 +53,15 @@ module.exports = () => {
     }
   };
 
-  const seeConfig = async () => {
+  const writeConfig = async () => {
     await getUserDefaults();
     const configStr = JSON.stringify(config);
     fs.writeFileSync('config.json', configStr);
-    process.exit();
+    if (config.role === 'bamDefaultRole') createRole(config.accountNumber, config.region);
+    // process.exit();
   };
 
-  seeConfig();
+  writeConfig();
+
   // TODO: create policy template --> createPolicy, createRole --> add name of role to config
 };

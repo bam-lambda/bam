@@ -48,20 +48,37 @@ module.exports = () => {
       config.accountNumber = await asyncQuestion('Please provide your AWS account number: ', '');
       config.region = await asyncQuestion('Please provide your default region: ', config.region);
       config.role = await asyncQuestion('Please provide your default role (if you do not provide one, one will be created for you): ', 'bamDefaultRole');
+      rl.close();
     } catch (err) {
       console.log(err, err.stack);
     }
   };
 
   const writeConfig = async () => {
-    await getUserDefaults();
     const configStr = JSON.stringify(config);
     fs.writeFileSync('config.json', configStr);
-    if (config.role === 'bamDefaultRole') createRole(config.accountNumber, config.region);
-    // process.exit();
+    if (config.role === 'bamDefaultRole') {
+      await createRole();
+    }
   };
 
-  writeConfig();
+  const init = async () => {
+    try {
+      await getUserDefaults();
+      await console.log('got defaults?');
+      const result = await writeConfig();
+      result.then((data) => console.log('Role Created 0'));
+      await process.stdout.write('Role Created1');
+    } catch (err) {
+      console.log(err, err.stack);
+    } finally {
+      await console.log('Role Created2');
+    }
+  };
+
+  init().then(() => {
+    console.log('Role created 3');
+  });
 
   // TODO: create policy template --> createPolicy, createRole --> add name of role to config
 };

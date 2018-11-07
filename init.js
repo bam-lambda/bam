@@ -42,7 +42,7 @@ const getUserDefaults = async () => {
   try {
     config.accountNumber = await asyncQuestion('Please provide your AWS account number: ', '');
     config.region = await asyncQuestion('Please provide your default region: ', config.region);
-    config.role = await asyncQuestion('Please provide your default role (if you do not provide one, one will be created for you): ', 'bamDefaultRole');
+    config.role = await asyncQuestion('Please provide your default role (if you do not provide one, one will be created for you): ', 'defaultBamRole');
     rl.close();
   } catch (err) {
     console.log(err, err.stack);
@@ -51,7 +51,7 @@ const getUserDefaults = async () => {
 
 const defaultBamRoleExists = async () => {
   const asyncGetRole = promisify(iam.getRole.bind(iam));
-  
+
   try {
     await asyncGetRole({ RoleName: 'defaultBamRole' });
     console.log('defaultBamRole exists')
@@ -65,7 +65,7 @@ const writeConfig = async () => {
   const doesDefaultBamRoleExist = await defaultBamRoleExists();
   const configStr = JSON.stringify(config);
   fs.writeFileSync('config.json', configStr);
-  if (config.role === 'bamDefaultRole' && !doesDefaultBamRoleExist) {
+  if (config.role === 'defaultBamRole' && !doesDefaultBamRoleExist) {
     await createRole();
   }
 };

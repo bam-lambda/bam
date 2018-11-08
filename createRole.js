@@ -4,17 +4,6 @@ const { promisify } = require('util');
 const iam = new AWS.IAM();
 const AWSLambdaBasicExecutionRolePolicyARN  = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 
-// const promiseTryCatch = async (asyncFunc) => {
-//   let result;
-//   try {
-//     result = await asyncFunc();
-//   } catch (err) {
-//     return console.error(err);
-//   }
-//   return result;
-// };
-
-
 const rolePolicy = {
   Version: '2012-10-17',
   Statement: [
@@ -28,22 +17,22 @@ const rolePolicy = {
   ]
 };
 
-const roleParams = {
-  RoleName: 'defaultBamRole',
-  AssumeRolePolicyDocument: JSON.stringify(rolePolicy)
-};
-
-const getAttachParams = (roleName) => {
-  return {
+const getAttachParams = roleName => (
+  {
     RoleName: roleName,
     PolicyArn: AWSLambdaBasicExecutionRolePolicyARN
-  };
-};
+  }
+);
 
 const asyncCreateRole = promisify(iam.createRole.bind(iam));
 const asyncAttachPolicy = promisify(iam.attachRolePolicy.bind(iam));
 
-module.exports = async () => {
+module.exports = async (defaultRole) => {
+  const roleParams = {
+    RoleName: defaultRole,
+    AssumeRolePolicyDocument: JSON.stringify(rolePolicy)
+  };
+
   try {
     const roleData = await asyncCreateRole(roleParams);
     const attachedParams = getAttachParams(roleData.Role.RoleName);

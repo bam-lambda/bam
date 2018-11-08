@@ -7,13 +7,8 @@ const createConfigFile = require('./createConfigFile.js');
 const fs = require('fs');
 
 if (args[0] === 'init') {
-  createBamDirectory();
-  console.log('bam directory created');
-  createConfigFile();
-  console.log('config file created');
-  const config = fs.readFileSync('./bam/config.json', 'utf8');
-  // console.log(config);
-
+  createBamDirectory('.');
+  createConfigFile('.', 'defaultBamRole');
   init();
 } else if (args.slice(0, 2).join(' ') === 'create lambda') {
   createLambda(args[2]);

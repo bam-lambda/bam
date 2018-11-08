@@ -1,5 +1,7 @@
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
+const fs = require('fs');
+const { doesRoleExist } = require('./doesResourceExist.js');
 
 const iam = new AWS.IAM();
 const AWSLambdaBasicExecutionRolePolicyARN  = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
@@ -27,18 +29,21 @@ const getAttachParams = roleName => (
 const asyncCreateRole = promisify(iam.createRole.bind(iam));
 const asyncAttachPolicy = promisify(iam.attachRolePolicy.bind(iam));
 
-module.exports = async (defaultRole) => {
+module.exports = async (defaultRole, src) => {
   const roleParams = {
     RoleName: defaultRole,
     AssumeRolePolicyDocument: JSON.stringify(rolePolicy)
   };
+  const config = JSON.parse(fs.readFileSync(`${src}/bam/config.json`, 'utf8'));
 
-  try {
-    const roleData = await asyncCreateRole(roleParams);
-    const attachedParams = getAttachParams(roleData.Role.RoleName);
-    await asyncAttachPolicy(attachedParams);
-    console.log('success: role created with policy');
-  } catch (err) {
-    console.log(err, err.stack);
+  if (config.role === defaultRole && !(await doesRoleExist(defaultRole))) {
+    try {
+      const roleData = await asyncCreateRole(roleParams);
+      const attachedParams = getAttachParams(roleData.Role.RoleName);
+      await asyncAttachPolicy(attachedParams);
+      console.log('success: role created with policy');
+    } catch (err) {
+      console.log(err, err.stack);
+    }
   }
 };

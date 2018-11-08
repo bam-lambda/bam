@@ -6,4 +6,6 @@ module.exports = function createBamDirectory(src) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
   }
+
+  console.log('bam directory created');
 };

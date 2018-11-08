@@ -6,7 +6,7 @@ const fs = require('fs');
 describe('it inits', () => {
   beforeEach(() => {
     createBamDirectory('test');
-    createConfigFile();
+    createConfigFile('test', 'testDefaultBamRole');
   });
 
   afterEach(() => {

@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const fs = require('fs');
-const doesRoleExist = require('./doesRoleExist.js');
+const { doesRoleExist } = require('./doesResourceExist.js');
 
 const iam = new AWS.IAM();
 const AWSLambdaBasicExecutionRolePolicyARN  = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';

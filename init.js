@@ -25,9 +25,9 @@ module.exports = async () => {
 
   const getUserDefaults = async () => {
     try {
-      config.accountNumber = await asyncQuestion('Please provide your AWS account number: ', '');
+      config.accountNumber = await asyncQuestion('Please provide your AWS account number: ', process.env.AWS_ID);
       config.region = await asyncQuestion('Please provide your default region: ', config.region);
-      config.role = await asyncQuestion('Please provide your default role (if you do not provide one, one will be created for you): ', defaultRole);  
+      config.role = await asyncQuestion('Please provide your default role (if you do not provide one, one will be created for you): ', defaultRole);
       rl.close();
     } catch (err) {
       console.log(err, err.stack);

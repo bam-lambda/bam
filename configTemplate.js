@@ -8,14 +8,9 @@ const getRegion = () => {
   return regionLine.split('= ')[1];
 };
 
-const config = (roleName) => ({
-  role: roleName,
-  region: getRegion(),
-});
-
-module.exports = function createConfigFile(src, roleName) {
-  const configStr = JSON.stringify(config(roleName));
-  fs.writeFileSync(`${src}/bam/config.json`, configStr);
-
-  console.log('config file created');
+module.exports = function configTemplate(roleName) {
+  return {
+    role: roleName,
+    region: getRegion(),
+  };
 };

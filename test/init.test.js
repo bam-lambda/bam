@@ -1,19 +1,21 @@
-// TODO: add test for creating functions directory
+// TODO: move to cli.js test
+//  TODO: add test for creating functions directory
+//  TODO: add test for library.json creation
 
-const init = require('../init.js');
 const { promisify } = require('util');
 const createDirectory = require('../createDirectory.js');
-const createConfigFile = require('../createConfigFile.js');
+const createJSONFile = require('../createJSONFile.js');
 const fs = require('fs');
 const { doesRoleExist, doesPolicyExist } = require('../doesResourceExist.js');
 const createRole = require('../createRole.js');
-
+const configTemplate = require('../configTemplate.js');
 const AWS = require('aws-sdk');
+
 const iam = new AWS.IAM();
 
 const roleName = 'testDefaultBamRole';
 const policyName = 'AWSLambdaBasicExecutionRole';
-const testPolicyARN  = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
+const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
@@ -21,7 +23,8 @@ const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 describe('bam init', () => {
   beforeEach(() => {
     createDirectory('bam', 'test');
-    createConfigFile('test', roleName);
+    const config = configTemplate(roleName);
+    createJSONFile('config', './test/bam', config);
   });
 
   afterEach(() => {

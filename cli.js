@@ -12,7 +12,7 @@ if (args[0] === 'init') {
   createConfigFile('.', 'defaultBamRole');
   init();
 } else if (args.slice(0, 2).join(' ') === 'create lambda') {
-  createLambda(args[2]);
+  createLambda(args[2], '.');
 } else {
 
 }

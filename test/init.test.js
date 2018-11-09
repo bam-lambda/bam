@@ -24,7 +24,7 @@ describe('bam init', () => {
     createConfigFile('test', roleName);
   });
 
-  afterEach(async () => {
+  afterEach(() => {
    fs.unlinkSync('./test/bam/config.json');
    fs.rmdirSync('./test/bam');
   });

@@ -1,6 +1,8 @@
+// TODO: add test for creating functions directory
+
 const init = require('../init.js');
 const { promisify } = require('util');
-const createBamDirectory = require('../createBamDirectory.js');
+const createDirectory = require('../createDirectory.js');
 const createConfigFile = require('../createConfigFile.js');
 const fs = require('fs');
 const { doesRoleExist, doesPolicyExist } = require('../doesResourceExist.js');
@@ -18,7 +20,7 @@ const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 
 describe('bam init', () => {
   beforeEach(() => {
-    createBamDirectory('test');
+    createDirectory('bam', 'test');
     createConfigFile('test', roleName);
   });
 

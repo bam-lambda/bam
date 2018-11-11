@@ -5,7 +5,7 @@ const getRegion = require('./getRegion.js');
 
 
 module.exports = async function deleteLambda(lambdaName, src) {
-  const region = getRegion();  
+  const region = getRegion();
   const apiVersion = 'latest';
 
   // delete from AWS
@@ -25,5 +25,4 @@ module.exports = async function deleteLambda(lambdaName, src) {
   // write back to library
   fs.writeFileSync(`${src}/bam/functions/library.json`, JSON.stringify(functions));
   console.log(`${lambdaName} has been deleted.`);
-};
-
+}

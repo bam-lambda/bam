@@ -3,20 +3,19 @@
 //  TODO: add test for library.json creation
 
 const { promisify } = require('util');
+const AWS = require('aws-sdk');
+const fs = require('fs');
+
 const createDirectory = require('../createDirectory.js');
 const createJSONFile = require('../createJSONFile.js');
-const fs = require('fs');
 const { doesRoleExist, doesPolicyExist } = require('../doesResourceExist.js');
 const createRole = require('../createRole.js');
 const configTemplate = require('../configTemplate.js');
-const AWS = require('aws-sdk');
 
 const iam = new AWS.IAM();
-
 const roleName = 'testDefaultBamRole';
 const policyName = 'AWSLambdaBasicExecutionRole';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
-
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 
@@ -28,8 +27,8 @@ describe('bam init', () => {
   });
 
   afterEach(() => {
-   fs.unlinkSync('./test/bam/config.json');
-   fs.rmdirSync('./test/bam');
+    fs.unlinkSync('./test/bam/config.json');
+    fs.rmdirSync('./test/bam');
   });
 
   test('bam directory has been created', () => {
@@ -58,8 +57,8 @@ describe('bam init', () => {
     });
 
     afterEach(async () => {
-     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
-     await asyncDeleteRole({ RoleName: roleName});
+      await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
+      await asyncDeleteRole({ RoleName: roleName });
     });
 
     test('testDefaultBamRole is created', async () => {

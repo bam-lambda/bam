@@ -1,6 +1,7 @@
+const fs = require('fs');
+
 const createLambda = require('../createLambda.js');
 const createDirectory = require('../createDirectory');
-const fs = require('fs');
 
 describe('bam create lambda', () => {
   beforeEach(() => {

@@ -3,14 +3,14 @@ const { promisify } = require('util');
 const fs = require('fs');
 const AWS = require('aws-sdk');
 
-const createLambda = require('../createLambda.js');
-const createDirectory = require('../createDirectory');
-const deployLambda = require('../deployLambda.js');
-const createJSONFile = require('../createJSONFile');
-const deleteLambda = require('../deleteLambda');
-const configTemplate = require('../configTemplate');
-const createRole = require('../createRole');
-const { doesLambdaExist } = require('../doesResourceExist');
+const createLambda = require('../src/commands/createLambda.js');
+const createDirectory = require('../src/util/createDirectory');
+const deployLambda = require('../src/commands/deployLambda.js');
+const createJSONFile = require('../src/util/createJSONFile');
+const deleteLambda = require('../src/commands/deleteLambda');
+const configTemplate = require('../src/util/configTemplate');
+const createRole = require('../src/util/createRole');
+const { doesLambdaExist } = require('../src/util/doesResourceExist');
 
 const iam = new AWS.IAM();
 const roleName = 'testDefaultBamRole';

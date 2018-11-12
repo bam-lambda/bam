@@ -1,8 +1,7 @@
 const fs = require('fs');
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
-const getRegion = require('./getRegion.js');
-
+const getRegion = require('../util/getRegion.js');
 
 module.exports = async function deleteLambda(lambdaName, src) {
   const region = getRegion();
@@ -10,7 +9,9 @@ module.exports = async function deleteLambda(lambdaName, src) {
 
   // delete from AWS
   const lambda = new AWS.Lambda({ apiVersion, region });
-  const asyncLambdaDeleteFunction = promisify(lambda.deleteFunction.bind(lambda, { FunctionName: lambdaName }));
+  const asyncLambdaDeleteFunction = promisify(lambda.deleteFunction.bind(lambda, {
+    FunctionName: lambdaName,
+  }));
   await asyncLambdaDeleteFunction();
 
   // delete from local directories
@@ -25,4 +26,4 @@ module.exports = async function deleteLambda(lambdaName, src) {
   // write back to library
   fs.writeFileSync(`${src}/bam/functions/library.json`, JSON.stringify(functions));
   console.log(`${lambdaName} has been deleted.`);
-}
+};

@@ -1,12 +1,6 @@
 const fs = require('fs');
 const readline = require('readline');
-const { promisify } = require('util');
-const createRole = require('./createRole.js');
-const AWS = require('aws-sdk');
-//const asyncQuestion = require('./asyncQuestion.js');
-
-const iam = new AWS.IAM();
-
+const createRole = require('../util/createRole.js');
 
 module.exports = async () => {
   const config = JSON.parse(fs.readFileSync('./bam/config.json', 'utf8'));
@@ -14,11 +8,11 @@ module.exports = async () => {
 
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
 
   const asyncQuestion = (prompt, defaultValue) => (
-    new Promise((resolve, reject) => {
+    new Promise((resolve) => {
       rl.question(prompt, resolve);
       rl.write(defaultValue);
     })

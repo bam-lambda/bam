@@ -4,7 +4,7 @@ const fs = require('fs');
 const { doesRoleExist } = require('./doesResourceExist.js');
 
 const iam = new AWS.IAM();
-const AWSLambdaBasicExecutionRolePolicyARN  = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
+const AWSLambdaBasicExecutionRolePolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 
 const rolePolicy = {
   Version: '2012-10-17',
@@ -12,17 +12,17 @@ const rolePolicy = {
     {
       Effect: 'Allow',
       Principal: {
-        Service: 'lambda.amazonaws.com'
+        Service: 'lambda.amazonaws.com',
       },
-      Action: 'sts:AssumeRole'
-    }
-  ]
+      Action: 'sts:AssumeRole',
+    },
+  ],
 };
 
 const getAttachParams = roleName => (
   {
     RoleName: roleName,
-    PolicyArn: AWSLambdaBasicExecutionRolePolicyARN
+    PolicyArn: AWSLambdaBasicExecutionRolePolicyARN,
   }
 );
 
@@ -32,7 +32,7 @@ const asyncAttachPolicy = promisify(iam.attachRolePolicy.bind(iam));
 module.exports = async (defaultRole, src) => {
   const roleParams = {
     RoleName: defaultRole,
-    AssumeRolePolicyDocument: JSON.stringify(rolePolicy)
+    AssumeRolePolicyDocument: JSON.stringify(rolePolicy),
   };
   const config = JSON.parse(fs.readFileSync(`${src}/bam/config.json`, 'utf8'));
 

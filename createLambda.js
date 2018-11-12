@@ -1,4 +1,3 @@
-const uuid = require("uuid");
 const createDirectory = require('./createDirectory.js');
 const fs = require('fs');
 
@@ -14,5 +13,5 @@ const template = `exports.handler = async (event) => {
 module.exports = (lambdaName, src) => {
   createDirectory(lambdaName, `${src}/bam/functions`);
   fs.writeFileSync(`${src}/bam/functions/${lambdaName}/index.js`, template);
-  console.log(`go to ${src}/bam/functions/${lambdaName}/index.js to write your lambda`)
+  console.log(`go to ${src}/bam/functions/${lambdaName}/index.js to write your lambda`);
 };

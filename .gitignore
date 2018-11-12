@@ -1,0 +1,7 @@
+.DS_Store
+/bam
+node_modules/
+.env
+*.log
+yarn.*
+package-lock.json

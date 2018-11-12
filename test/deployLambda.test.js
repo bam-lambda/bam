@@ -1,3 +1,4 @@
+/* global jest, test, expect, describe, beforeEach, afterEach */
 const { promisify } = require('util');
 const fs = require('fs');
 const AWS = require('aws-sdk');

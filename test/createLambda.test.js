@@ -1,3 +1,4 @@
+/* global test, expect, describe, beforeEach, afterEach */
 const fs = require('fs');
 
 const createLambda = require('../createLambda.js');
@@ -10,15 +11,15 @@ describe('bam create lambda', () => {
   });
 
   afterEach(() => {
-   fs.unlinkSync('./test/bam/functions/testLambda/index.js');
-   fs.rmdirSync('./test/bam/functions/testLambda');
-   fs.rmdirSync('./test/bam/functions');
-   fs.rmdirSync('./test/bam');
+    fs.unlinkSync('./test/bam/functions/testLambda/index.js');
+    fs.rmdirSync('./test/bam/functions/testLambda');
+    fs.rmdirSync('./test/bam/functions');
+    fs.rmdirSync('./test/bam');
   });
 
   test('index.js exists within functions directory', () => {
     createLambda('testLambda', './test');
-    const template = fs.existsSync('./test/bam/functions/testLambda/index.js')
+    const template = fs.existsSync('./test/bam/functions/testLambda/index.js');
     expect(template).toBe(true);
   });
 });

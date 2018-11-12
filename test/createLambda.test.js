@@ -1,8 +1,8 @@
 /* global test, expect, describe, beforeEach, afterEach */
 const fs = require('fs');
 
-const createLambda = require('../createLambda.js');
-const createDirectory = require('../createDirectory');
+const createLambda = require('../src/commands/createLambda.js');
+const createDirectory = require('../src/util/createDirectory');
 
 describe('bam create lambda', () => {
   beforeEach(() => {

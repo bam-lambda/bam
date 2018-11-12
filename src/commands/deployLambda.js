@@ -1,8 +1,8 @@
 const fs = require('fs');
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
-const zipper = require('./zipper.js');
-const delay = require('./delay.js');
+const zipper = require('../util/zipper.js');
+const delay = require('../util/delay.js');
 
 const apiVersion = 'latest';
 
@@ -24,10 +24,11 @@ module.exports = async (lambdaName, description, src) => {
       console.log('error', err.code);
       if (err.code === 'InvalidParameterValueException') {
         await delay(3000);
-        return await tryToDeployLambda(params);
-      } else {
-        console.log(err, err.stack);
+        const deployed = await tryToDeployLambda(params);
+        return deployed;
       }
+
+      console.log(err, err.stack);
     }
   };
 

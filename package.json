@@ -20,7 +20,7 @@
   ],
   "license": "MIT",
   "bin": {
-    "bam": "./cli.js"
+    "bam": "./bin/cli.js"
   },
   "dependencies": {
     "aws-sdk": "^2.348.0",

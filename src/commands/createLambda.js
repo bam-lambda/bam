@@ -1,5 +1,5 @@
-const createDirectory = require('./createDirectory.js');
 const fs = require('fs');
+const createDirectory = require('../util/createDirectory.js');
 
 const template = `exports.handler = async (event) => {
   const response = {

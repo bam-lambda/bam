@@ -15,6 +15,7 @@ const deployApi = require('../src/commands/deployApi.js');
 const deleteLambda = require('../src/commands/deleteLambda');
 const { doesApiExist } = require('../src/util/doesResourceExist');
 const deleteApi = require('../src/commands/deleteApi');
+const delay = require('../src/util/delay.js');
 
 const iam = new AWS.IAM();
 const roleName = 'testDefaultBamRole';
@@ -30,7 +31,7 @@ const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 
 describe('bam deploy api', () => {
   beforeEach(async () => {
-    jest.setTimeout(25000);
+    jest.setTimeout(60000);
     createDirectory('bam', './test');
     createDirectory('functions', './test/bam/');
     createJSONFile('config', './test/bam', config);
@@ -52,6 +53,7 @@ describe('bam deploy api', () => {
     fs.rmdirSync('./test/bam');
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
+    await delay(30000);
   });
 
   test.skip('Endpoint responds to api call', async () => {

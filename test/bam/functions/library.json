@@ -1,0 +1,1 @@
+{"testBamLambda":{"arn":"arn:aws:lambda:us-east-2:411246819474:function:testBamLambda","description":"test description","api":{"endpoint":"https://7po4zrqm29.execute-api.us-east-2.amazonaws.com/test/testBamApi","restApiId":"7po4zrqm29"}}}

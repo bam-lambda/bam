@@ -91,7 +91,7 @@ module.exports = async function deployApi (resourceName, lambdaName, path, stage
  
     // write to library
     const functions = JSON.parse(fs.readFileSync(`${path}/bam/functions/library.json`));
-    functions[lambdaName].endpoint = endpoint;
+    functions[lambdaName].api = { endpoint, restApiId };
     fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
     console.log(`Api gateway deployed. Call ${lambdaName} at ${endpoint} (see ${path}/bam/functions/library.json)`);
   } catch (err) {

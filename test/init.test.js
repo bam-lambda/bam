@@ -1,4 +1,3 @@
-/* global test, expect, describe, beforeEach, afterEach */
 // TODO: move to cli.js test
 //  TODO: add test for creating functions directory
 //  TODO: add test for library.json creation

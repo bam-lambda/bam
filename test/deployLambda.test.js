@@ -1,4 +1,3 @@
-/* global jest, test, expect, describe, beforeEach, afterEach */
 const { promisify } = require('util');
 const fs = require('fs');
 const AWS = require('aws-sdk');
@@ -44,17 +43,17 @@ describe('bam create lambda', () => {
     await asyncDeleteRole({ RoleName: roleName });
   });
 
-  test('{lambdaName}.zip exists within ./test/bam/functions/{lambdaName}', () => {
+  test('Zip file exists within ./test/bam/functions/{lambdaName}', () => {
     const template = fs.existsSync(`./test/bam/functions/${lambdaName}/${lambdaName}.zip`);
     expect(template).toBe(true);
   });
 
-  test('{lambdaName} exists on AWS', async () => {
+  test('Lambda exists on AWS', async () => {
     const lambda = await doesLambdaExist(lambdaName);
     expect(lambda).toBe(true);
   });
 
-  test('{lambdaName} metadata exists within ./test/bam/functions/library.json', () => {
+  test('Lambda metadata exists within ./test/bam/functions/library.json', () => {
     const library = JSON.parse(fs.readFileSync('./test/bam/functions/library.json'));
     const lambda = library[lambdaName];
     expect(lambda).toBeTruthy();

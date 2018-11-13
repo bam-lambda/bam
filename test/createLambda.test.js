@@ -1,4 +1,3 @@
-/* global test, expect, describe, beforeEach, afterEach */
 const fs = require('fs');
 
 const createLambda = require('../src/commands/createLambda.js');

@@ -42,8 +42,22 @@ const doesLambdaExist = async (lambdaName) => {
   }
 };
 
+const doesApiExist = async (restApiId) => {
+  const api = new AWS.APIGateway({ apiVersion, region: getRegion() });
+  const asyncGetRestApi = promisify(api.getRestApi.bind(api));
+
+  try {
+    await asyncGetRestApi({ restApiId });
+    return true;
+  } catch (err) {
+    console.log(err, err.stack);
+    return false;
+  }
+};
+
 module.exports = {
   doesRoleExist,
   doesPolicyExist,
   doesLambdaExist,
+  doesApiExist,
 };

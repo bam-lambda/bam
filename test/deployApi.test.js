@@ -20,7 +20,6 @@ const delay = require('../src/util/delay.js');
 const iam = new AWS.IAM();
 const roleName = 'testDefaultBamRole';
 const lambdaName = 'testBamLambda';
-const resourceName = 'testBamApi';
 const stageName = 'test';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const config = configTemplate(roleName);
@@ -39,7 +38,7 @@ describe('bam deploy api', () => {
     await createRole(roleName, './test');
     createLambda(lambdaName, './test');
     await deployLambda(lambdaName, 'test description', './test');
-    await deployApi(resourceName, lambdaName, './test', stageName);
+    await deployApi(lambdaName, './test', stageName);
   });
 
   afterEach(async () => {

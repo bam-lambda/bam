@@ -2,15 +2,12 @@ const fs = require('fs');
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const uuid = require('uuid');
-const zipper = require('../util/zipper.js');
-const delay = require('../util/delay.js');
-const getRegion = require('../util/getRegion.js');
 const bamBam = require('../util/bamBam.js');
 
 const apiVersion = 'latest';
 
 
-module.exports = async function deployApi (resourceName, lambdaName, path, stageName='dev') {
+module.exports = async function deployApi(resourceName, lambdaName, path, stageName = 'dev') {
   const config = JSON.parse(fs.readFileSync(`${path}/bam/config.json`));
   const { region, accountNumber } = config;
   const lambda = new AWS.Lambda({ apiVersion, region });
@@ -43,23 +40,23 @@ module.exports = async function deployApi (resourceName, lambdaName, path, stage
 
     // add permission to lambda
     const sourceArn = `arn:aws:execute-api:${region}:${accountNumber}:${restApiId}/*/${httpMethod}/${resourceName}`;
-    const addPermissionParams = { 
-                                  FunctionName: lambdaName,
-                                  StatementId: uuid.v4(),
-                                  Principal: 'apigateway.amazonaws.com',
-                                  Action: 'lambda:InvokeFunction',
-                                  SourceArn: sourceArn
-                                };
+    const addPermissionParams = {
+      FunctionName: lambdaName,
+      StatementId: uuid.v4(),
+      Principal: 'apigateway.amazonaws.com',
+      Action: 'lambda:InvokeFunction',
+      SourceArn: sourceArn,
+    };
     const actionStr = `add permission to ${resourceName}`;
     const successStr = `permission granted to invoke ${lambdaName}`;
     await bamBam(asyncAddPermission, addPermissionParams, actionStr, successStr);
 
     // put method
     const putMethodParams = {
-                              restApiId,
-                              resourceId,
-                              httpMethod,
-                              authorizationType: 'NONE',
+      restApiId,
+      resourceId,
+      httpMethod,
+      authorizationType: 'NONE',
     };
     await asyncPutMethod(putMethodParams);
 
@@ -71,7 +68,7 @@ module.exports = async function deployApi (resourceName, lambdaName, path, stage
       type: 'AWS_PROXY',
       integrationHttpMethod: 'POST',
       uri: `arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${region}:${accountNumber}:function:${lambdaName}/invocations`,
-    }
+    };
     await asyncPutIntegration(putIntegrationParams);
 
     // put method response
@@ -79,7 +76,7 @@ module.exports = async function deployApi (resourceName, lambdaName, path, stage
       httpMethod,
       resourceId,
       restApiId,
-      statusCode: '200'
+      statusCode: '200',
     };
     await asyncPutMethodResponse(putMethodResponseParams);
 
@@ -88,7 +85,7 @@ module.exports = async function deployApi (resourceName, lambdaName, path, stage
 
     // api endpoint
     const endpoint = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}/${resourceName}`;
- 
+
     // write to library
     const functions = JSON.parse(fs.readFileSync(`${path}/bam/functions/library.json`));
     functions[lambdaName].api = { endpoint, restApiId };
@@ -97,10 +94,4 @@ module.exports = async function deployApi (resourceName, lambdaName, path, stage
   } catch (err) {
     console.log(err);
   }
-  
-
 };
-
-
-
-

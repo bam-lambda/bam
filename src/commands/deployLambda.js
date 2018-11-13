@@ -2,7 +2,7 @@ const fs = require('fs');
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const zipper = require('../util/zipper.js');
-const delay = require('../util/delay.js');
+const bamBam = require('../util/bamBam.js');
 
 const apiVersion = 'latest';
 
@@ -13,24 +13,6 @@ module.exports = async (lambdaName, description, src) => {
   const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
   const zippedFileName = await zipper(lambdaName, src);
   const zipContents = fs.readFileSync(zippedFileName);
-
-  const tryToDeployLambda = async (params) => {
-    try {
-      console.log('trying to deploy to AWS');
-      const data = await asyncLambdaCreateFunction(params);
-      console.log(`success: lambda ${params.FunctionName} deployed`);
-      return data;
-    } catch (err) {
-      console.log('error', err.code);
-      if (err.code === 'InvalidParameterValueException') {
-        await delay(3000);
-        const deployed = await tryToDeployLambda(params);
-        return deployed;
-      }
-
-      console.log(err, err.stack);
-    }
-  };
 
   const deployLambda = async () => {
     const params = {
@@ -44,7 +26,9 @@ module.exports = async (lambdaName, description, src) => {
       Description: description,
     };
 
-    return tryToDeployLambda(params);
+    const actionStr = `deploy ${lambdaName}`;
+    const successStr = `deployed ${lambdaName}`;
+    return bamBam(asyncLambdaCreateFunction, params, actionStr, successStr);
   };
 
   const writeToLib = (data) => {

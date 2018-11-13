@@ -8,7 +8,6 @@ module.exports = async function bamBam (asyncCallback, params, actionStr, succes
     return data;
   } catch (err) {
     if (err.code === retryError) {
-      console.log('error', err.code);
       await delay(3000);
       const deployed = await bamBam(asyncCallback, params, actionStr, successStr, retryError);
       return deployed;

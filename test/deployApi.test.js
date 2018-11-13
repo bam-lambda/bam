@@ -1,6 +1,6 @@
-/* global jest, test, expect, describe, beforeEach, afterEach */
 const { promisify } = require('util');
 const fs = require('fs');
+const https = require('https');
 const AWS = require('aws-sdk');
 
 const createDirectory = require('../src/util/createDirectory');
@@ -44,7 +44,7 @@ describe('bam deploy api', () => {
 
   afterEach(async () => {
     const library = JSON.parse(fs.readFileSync('./test/bam/functions/library.json'));
-    const restApiId = library[lambdaName].api.restApiId;
+    const { restApiId } = library[lambdaName].api;
     await deleteApi(restApiId, './test');
     await deleteLambda(lambdaName, './test');
     fs.unlinkSync('./test/bam/functions/library.json');
@@ -56,19 +56,36 @@ describe('bam deploy api', () => {
     await delay(30000);
   });
 
-  test.skip('Endpoint responds to api call', async () => {
+  test('Response is 200 when hitting endpoint from library.json', async () => {
+    const library = JSON.parse(fs.readFileSync('./test/bam/functions/library.json'));
+    const url = library[lambdaName].api.endpoint;
+    let responseStatus;
 
+    const asyncHttpsGet = endpoint => (
+      new Promise((resolve) => {
+        https.get(endpoint, resolve);
+      })
+    );
+
+    try {
+      const response = await asyncHttpsGet(url);
+      responseStatus = response.statusCode;
+    } catch (err) {
+      console.log(err, err.stack);
+    }
+
+    expect(responseStatus).toEqual(200);
   });
 
   test('Api metadata exists within ./test/bam/functions/library.json', () => {
     const library = JSON.parse(fs.readFileSync('./test/bam/functions/library.json'));
-    const api = library[lambdaName].api;
+    const { api } = library[lambdaName];
     expect(api).toBeTruthy();
   });
 
   test('Api endpoint exists on AWS', async () => {
     const library = JSON.parse(fs.readFileSync('./test/bam/functions/library.json'));
-    const restApiId = library[lambdaName].api.restApiId;
+    const { restApiId } = library[lambdaName].api;
     const apiExists = await doesApiExist(restApiId);
     expect(apiExists).toBe(true);
   });

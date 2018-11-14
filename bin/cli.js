@@ -23,6 +23,7 @@ const [,, command, lambdaName] = process.argv;
     const [description] = await getUserInput([['Please give a brief description of your lambda: ', '']]);
     await deployLambda(lambdaName, description, '.');
     deployApi(lambdaName, '.');
-  // } else {
+  } else {
+    console.log(`Command: ${command} is not valid.`);
   }
 })();

@@ -1,13 +1,13 @@
 const readline = require('readline');
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-
 const answers = [];
 
 module.exports = async function getUserInput(prompts) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
   for (let i = 0; i < prompts.length; i += 1) {
     const [question, defaultAnswer] = prompts[i];
     const prompt = new Promise((resolve, reject) => {
@@ -24,6 +24,5 @@ module.exports = async function getUserInput(prompts) {
   }
 
   rl.close();
-  // process.stdin.destroy();
   return answers;
 };

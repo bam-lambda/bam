@@ -20,10 +20,9 @@ const [,, command, lambdaName] = process.argv;
     }
     createLambda(lambdaName, '.');
   } else if (command === 'deploy') {
-    const description = await getUserInput('Please give a brief description of your lambda: ', '');
+    const [description] = await getUserInput([['Please give a brief description of your lambda: ', '']]);
     await deployLambda(lambdaName, description, '.');
     deployApi(lambdaName, '.');
-  } else {
-
+  // } else {
   }
 })();

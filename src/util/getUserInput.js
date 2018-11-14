@@ -24,24 +24,6 @@ module.exports = async function getUserInput(prompts) {
   }
 
   rl.close();
-  process.stdin.destroy();
+  // process.stdin.destroy();
   return answers;
 };
-
-/*
-//ask user for their name, and then echo it to the console
-rl.setPrompt("What is your name?");
-rl.prompt(); //output the prompt
-
-//when the user response, a 'line' event will trigger
-rl.on('line', function(answer) {
-    //echo the user's response to the console
-    console.log(answer.trim())
-});
-rl.close();
-
-//when the readline connection closes, a 'close' event will trigger
-rl.on('close', function() {
-    console.log("Bye!");
-});
-*/

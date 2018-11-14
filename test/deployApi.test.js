@@ -25,6 +25,21 @@ const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecut
 const config = configTemplate(roleName);
 config.accountNumber = process.env.AWS_ID;
 
+const testLambda = `
+  exports.handler = async (event) => {
+    const queryParams = event.queryStringParameters;
+    const name = queryParams.name;
+
+    const html = '<h1>' + name + '</h1>';
+
+    return {
+      statusCode: 200,
+      headers: { 'content-type': 'text/html' },
+      body: html,
+    };
+  };
+`;
+
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 
@@ -37,8 +52,6 @@ describe('bam deploy api', () => {
     createJSONFile('library', './test/bam/functions', {});
     await createRole(roleName, './test');
     createLambda(lambdaName, './test');
-    await deployLambda(lambdaName, 'test description', './test');
-    await deployApi(lambdaName, './test', stageName);
   });
 
   afterEach(async () => {
@@ -56,6 +69,9 @@ describe('bam deploy api', () => {
   });
 
   test('Response is 200 when hitting endpoint from library.json', async () => {
+    await deployLambda(lambdaName, 'test description', './test');
+    await deployApi(lambdaName, './test', stageName);
+
     const library = JSON.parse(fs.readFileSync('./test/bam/functions/library.json'));
     const url = library[lambdaName].api.endpoint;
     let responseStatus;
@@ -76,16 +92,50 @@ describe('bam deploy api', () => {
     expect(responseStatus).toEqual(200);
   });
 
-  test('Api metadata exists within ./test/bam/functions/library.json', () => {
+  test('Api metadata exists within ./test/bam/functions/library.json', async () => {
+    await deployLambda(lambdaName, 'test description', './test');
+    await deployApi(lambdaName, './test', stageName);
+
     const library = JSON.parse(fs.readFileSync('./test/bam/functions/library.json'));
     const { api } = library[lambdaName];
     expect(api).toBeTruthy();
   });
 
   test('Api endpoint exists on AWS', async () => {
+    await deployLambda(lambdaName, 'test description', './test');
+    await deployApi(lambdaName, './test', stageName);
+
     const library = JSON.parse(fs.readFileSync('./test/bam/functions/library.json'));
     const { restApiId } = library[lambdaName].api;
     const apiExists = await doesApiExist(restApiId);
     expect(apiExists).toBe(true);
+  });
+
+  test('Response contains query param in body', async () => {
+    fs.writeFileSync(`./test/bam/functions/${lambdaName}/index.js`, testLambda);
+    await deployLambda(lambdaName, 'test description', './test');
+    await deployApi(lambdaName, './test', stageName);
+
+    const library = JSON.parse(fs.readFileSync('./test/bam/functions/library.json'));
+    const url = `${library[lambdaName].api.endpoint}?name=John`;
+    let responseBody;
+
+    const asyncHttpsGet = endpoint => (
+      new Promise((resolve) => {
+        https.get(endpoint, resolve);
+      })
+    );
+
+    try {
+      const response = await asyncHttpsGet(url);
+      response.setEncoding('utf8');
+      response.on('data', (data) => {
+        console.log(data);
+        responseBody = data;
+        expect(responseBody).toMatch('John');
+      });
+    } catch (err) {
+      console.log(err, err.stack);
+    }
   });
 });

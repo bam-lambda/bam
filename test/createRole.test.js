@@ -4,9 +4,9 @@ const fs = require('fs');
 
 const createDirectory = require('../src/util/createDirectory.js');
 const createJSONFile = require('../src/util/createJSONFile.js');
-const { doesRoleExist, doesPolicyExist } = require('../src/util/doesResourceExist.js');
-const createRole = require('../src/util/createRole.js');
-const configTemplate = require('../src/util/configTemplate.js');
+const { doesRoleExist, doesPolicyExist } = require('../src/aws/doesResourceExist.js');
+const createRole = require('../src/aws/createRole.js');
+const configTemplate = require('../templates/configTemplate.js');
 
 const iam = new AWS.IAM();
 const roleName = 'testDefaultBamRole';

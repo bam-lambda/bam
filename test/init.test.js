@@ -2,7 +2,7 @@ const fs = require('fs');
 
 const createDirectory = require('../src/util/createDirectory.js');
 const createJSONFile = require('../src/util/createJSONFile.js');
-const configTemplate = require('../src/util/configTemplate.js');
+const configTemplate = require('../templates/configTemplate.js');
 
 const roleName = 'testDefaultBamRole';
 

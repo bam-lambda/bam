@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
-const getRegion = require('./getRegion');
+const getRegion = require('../util/getRegion');
 
 const iam = new AWS.IAM();
 const apiVersion = 'latest';

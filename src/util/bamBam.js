@@ -1,4 +1,4 @@
-const delay = require('../util/delay.js');
+const delay = require('./delay.js');
 
 module.exports = async function bamBam (asyncCallback, params, actionStr, successStr, retryError='InvalidParameterValueException') {
   try {

@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 const fs = require('fs');
-const createLambda = require('../src/commands/createLambda.js');
-const getUserDefaults = require('../src/commands/getUserDefaults.js');
+const createLambda = require('../src/aws/createLambda.js');
+const getUserDefaults = require('../src/util/getUserDefaults.js');
 const init = require('../src/util/init.js');
-const createRole = require('../src/util/createRole.js');
-const deployLambda = require('../src/commands/deployLambda.js');
+const createRole = require('../src/aws/createRole.js');
+const deployLambda = require('../src/aws/deployLambda.js');
 const asyncQuestion = require('../src/util/asyncQuestion.js');
-const deployApi = require('../src/commands/deployApi.js');
+const deployApi = require('../src/aws/deployApi.js');
 
 const defaultRole = 'defaultBamRole';
 const [,, command, lambdaName] = process.argv;

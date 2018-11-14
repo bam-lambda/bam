@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const createLambda = require('../src/commands/createLambda.js');
+const createLambda = require('../src/aws/createLambda.js');
 const createDirectory = require('../src/util/createDirectory');
 
 describe('bam create lambda', () => {

@@ -1,6 +1,6 @@
 const createDirectory = require('./createDirectory.js');
 const createJSONFile = require('./createJSONFile.js');
-const configTemplate = require('./configTemplate.js');
+const configTemplate = require('../../templates/configTemplate.js');
 
 const defaultRole = 'defaultBamRole';
 const configJSON = configTemplate(defaultRole);

@@ -6,7 +6,6 @@ const bamBam = require('../util/bamBam.js');
 
 const apiVersion = 'latest';
 
-
 module.exports = async function deployApi(lambdaName, path, stageName = 'dev') {
   const config = JSON.parse(fs.readFileSync(`${path}/bam/config.json`));
   const { region, accountNumber } = config;

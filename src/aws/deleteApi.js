@@ -14,10 +14,9 @@ module.exports = async function deleteApi(restApiId, path) {
 
   // read from library and remove property
   const functions = JSON.parse(fs.readFileSync(`${path}/bam/functions/library.json`));
-  const lambda = Object.values(functions).find((obj) => obj.api && obj.api.restApiId === restApiId);
+  const lambda = Object.values(functions).find(obj => obj.api && obj.api.restApiId === restApiId);
   delete lambda.api;
-console.log(lambda)
   // write back to library
   fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
-  console.log(`API has been deleted.`);
+  console.log('API has been deleted.');
 };

@@ -4,23 +4,22 @@ const https = require('https');
 const AWS = require('aws-sdk');
 
 const createDirectory = require('../src/util/createDirectory');
-const configTemplate = require('../src/util/configTemplate');
-const createRole = require('../src/util/createRole');
+const configTemplate = require('../templates/configTemplate');
+const createRole = require('../src/aws/createRole');
 const createJSONFile = require('../src/util/createJSONFile');
 
-const createLambda = require('../src/commands/createLambda.js');
-const deployLambda = require('../src/commands/deployLambda.js');
-const deployApi = require('../src/commands/deployApi.js');
+const createLambda = require('../src/aws/createLambda.js');
+const deployLambda = require('../src/aws/deployLambda.js');
+const deployApi = require('../src/aws/deployApi.js');
 
-const deleteLambda = require('../src/commands/deleteLambda');
-const { doesApiExist } = require('../src/util/doesResourceExist');
-const deleteApi = require('../src/commands/deleteApi');
+const deleteLambda = require('../src/aws/deleteLambda');
+const { doesApiExist } = require('../src/aws/doesResourceExist');
+const deleteApi = require('../src/aws/deleteApi');
 const delay = require('../src/util/delay.js');
 
 const iam = new AWS.IAM();
 const roleName = 'testDefaultBamRole';
 const lambdaName = 'testBamLambda';
-const resourceName = 'testBamApi';
 const stageName = 'test';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const config = configTemplate(roleName);
@@ -39,7 +38,7 @@ describe('bam deploy api', () => {
     await createRole(roleName, './test');
     createLambda(lambdaName, './test');
     await deployLambda(lambdaName, 'test description', './test');
-    await deployApi(resourceName, lambdaName, './test', stageName);
+    await deployApi(lambdaName, './test', stageName);
   });
 
   afterEach(async () => {

@@ -1,6 +1,5 @@
 const fs = require('fs');
 const readline = require('readline');
-const createRole = require('../util/createRole.js');
 
 module.exports = async () => {
   const config = JSON.parse(fs.readFileSync('./bam/config.json', 'utf8'));
@@ -36,6 +35,5 @@ module.exports = async () => {
 
   await getUserDefaults();
   writeConfig();
-  await createRole(defaultRole, '.');
   console.log('success: config file complete');
 };

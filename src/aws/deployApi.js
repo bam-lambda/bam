@@ -6,8 +6,7 @@ const bamBam = require('../util/bamBam.js');
 
 const apiVersion = 'latest';
 
-
-module.exports = async function deployApi(resourceName, lambdaName, path, stageName = 'dev') {
+module.exports = async function deployApi(lambdaName, path, stageName = 'dev') {
   const config = JSON.parse(fs.readFileSync(`${path}/bam/config.json`));
   const { region, accountNumber } = config;
   const lambda = new AWS.Lambda({ apiVersion, region });
@@ -29,17 +28,17 @@ module.exports = async function deployApi(resourceName, lambdaName, path, stageN
   // Sequence:
   try {
     // create rest api
-    const restApiId = (await asyncCreateApi({ name: resourceName })).id;
+    const restApiId = (await asyncCreateApi({ name: lambdaName })).id;
 
     // get resources
     const parentId = (await asyncGetResources({ restApiId })).items[0].id;
 
     // create resource
-    const createResourceParams = { restApiId, parentId, pathPart: resourceName };
+    const createResourceParams = { restApiId, parentId, pathPart: lambdaName };
     const resourceId = (await asyncCreateResource(createResourceParams)).id;
 
     // add permission to lambda
-    const sourceArn = `arn:aws:execute-api:${region}:${accountNumber}:${restApiId}/*/${httpMethod}/${resourceName}`;
+    const sourceArn = `arn:aws:execute-api:${region}:${accountNumber}:${restApiId}/*/${httpMethod}/${lambdaName}`;
     const addPermissionParams = {
       FunctionName: lambdaName,
       StatementId: uuid.v4(),
@@ -47,7 +46,7 @@ module.exports = async function deployApi(resourceName, lambdaName, path, stageN
       Action: 'lambda:InvokeFunction',
       SourceArn: sourceArn,
     };
-    const actionStr = `add permission to ${resourceName}`;
+    const actionStr = `add permission to ${lambdaName}`;
     const successStr = `permission granted to invoke ${lambdaName}`;
     await bamBam(asyncAddPermission, addPermissionParams, actionStr, successStr);
 
@@ -84,7 +83,7 @@ module.exports = async function deployApi(resourceName, lambdaName, path, stageN
     await asyncCreateDeployment({ restApiId, stageName });
 
     // api endpoint
-    const endpoint = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}/${resourceName}`;
+    const endpoint = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}/${lambdaName}`;
 
     // write to library
     const functions = JSON.parse(fs.readFileSync(`${path}/bam/functions/library.json`));

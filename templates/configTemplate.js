@@ -1,4 +1,4 @@
-const getRegion = require('./getRegion.js');
+const getRegion = require('../src/util/getRegion.js');
 
 module.exports = function configTemplate(roleName) {
   return {

@@ -25,41 +25,6 @@ const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecut
 const config = configTemplate(roleName);
 config.accountNumber = process.env.AWS_ID;
 
-const testLambda = `
-  exports.handler = async (event) => {
-    const queryParams = event.queryStringParameters;
-    const name = queryParams.name;
-
-    const html = '<h1>' + name + '</h1>';
-
-    return {
-      statusCode: 200,
-      headers: { 'content-type': 'text/html' },
-      body: html,
-    };
-  };
-`;
-
-const testLambdaWithDependencies = `
-  const uuid = require('uuid');
-  const util = require('util');
-  const moment = require('moment');
-
-  exports.handler = async (event) => {
-    const uuidP = '<p>uuid' + uuid.v4() + '</p>'
-    const momentP = '<p>' + moment('01/12/2016', 'DD/MM/YYYY', true).format() + '</p>'
-    const utilP = '<p>' +  util.inspect({cool: 'as ice'}) + '</p>'
-
-    const html = uuidP + momentP + utilP;
-
-    return {
-      statusCode: 200,
-      headers: { 'content-type': 'text/html' },
-      body: html,
-    };
-  };
-`;
-
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 
@@ -132,7 +97,8 @@ describe('bam deploy api', () => {
   });
 
   test('Response contains query param in body', async () => {
-    fs.writeFileSync(`./test/bam/functions/${lambdaName}/index.js`, testLambda);
+    const testLambdaWithQueryParams = fs.readFileSync('./test/templates/testLambdaWithQueryParams.js');
+    fs.writeFileSync(`./test/bam/functions/${lambdaName}/index.js`, testLambdaWithQueryParams);
     await deployLambda(lambdaName, 'test description', './test');
     await deployApi(lambdaName, './test', stageName);
 
@@ -161,6 +127,7 @@ describe('bam deploy api', () => {
 
   describe('lambda with dependencies', () => {
     beforeEach(async () => {
+      const testLambdaWithDependencies = fs.readFileSync('./test/templates/testLambdaWithDependencies.js');
       fs.writeFileSync(`./test/bam/functions/${lambdaName}/index.js`, testLambdaWithDependencies);
       await deployLambda(lambdaName, 'test description', './test');
       await deployApi(lambdaName, './test', stageName);

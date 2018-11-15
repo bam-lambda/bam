@@ -2,8 +2,11 @@ const fs = require('fs');
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const getRegion = require('../util/getRegion.js');
+const rimraf = require('rimraf');
 
-module.exports = async function deleteLambda(lambdaName, src) {
+const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
+
+module.exports = async function deleteLambda(lambdaName, path) {
   const region = getRegion();
   const apiVersion = 'latest';
 
@@ -15,15 +18,17 @@ module.exports = async function deleteLambda(lambdaName, src) {
   await asyncLambdaDeleteFunction();
 
   // delete from local directories
-  fs.unlinkSync(`${src}/bam/functions/${lambdaName}/index.js`);
-  fs.unlinkSync(`${src}/bam/functions/${lambdaName}/${lambdaName}.zip`);
-  fs.rmdirSync(`${src}/bam/functions/${lambdaName}`);
+  try {
+    await asyncRimRaf(`${path}/bam/functions/${lambdaName}`);
+  } catch (err) {
+    console.log(err);
+  }
 
   // read from library and remove property
-  const functions = JSON.parse(fs.readFileSync(`${src}/bam/functions/library.json`));
+  const functions = JSON.parse(fs.readFileSync(`${path}/bam/functions/library.json`));
   delete functions[lambdaName];
 
   // write back to library
-  fs.writeFileSync(`${src}/bam/functions/library.json`, JSON.stringify(functions));
+  fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
   console.log(`${lambdaName} has been deleted.`);
 };

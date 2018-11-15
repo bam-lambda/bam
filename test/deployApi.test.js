@@ -19,26 +19,11 @@ const delay = require('../src/util/delay.js');
 
 const iam = new AWS.IAM();
 const roleName = 'testDefaultBamRole';
-const lambdaName = 'testBamLambda';
+const lambdaName = 'testBamLambda1';
 const stageName = 'test';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const config = configTemplate(roleName);
 config.accountNumber = process.env.AWS_ID;
-
-const testLambda = `
-  exports.handler = async (event) => {
-    const queryParams = event.queryStringParameters;
-    const name = queryParams.name;
-
-    const html = '<h1>' + name + '</h1>';
-
-    return {
-      statusCode: 200,
-      headers: { 'content-type': 'text/html' },
-      body: html,
-    };
-  };
-`;
 
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
@@ -112,7 +97,8 @@ describe('bam deploy api', () => {
   });
 
   test('Response contains query param in body', async () => {
-    fs.writeFileSync(`./test/bam/functions/${lambdaName}/index.js`, testLambda);
+    const testLambdaWithQueryParams = fs.readFileSync('./test/templates/testLambdaWithQueryParams.js');
+    fs.writeFileSync(`./test/bam/functions/${lambdaName}/index.js`, testLambdaWithQueryParams);
     await deployLambda(lambdaName, 'test description', './test');
     await deployApi(lambdaName, './test', stageName);
 
@@ -137,5 +123,63 @@ describe('bam deploy api', () => {
     } catch (err) {
       console.log(err, err.stack);
     }
+  });
+
+  describe('lambda with dependencies', () => {
+    beforeEach(async () => {
+      const testLambdaWithDependencies = fs.readFileSync('./test/templates/testLambdaWithDependencies.js');
+      fs.writeFileSync(`./test/bam/functions/${lambdaName}/index.js`, testLambdaWithDependencies);
+      await deployLambda(lambdaName, 'test description', './test');
+      await deployApi(lambdaName, './test', stageName);
+    });
+
+    test('Response contains output from dependencies in body', async () => {
+      const library = JSON.parse(fs.readFileSync('./test/bam/functions/library.json'));
+      const url = library[lambdaName].api.endpoint;
+      let responseBody;
+
+      const asyncHttpsGet = endpoint => (
+        new Promise((resolve) => {
+          https.get(endpoint, resolve);
+        })
+      );
+
+      try {
+        const response = await asyncHttpsGet(url);
+        response.setEncoding('utf8');
+        response.on('data', (data) => {
+          responseBody = data;
+          expect(responseBody).toMatch('uuid');
+          expect(responseBody).toMatch('2016-12');
+          expect(responseBody).toMatch('cool');
+        });
+      } catch (err) {
+        console.log(err, err.stack);
+      }
+    });
+
+    test('package.json file is created', async () => {
+      const packageJSONExists = fs.existsSync(`./test/bam/functions/${lambdaName}/package.json`);
+      const packageLockJSONExists = fs.existsSync(`./test/bam/functions/${lambdaName}/package-lock.json`);
+      expect(packageJSONExists).toBe(true);
+      expect(packageLockJSONExists).toBe(true);
+    });
+
+    test('node modules directory is created', async () => {
+      const nodeModulesDirExists = fs.existsSync(`./test/bam/functions/${lambdaName}/node_modules`);
+      expect(nodeModulesDirExists).toBe(true);
+    });
+
+    test('node modules directory contains dependencies', async () => {
+      const uuid = fs.existsSync(`./test/bam/functions/${lambdaName}/node_modules/uuid`);
+      const moment = fs.existsSync(`./test/bam/functions/${lambdaName}/node_modules/moment`);
+      expect(uuid).toBe(true);
+      expect(moment).toBe(true);
+    });
+
+    test('node modules directory does not contain native node modules', async () => {
+      const util = fs.existsSync(`./test/bam/functions/${lambdaName}/node_modules/util`);
+      expect(util).toBe(false);
+    });
   });
 });

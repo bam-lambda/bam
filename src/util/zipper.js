@@ -6,7 +6,7 @@ const packageTemplateObj = {
   dependencies: {},
 };
 
-async function zipper(lambdaName, path) {
+module.exports = async function zipper(lambdaName, path) {
   const isNativeModule = (name) => {
     const nativeModules = Object.keys(process.binding('natives'));
     return !(nativeModules.indexOf(name) === -1);
@@ -14,7 +14,7 @@ async function zipper(lambdaName, path) {
 
   const npmDependencies = () => {
     const lambdaFile = fs.readFileSync(`${path}/bam/functions/${lambdaName}/index.js`, 'utf8');
-    const dependencies = lambdaFile.match(/require\([^)]+\)/) || [];
+    const dependencies = lambdaFile.match(/require\([^)]+\)/g) || [];
     return dependencies.map(pkg => pkg.slice(9, -2)).filter(pkg => !isNativeModule(pkg));
   };
 
@@ -36,13 +36,14 @@ async function zipper(lambdaName, path) {
     }
 
     await installPackages();
-    // TODO: zip all together
-  } else {
-    // await exec(`zip -r ${lambdaName} index.js`, { cwd: dir });
   }
 
-  console.log(`zipped file was created at ${dir}/${lambdaName}.zip`);
-  return `${dir}/${lambdaName}.zip`;
-}
+  try {
+    await exec(`zip -r ${lambdaName} .`, { cwd: dir });
+    console.log(`zipped file was created at ${dir}/${lambdaName}.zip`);
+  } catch (err) {
+    console.log(err, err.stack);
+  }
 
-zipper('lambdaDambda', '.');
+  return `${dir}/${lambdaName}.zip`;
+};

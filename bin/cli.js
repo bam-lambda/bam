@@ -7,6 +7,7 @@ const createRole = require('../src/aws/createRole.js');
 const deployLambda = require('../src/aws/deployLambda.js');
 const getUserInput = require('../src/util/getUserInput.js');
 const deployApi = require('../src/aws/deployApi.js');
+const spinner = require('../src/util/spinner.js');
 
 const defaultRole = 'defaultBamRole';
 const [,, command, lambdaName] = process.argv;
@@ -18,6 +19,7 @@ const [,, command, lambdaName] = process.argv;
       await createRole(defaultRole, '.');
       await getUserDefaults();
     }
+    await spinner();
     createLambda(lambdaName, '.');
   } else if (command === 'deploy') {
     const [description] = await getUserInput([['Please give a brief description of your lambda: ', '']]);

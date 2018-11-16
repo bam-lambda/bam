@@ -3,7 +3,7 @@ const createDirectory = require('../util/createDirectory.js');
 
 const lambdaTemplate = fs.readFileSync('./templates/lambdaTemplate.js', 'utf8');
 
-module.exports = (lambdaName, path) => {
+module.exports = function createLambda(lambdaName, path) {
   // display error to warn user if lambdaName has already been used
   const alreadyExists = fs.existsSync(`${path}/bam/functions/${lambdaName}`);
   if (alreadyExists) {

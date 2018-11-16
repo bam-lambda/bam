@@ -46,6 +46,7 @@ const spinningCursor = async () => {
 
 module.exports = async function displaySpinningCursor() {
   await spinningCursor();
+  process.stdout.write('\033[0m');  
   process.stdout.clearLine();
   console.log();
 };

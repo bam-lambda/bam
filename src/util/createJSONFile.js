@@ -1,8 +1,8 @@
 const fs = require('fs');
 
-module.exports = function createJSONFile(fileName, src, json) {
+module.exports = function createJSONFile(fileName, path = '.', json) {
   const configStr = JSON.stringify(json);
-  fs.writeFileSync(`${src}/${fileName}.json`, configStr);
+  fs.writeFileSync(`${path}/${fileName}.json`, configStr);
 
   console.log('JSON file created');
 };

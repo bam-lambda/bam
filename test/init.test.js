@@ -1,18 +1,11 @@
 const fs = require('fs');
-
-const createDirectory = require('../src/util/createDirectory.js');
-const createJSONFile = require('../src/util/createJSONFile.js');
-const configTemplate = require('../templates/configTemplate.js');
+const init = require('../src/util/init.js');
 
 const roleName = 'testDefaultBamRole';
 
 describe('bam init', () => {
   beforeEach(() => {
-    createDirectory('bam', 'test');
-    const config = configTemplate(roleName);
-    createJSONFile('config', './test/bam', config);
-    createDirectory('functions', './test/bam');
-    createJSONFile('library', './test/bam/functions', {});
+    init(roleName, './test');
   });
 
   afterEach(() => {

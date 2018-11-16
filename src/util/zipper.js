@@ -6,7 +6,7 @@ const packageTemplateObj = {
   dependencies: {},
 };
 
-module.exports = async function zipper(lambdaName, path) {
+module.exports = async function zipper(lambdaName, path = '.') {
   const isNativeModule = (name) => {
     const nativeModules = Object.keys(process.binding('natives'));
     return !(nativeModules.indexOf(name) === -1);

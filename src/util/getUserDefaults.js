@@ -1,11 +1,11 @@
 const fs = require('fs');
 const getUserInput = require('./getUserInput.js');
 
-module.exports = async () => {
+module.exports = async function getUserDefaults() {
   const config = JSON.parse(fs.readFileSync('./bam/config.json', 'utf8'));
   const defaultRole = config.role;
 
-  const getUserDefaults = async () => {
+  const promptUser = async () => {
     const configPrompts = [
       ['Please provide your AWS account number: ', process.env.AWS_ID],
       ['Please provide your default region: ', config.region],
@@ -21,7 +21,7 @@ module.exports = async () => {
     fs.writeFileSync('./bam/config.json', configStr);
   };
 
-  await getUserDefaults();
+  await promptUser();
   writeConfig();
   console.log('success: config file complete');
 };

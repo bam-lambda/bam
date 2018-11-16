@@ -7,7 +7,7 @@ const bamBam = require('../util/bamBam.js');
 
 const apiVersion = 'latest';
 
-module.exports = async (lambdaName, description, path) => {
+module.exports = async function deployLambda(lambdaName, description, path) {
   const config = JSON.parse(fs.readFileSync(`${path}/bam/config.json`));
   const { accountNumber, region, role } = config;
   const lambda = new AWS.Lambda({ apiVersion, region });
@@ -16,7 +16,7 @@ module.exports = async (lambdaName, description, path) => {
   const zippedFileName = await zipper(lambdaName, path);
   const zipContents = fs.readFileSync(zippedFileName);
 
-  const deployLambda = async () => {
+  const createAwsLambda = async () => {
     const params = {
       Code: {
         ZipFile: zipContents,
@@ -46,6 +46,6 @@ module.exports = async (lambdaName, description, path) => {
     console.log(`${lambdaName} has been deployed. Check out ${path}/bam/functions/library.json`);
   };
 
-  const data = await deployLambda();
+  const data = await createAwsLambda();
   if (data) await writeToLib(data);
 };

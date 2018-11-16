@@ -2,16 +2,18 @@ const fs = require('fs');
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const zipper = require('../util/zipper.js');
+const installLambdaDependencies = require('../util/installLambdaDependencies.js');
 const bamBam = require('../util/bamBam.js');
 
 const apiVersion = 'latest';
 
-module.exports = async function deployLambda(lambdaName, description, src) {
-  const config = JSON.parse(fs.readFileSync(`${src}/bam/config.json`));
+module.exports = async function deployLambda(lambdaName, description, path) {
+  const config = JSON.parse(fs.readFileSync(`${path}/bam/config.json`));
   const { accountNumber, region, role } = config;
   const lambda = new AWS.Lambda({ apiVersion, region });
   const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
-  const zippedFileName = await zipper(lambdaName, src);
+  await installLambdaDependencies(lambdaName, path);
+  const zippedFileName = await zipper(lambdaName, path);
   const zipContents = fs.readFileSync(zippedFileName);
 
   const createAwsLambda = async () => {
@@ -32,19 +34,18 @@ module.exports = async function deployLambda(lambdaName, description, src) {
   };
 
   const writeToLib = (data) => {
-    if (!data) return null;
     const name = data.FunctionName;
     const arn = data.FunctionArn;
 
     // read contents from library
-    const functions = JSON.parse(fs.readFileSync(`${src}/bam/functions/library.json`));
+    const functions = JSON.parse(fs.readFileSync(`${path}/bam/functions/library.json`));
     functions[name] = { arn, description };
 
     // write back to library
-    fs.writeFileSync(`${src}/bam/functions/library.json`, JSON.stringify(functions));
-    console.log(`${lambdaName} has been deployed. Check out ${src}/bam/functions/library.json`);
+    fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
+    console.log(`${lambdaName} has been deployed. Check out ${path}/bam/functions/library.json`);
   };
 
   const data = await createAwsLambda();
-  await writeToLib(data);
+  if (data) await writeToLib(data);
 };

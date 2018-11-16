@@ -15,16 +15,16 @@ const [,, command, lambdaName] = process.argv;
 (async () => {
   if (command === 'create') {
     if (!fs.existsSync('./bam')) {
-      await init();
-      await createRole(defaultRole, '.');
+      await init(defaultRole);
+      await createRole(defaultRole);
       await getUserDefaults();
     }
     await spinner();
-    createLambda(lambdaName, '.');
+    createLambda(lambdaName);
   } else if (command === 'deploy') {
     const [description] = await getUserInput([['Please give a brief description of your lambda: ', '']]);
-    await deployLambda(lambdaName, description, '.');
-    deployApi(lambdaName, '.');
+    await deployLambda(lambdaName, description);
+    deployApi(lambdaName);
   } else {
     console.log(`Command: ${command} is not valid.`);
   }

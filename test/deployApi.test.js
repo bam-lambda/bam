@@ -182,4 +182,18 @@ describe('bam deploy api', () => {
       expect(util).toBe(false);
     });
   });
+
+  describe('lambda with dependencies after exports.handler', () => {
+    beforeEach(async () => {
+      const testLambdaWithIncorrectDependencies = fs.readFileSync('./test/templates/testLambdaWithIncorrectDependencies.js');
+      fs.writeFileSync(`./test/bam/functions/${lambdaName}/index.js`, testLambdaWithIncorrectDependencies);
+      await deployLambda(lambdaName, 'test description', './test');
+      await deployApi(lambdaName, './test', stageName);
+    });
+
+    test('node modules directory does not contain modules listed after exports.handler', async () => {
+      const moment = fs.existsSync(`./test/bam/functions/${lambdaName}/node_modules/moment`);
+      expect(moment).toBe(false);
+    });
+  });
 });

@@ -1,6 +1,6 @@
 const delay = require('./delay.js');
 
-module.exports = async function bamBam (asyncCallback, params, actionStr, successStr, retryError='InvalidParameterValueException') {
+module.exports = async function bamBam(asyncCallback, params, actionStr, successStr, retryError = 'InvalidParameterValueException') {
   try {
     console.log(`trying to ${actionStr}`);
     const data = await asyncCallback(params);

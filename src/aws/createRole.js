@@ -29,7 +29,7 @@ const getAttachParams = roleName => (
 const asyncCreateRole = promisify(iam.createRole.bind(iam));
 const asyncAttachPolicy = promisify(iam.attachRolePolicy.bind(iam));
 
-module.exports = async (defaultRole, src) => {
+module.exports = async function createRole(defaultRole, src) {
   const roleParams = {
     RoleName: defaultRole,
     AssumeRolePolicyDocument: JSON.stringify(rolePolicy),

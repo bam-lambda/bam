@@ -2,6 +2,7 @@ const fs = require('fs');
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const zipper = require('../util/zipper.js');
+const installLambdaDependencies = require('../util/installLambdaDependencies.js');
 const bamBam = require('../util/bamBam.js');
 
 const apiVersion = 'latest';
@@ -11,6 +12,8 @@ module.exports = async function deployLambda(lambdaName, description, path = '.'
   const { accountNumber, region, role } = config;
   const lambda = new AWS.Lambda({ apiVersion, region });
   const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
+
+  await installLambdaDependencies(lambdaName, path);
   const zippedFileName = await zipper(lambdaName, path);
   const zipContents = fs.readFileSync(zippedFileName);
 
@@ -32,7 +35,6 @@ module.exports = async function deployLambda(lambdaName, description, path = '.'
   };
 
   const writeToLib = (data) => {
-    if (!data) return null;
     const name = data.FunctionName;
     const arn = data.FunctionArn;
 
@@ -46,5 +48,5 @@ module.exports = async function deployLambda(lambdaName, description, path = '.'
   };
 
   const data = await createAwsLambda();
-  await writeToLib(data);
+  if (data) await writeToLib(data);
 };

@@ -1,6 +1,7 @@
 const exitHandler = () => {
   process.stdout.clearLine();
   process.stdout.write('\u001b[?25h');
+  process.stdout.write('\033[0m');
   console.log();
   process.exit();
 };
@@ -45,7 +46,7 @@ const spinningCursor = async () => {
 };
 
 module.exports = async function displaySpinningCursor() {
-  await spinningCursor();
+  await spinningCursor(); 
   process.stdout.clearLine();
   console.log();
 };

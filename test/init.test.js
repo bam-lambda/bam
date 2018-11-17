@@ -1,10 +1,13 @@
 const fs = require('fs');
+const rimraf = require('rimraf');
 
 const createDirectory = require('../src/util/createDirectory.js');
 const createJSONFile = require('../src/util/createJSONFile.js');
 const configTemplate = require('../templates/configTemplate.js');
 
 const roleName = 'testDefaultBamRole';
+const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
+const path = './test';
 
 describe('bam init', () => {
   beforeEach(() => {
@@ -15,11 +18,12 @@ describe('bam init', () => {
     createJSONFile('library', './test/bam/functions', {});
   });
 
-  afterEach(() => {
-    fs.unlinkSync('./test/bam/config.json');
-    fs.unlinkSync('./test/bam/functions/library.json');
-    fs.rmdirSync('./test/bam/functions');
-    fs.rmdirSync('./test/bam');
+  afterEach(async () => {
+    try {
+      await asyncRimRaf(`${path}/bam`);
+    } catch (err) {
+      console.log(err);
+    }
   });
 
   test('bam directory has been created', () => {

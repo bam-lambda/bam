@@ -9,7 +9,7 @@ module.exports = async function getUserDefaults() {
     const configPrompts = [
       ['Please provide your AWS account number: ', process.env.AWS_ID],
       ['Please provide your default region: ', config.region],
-      ['Please provide your default role (if you do not provide one, one will be created for you): ', defaultRole],
+      ['Please provide your default role (if you do not provide one, "defaultBamRole" will be created for you): ', defaultRole],
     ];
 
     const userDefaults = await getUserInput(configPrompts);
@@ -23,5 +23,5 @@ module.exports = async function getUserDefaults() {
 
   await promptUser();
   writeConfig();
-  console.log('success: config file complete');
+  // console.log('success: config file complete');
 };

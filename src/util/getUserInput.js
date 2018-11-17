@@ -1,4 +1,5 @@
 const readline = require('readline');
+const { brightGreenText, brightGreenBackgroundText } = require('./fancyText.js');
 
 const answers = [];
 
@@ -13,7 +14,11 @@ module.exports = async function getUserInput(prompts) {
     const prompt = new Promise((resolve, reject) => {
       try {
         rl.question(question, resolve);
+        brightGreenBackgroundText();
         rl.write(defaultAnswer);
+        // change hardcoded code
+        process.stdout.write('\x1b[0m');
+        brightGreenText();
       } catch (err) {
         reject(console.log(err, err.stack));
       }

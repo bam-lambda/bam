@@ -13,5 +13,5 @@ module.exports = function createLambda(lambdaName, path = '.') {
 
   createDirectory(lambdaName, `${path}/bam/functions`);
   fs.writeFileSync(`${path}/bam/functions/${lambdaName}/index.js`, lambdaTemplate);
-  console.log(`go to ${path}/bam/functions/${lambdaName}/index.js to write your lambda`);
+  console.log(`\nBAM! Go to ${path}/bam/functions/${lambdaName}/index.js to write your lambda`);
 };

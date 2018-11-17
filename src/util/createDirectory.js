@@ -7,5 +7,5 @@ module.exports = function createDirectory(name, path = '.') {
     fs.mkdirSync(dir);
   }
 
-  console.log(`${name} directory created`);
+  // console.log(`${name} directory created`);
 };

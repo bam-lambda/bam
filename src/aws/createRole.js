@@ -41,7 +41,7 @@ module.exports = async function createRole(defaultRole, path = '.') {
       const roleData = await asyncCreateRole(roleParams);
       const attachedParams = getAttachParams(roleData.Role.RoleName);
       await asyncAttachPolicy(attachedParams);
-      console.log('success: role created with policy');
+      // console.log('success: role created with policy');
     } catch (err) {
       console.log(err, err.stack);
     }

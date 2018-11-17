@@ -3,7 +3,7 @@ const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const getRegion = require('../util/getRegion.js');
 
-module.exports = async function deleteApi(restApiId, path) {
+module.exports = async function deleteApi(restApiId, path = '.') {
   const region = getRegion();
   const apiVersion = 'latest';
 

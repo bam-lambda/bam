@@ -7,7 +7,7 @@ const getRegion = require('../util/getRegion.js');
 
 const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
 
-module.exports = async function deleteLambda(lambdaName, path) {
+module.exports = async function deleteLambda(lambdaName, path = '.') {
   const region = getRegion();
   const apiVersion = 'latest';
 

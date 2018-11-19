@@ -17,21 +17,21 @@ class Ansi {
 
 const ansi = new Ansi();
 
+const hideCursor = () => process.stdout.write(ansi.codes.hideCursor);
+const showCursor = () => process.stdout.write(ansi.codes.showCursor);
+const resetColor = () => process.stdout.write(ansi.codes.resetColor);
+
+const resetStyledText = () => {
+  resetColor();
+  showCursor();
+};
+
 const getStyledText = (text, ...codes) => (
   codes.reduce((codesStr, code) => `${codesStr}${ansi.codes[code]}`, '') + text
 );
 
 const changeTextStyle = (...codes) => {
   process.stdout.write(getStyledText('', ...codes));
-};
-
-const hideCursor = () => process.stdout.write(ansi.codes.hideCursor);
-const showCursor = () => process.stdout.write(ansi.codes.showCursor);
-const resetColor = () => process.stdout.write(ansi.codes.resetColor);
-
-const reset = () => {
-  resetColor();
-  showCursor();
 };
 
 const setBrightGreenText = () => {
@@ -45,7 +45,7 @@ const brightGreenSpinner = () => {
   return setInterval(() => {
     i += 1;
     const cursor = cursors[i % 4];
-    reset();
+    resetStyledText();
     process.stdout.cursorTo(0);
     setBrightGreenText();
     process.stdout.write(cursor);
@@ -55,7 +55,7 @@ const brightGreenSpinner = () => {
 
 const spinnerCleanup = () => {
   process.stdout.cursorTo(0);
-  reset();
+  resetStyledText();
   setBrightGreenText();
 };
 
@@ -80,14 +80,14 @@ const brightGreenBamCharByChar = async () => {
 
 // catch ctrl+c event and exit normally
 process.on('SIGINT', () => {
-  reset();
+  resetStyledText();
   console.log('Ctrl-C...');
   process.exit(2);
 });
 
 // catch uncaught exceptions, trace, then exit normally
 process.on('uncaughtException', (e) => {
-  reset();
+  resetStyledText();
   console.log('Uncaught Exception...');
   console.log(e.stack);
   process.exit(99);
@@ -100,5 +100,5 @@ module.exports = {
   setBrightGreenText,
   brightGreenBamCharByChar,
   resetColor,
-  ansi,
+  resetStyledText,
 };

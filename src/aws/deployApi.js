@@ -96,5 +96,7 @@ module.exports = async function deployApi(lambdaName, path = '.', stageName = 'd
     console.log(`BAM! Endpoint "${lambdaName}" has been deployed: ${endpoint}`);
   } catch (err) {
     console.log(err);
+    clearInterval(spinnerInterval);
+    spinnerCleanup();
   }
 };

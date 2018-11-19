@@ -9,6 +9,7 @@ const deployLambda = require('../src/aws/deployLambda.js');
 const getUserInput = require('../src/util/getUserInput.js');
 const deployApi = require('../src/aws/deployApi.js');
 const {
+  resetStyledText,
   setBrightGreenText,
   brightGreenBamCharByChar,
 } = require('../src/util/fancyText.js');
@@ -17,6 +18,7 @@ const defaultRole = 'defaultBamRole';
 const [,, command, lambdaName] = process.argv;
 
 (async () => {
+  resetStyledText();
   setBrightGreenText();
 
   if (command === 'create') {

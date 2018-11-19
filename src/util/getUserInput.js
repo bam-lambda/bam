@@ -21,7 +21,7 @@ module.exports = async function getUserInput(prompts) {
         resetColor();
         rl.question('', resolve);
         rl.write(colorfulQuestion);
-        rl.write(getStyledText(defaultAnswer, 'white', 'bright'));
+        rl.write(getStyledText(defaultAnswer, 'resetColor', 'bright'));
       } catch (err) {
         reject(console.log(err, err.stack));
       }

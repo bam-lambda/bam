@@ -73,8 +73,8 @@ const brightGreenBamCharByChar = async () => {
     });
   }
 
-  // moves cursor 6 lines up
-  process.stdout.moveCursor(0, -6);
+  // moves cursor 5 lines up
+  process.stdout.moveCursor(0, -5);
   console.log(exclaimBamStr);
 };
 

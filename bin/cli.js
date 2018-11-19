@@ -22,9 +22,16 @@ const [,, command, lambdaName] = process.argv;
     await spinner();
     createLambda(lambdaName);
   } else if (command === 'deploy') {
-    const [description] = await getUserInput([['Please give a brief description of your lambda: ', '']]);
+    const question = {
+      question: 'Please give a brief description of your lambda: ',
+      validator: () => (true),
+      feedback: 'invalid description',
+      defaultAnswer: ''
+    };
+    const [description] = await getUserInput([question]);
     await deployLambda(lambdaName, description);
     deployApi(lambdaName);
+
   } else {
     console.log(`Command: ${command} is not valid.`);
   }

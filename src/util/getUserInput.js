@@ -1,14 +1,22 @@
 const readline = require('readline');
+const {
+  setBrightGreenText,
+  getStyledText,
+  resetColor,
+} = require('./fancyText.js');
 
 const answers = [];
 
 const asyncValidate = async (asyncCallback, validator, feedback, question, defaultAnswer) => {
   let valid = false,
+      colorfulResult,
       result;
 
   while (true) {
-    result = await asyncCallback(question, defaultAnswer);   
+    colorfulResult = await asyncCallback(question, defaultAnswer);
+    result = colorfulResult.split('[1m')[2];
     if (await validator(result)) break;
+    setBrightGreenText();
     console.log(feedback);
   }
 
@@ -24,8 +32,10 @@ module.exports = async function getUserInput(prompts) {
   // returns a pending prompt promise to handle single attempt at a question
   const pendingPrompt = (question, defaultAnswer) => (
     new Promise((resolve, reject) => {
-      rl.question(question, resolve);
-      rl.write(defaultAnswer);
+        resetColor();
+        rl.question('', resolve);
+        rl.write(getStyledText(question, 'green', 'bright'););
+        rl.write(getStyledText(defaultAnswer, 'resetColor', 'bright'));
     })
   );
 
@@ -38,4 +48,3 @@ module.exports = async function getUserInput(prompts) {
   rl.close();
   return answers;
 };
-

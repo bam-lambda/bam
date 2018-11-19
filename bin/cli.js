@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const fs = require('fs');
+
 const createLambda = require('../src/aws/createLambda.js');
 const getUserDefaults = require('../src/util/getUserDefaults.js');
 const init = require('../src/util/init.js');
@@ -7,19 +8,26 @@ const createRole = require('../src/aws/createRole.js');
 const deployLambda = require('../src/aws/deployLambda.js');
 const getUserInput = require('../src/util/getUserInput.js');
 const deployApi = require('../src/aws/deployApi.js');
-const spinner = require('../src/util/spinner.js');
+const {
+  resetStyledText,
+  setBrightGreenText,
+  brightGreenBamCharByChar,
+} = require('../src/util/fancyText.js');
 
 const defaultRole = 'defaultBamRole';
 const [,, command, lambdaName] = process.argv;
 
 (async () => {
+  resetStyledText();
+  setBrightGreenText();
+
   if (command === 'create') {
     if (!fs.existsSync('./bam')) {
+      await brightGreenBamCharByChar();
       await init(defaultRole);
       await createRole(defaultRole);
       await getUserDefaults();
     }
-    await spinner();
     createLambda(lambdaName);
   } else if (command === 'deploy') {
     const question = {
@@ -30,8 +38,7 @@ const [,, command, lambdaName] = process.argv;
     };
     const [description] = await getUserInput([question]);
     await deployLambda(lambdaName, description);
-    deployApi(lambdaName);
-
+    await deployApi(lambdaName);
   } else {
     console.log(`Command: ${command} is not valid.`);
   }

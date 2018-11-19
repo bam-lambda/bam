@@ -3,6 +3,7 @@ const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const uuid = require('uuid');
 const bamBam = require('../util/bamBam.js');
+const { brightGreenSpinner, spinnerCleanup } = require('../util/fancyText.js');
 
 const apiVersion = 'latest';
 
@@ -24,6 +25,7 @@ module.exports = async function deployApi(lambdaName, path = '.', stageName = 'd
   const asyncPutMethodResponse = promisify(api.putMethodResponse.bind(api));
   const asyncCreateDeployment = promisify(api.createDeployment.bind(api));
 
+  const spinnerInterval = brightGreenSpinner();
 
   // Sequence:
   try {
@@ -89,8 +91,12 @@ module.exports = async function deployApi(lambdaName, path = '.', stageName = 'd
     const functions = JSON.parse(fs.readFileSync(`${path}/bam/functions/library.json`));
     functions[lambdaName].api = { endpoint, restApiId };
     fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
-    console.log(`Api gateway deployed. Call ${lambdaName} at ${endpoint} (see ${path}/bam/functions/library.json)`);
+    clearInterval(spinnerInterval);
+    spinnerCleanup();
+    console.log(`BAM! Endpoint "${lambdaName}" has been deployed: ${endpoint}`);
   } catch (err) {
     console.log(err);
+    clearInterval(spinnerInterval);
+    spinnerCleanup();
   }
 };

@@ -55,5 +55,5 @@ module.exports = async function getUserDefaults() {
 
   await getUserInputs();
   writeConfig();
-  console.log('success: config file complete');
+  // console.log('success: config file complete');
 };

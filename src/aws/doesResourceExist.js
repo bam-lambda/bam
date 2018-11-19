@@ -10,7 +10,7 @@ const doesRoleExist = async (role) => {
 
   try {
     await asyncGetRole({ RoleName: role });
-    console.log(`${role} exists`);
+    // console.log(`${role} exists`);
     return true;
   } catch (err) {
     return false;

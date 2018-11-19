@@ -61,21 +61,8 @@ const spinnerCleanup = () => {
 
 const brightGreenBamCharByChar = async () => {
   const bamStr = fs.readFileSync('./ascii/bam.txt', 'utf8');
-  const exclaimBamStr = fs.readFileSync('./ascii/exclaimBam.txt', 'utf8');
   setBrightGreenText();
-
-  for (let i = 0; i < bamStr.length; i += 1) {
-    const char = bamStr[i];
-    await new Promise((res) => {
-      setTimeout(() => {
-        res(process.stdout.write(char));
-      }, 20);
-    });
-  }
-
-  // moves cursor 5 lines up
-  process.stdout.moveCursor(0, -5);
-  console.log(exclaimBamStr);
+  console.log(bamStr);
 };
 
 // catch ctrl+c event and exit normally

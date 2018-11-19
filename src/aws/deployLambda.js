@@ -4,6 +4,7 @@ const { promisify } = require('util');
 const zipper = require('../util/zipper.js');
 const installLambdaDependencies = require('../util/installLambdaDependencies.js');
 const bamBam = require('../util/bamBam.js');
+const { brightGreenSpinner, spinnerCleanup } = require('../util/fancyText.js');
 
 const apiVersion = 'latest';
 
@@ -12,6 +13,8 @@ module.exports = async function deployLambda(lambdaName, description, path = '.'
   const { accountNumber, region, role } = config;
   const lambda = new AWS.Lambda({ apiVersion, region });
   const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
+
+  const spinnerInterval = brightGreenSpinner();
 
   await installLambdaDependencies(lambdaName, path);
   const zippedFileName = await zipper(lambdaName, path);
@@ -44,9 +47,12 @@ module.exports = async function deployLambda(lambdaName, description, path = '.'
 
     // write back to library
     fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
-    console.log(`${lambdaName} has been deployed. Check out ${path}/bam/functions/library.json`);
   };
 
   const data = await createAwsLambda();
   if (data) await writeToLib(data);
+
+  clearInterval(spinnerInterval);
+  spinnerCleanup();
+  console.log(`BAM! Lambda "${lambdaName}" has been deployed`);
 };

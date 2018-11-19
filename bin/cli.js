@@ -9,9 +9,9 @@ const deployLambda = require('../src/aws/deployLambda.js');
 const getUserInput = require('../src/util/getUserInput.js');
 const deployApi = require('../src/aws/deployApi.js');
 const {
-  displayGreenSpinningCursor,
   brightGreenText,
-  greenBamCharByChar,
+  brightGreenBamCharByChar,
+  resetColor,
 } = require('../src/util/fancyText.js');
 
 const defaultRole = 'defaultBamRole';
@@ -20,20 +20,26 @@ const [,, command, lambdaName] = process.argv;
 (async () => {
   if (command === 'create') {
     if (!fs.existsSync('./bam')) {
+      await brightGreenBamCharByChar();
       brightGreenText();
-      await greenBamCharByChar();
       await init(defaultRole);
       await createRole(defaultRole);
       await getUserDefaults();
     }
-    await displayGreenSpinningCursor();
     brightGreenText();
     createLambda(lambdaName);
   } else if (command === 'deploy') {
+    brightGreenText();
     const [description] = await getUserInput([['Please give a brief description of your lambda: ', '']]);
+    // await displayGreenSpinningCursor(false);
+    brightGreenText();
     await deployLambda(lambdaName, description);
-    deployApi(lambdaName);
+    // await displayGreenSpinningCursor(false);
+    brightGreenText();
+    await deployApi(lambdaName);
   } else {
+    brightGreenText();
     console.log(`Command: ${command} is not valid.`);
+    resetColor();
   }
 })();

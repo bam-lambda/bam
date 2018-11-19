@@ -18,28 +18,22 @@ const defaultRole = 'defaultBamRole';
 const [,, command, lambdaName] = process.argv;
 
 (async () => {
+  brightGreenText();
+
   if (command === 'create') {
     if (!fs.existsSync('./bam')) {
       await brightGreenBamCharByChar();
-      brightGreenText();
       await init(defaultRole);
       await createRole(defaultRole);
       await getUserDefaults();
     }
-    brightGreenText();
     createLambda(lambdaName);
   } else if (command === 'deploy') {
     brightGreenText();
     const [description] = await getUserInput([['Please give a brief description of your lambda: ', '']]);
-    // await displayGreenSpinningCursor(false);
-    brightGreenText();
     await deployLambda(lambdaName, description);
-    // await displayGreenSpinningCursor(false);
-    brightGreenText();
     await deployApi(lambdaName);
   } else {
-    brightGreenText();
     console.log(`Command: ${command} is not valid.`);
-    resetColor();
   }
 })();

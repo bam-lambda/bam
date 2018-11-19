@@ -1,5 +1,4 @@
 // TODO: user entered text is white
-// TODO: reduce number of calls in cli.js
 const fs = require('fs');
 
 class Ansi {
@@ -23,6 +22,7 @@ const changeTextStyle = (...codes) => {
   const styles = codes.reduce((codesStr, code) => `${codesStr}${ansi.codes[code]}`, '');
   process.stdout.write(styles);
 };
+
 const hideCursor = () => process.stdout.write(ansi.codes.hideCursor);
 const showCursor = () => process.stdout.write(ansi.codes.showCursor);
 const resetColor = () => process.stdout.write(ansi.codes.resetColor);
@@ -49,7 +49,7 @@ const brightGreenSpinner = () => {
     const cursor = cursors[i % 4];
     reset();
     process.stdout.cursorTo(0);
-    changeTextStyle('bright', 'green');
+    brightGreenText();
     process.stdout.write(cursor);
     hideCursor();
   }, 200);
@@ -77,9 +77,7 @@ const brightGreenBamCharByChar = async () => {
 
   // moves cursor 6 lines up
   process.stdout.moveCursor(0, -6);
-  brightGreenText();
   console.log(exclaimBamStr);
-  reset();
 };
 
 // catch ctrl+c event and exit normally

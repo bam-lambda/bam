@@ -1,12 +1,13 @@
 const fs = require('fs');
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
-const getRegion = require('../util/getRegion.js');
 const rimraf = require('rimraf');
+
+const getRegion = require('../util/getRegion.js');
 
 const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
 
-module.exports = async function deleteLambda(lambdaName, path) {
+module.exports = async function deleteLambda(lambdaName, path = '.') {
   const region = getRegion();
   const apiVersion = 'latest';
 

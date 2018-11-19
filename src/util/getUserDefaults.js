@@ -1,16 +1,48 @@
 const fs = require('fs');
 const getUserInput = require('./getUserInput.js');
 
+const { doesRoleExist } = require('../aws/doesResourceExist.js');
+
+const regions = ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2', 
+                 'ca-central-1', 'eu-central-1', 'eu-west-1', 'eu-west-2', 
+                 'eu-west-3', 'ap-northeast-1', 'ap-northeast-2', 'ap-northeast-3', 
+                 'ap-southeast-1', 'ap-southeast-2', 'ap-south-1', 'sa-east-1'];
+
+const badNum = 'Valid account numbers are 12 numerical digits.';
+const badRegion = `Valid regions must be one of the following: ${regions.join(', ')}`;
+const badRole = 'The role name you supplied is not registered to the account provided.';
+
+const validNum = (r) => ( /^[0-9]{12}$/.test(r) );
+const validRegion = (r) => ( regions.includes(r) );
+const validRole = doesRoleExist;
+
 module.exports = async function getUserDefaults() {
   const config = JSON.parse(fs.readFileSync('./bam/config.json', 'utf8'));
   const defaultRole = config.role;
 
-  const promptUser = async () => {
-    const configPrompts = [
-      ['Please provide your AWS account number: ', process.env.AWS_ID],
-      ['Please provide your default region: ', config.region],
-      ['Please provide your default role (if you do not provide one, "defaultBamRole" will be created for you): ', defaultRole],
-    ];
+  const getUserInputs = async () => {
+    const q1 = {
+      question: 'Please provide your AWS account number: ',
+      validator: validNum,
+      feedback: badNum,
+      defaultAnswer: process.env.AWS_ID
+    };
+
+    const q2 = {
+      question: 'Please provide your default region: ',
+      validator: validRegion,
+      feedback: badRegion,
+      defaultAnswer: config.region
+    };
+
+    const q3 = {
+      question: 'Please provide your default role (if you do not provide one, one will be created for you): ',
+      validator: validRole,
+      feedback: badRole,
+      defaultAnswer: defaultRole
+    };
+
+    const configPrompts = [q1, q2, q3];
 
     const userDefaults = await getUserInput(configPrompts);
     [config.accountNumber, config.region, config.role] = userDefaults;
@@ -21,7 +53,7 @@ module.exports = async function getUserDefaults() {
     fs.writeFileSync('./bam/config.json', configStr);
   };
 
-  await promptUser();
+  await getUserInputs();
   writeConfig();
   // console.log('success: config file complete');
 };

@@ -7,29 +7,41 @@ const {
 
 const answers = [];
 
+const asyncValidate = async (asyncCallback, validator, feedback, question, defaultAnswer) => {
+  let valid = false,
+      colorfulResult,
+      result;
+
+  while (true) {
+    colorfulResult = await asyncCallback(question, defaultAnswer);
+    result = colorfulResult.split('[1m')[2];
+    if (await validator(result)) break;
+    setBrightGreenText();
+    console.log(feedback);
+  }
+
+  return result;
+};
+
 module.exports = async function getUserInput(prompts) {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
 
-  for (let i = 0; i < prompts.length; i += 1) {
-    const [question, defaultAnswer] = prompts[i];
-    const colorfulQuestion = getStyledText(question, 'green', 'bright');
-    const prompt = new Promise((resolve, reject) => {
-      try {
+  // returns a pending prompt promise to handle single attempt at a question
+  const pendingPrompt = (question, defaultAnswer) => (
+    new Promise((resolve, reject) => {
         resetColor();
         rl.question('', resolve);
-        rl.write(colorfulQuestion);
+        rl.write(getStyledText(question, 'green', 'bright'););
         rl.write(getStyledText(defaultAnswer, 'resetColor', 'bright'));
-      } catch (err) {
-        reject(console.log(err, err.stack));
-      }
-    });
+    })
+  );
 
-    const colorfulAnswer = await prompt;
-    const answer = colorfulAnswer.split('[1m')[2];
-    setBrightGreenText();
+  for (let i = 0; i < prompts.length; i += 1) {
+    const { question, validator, feedback, defaultAnswer } = prompts[i];
+    const answer = await asyncValidate(pendingPrompt, validator, feedback, question, defaultAnswer);
     answers.push(answer);
   }
 

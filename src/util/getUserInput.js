@@ -1,5 +1,9 @@
 const readline = require('readline');
-const { brightGreenText, greenBackgroundWhiteText, resetColor } = require('./fancyText.js');
+const {
+  setBrightGreenText,
+  getStyledText,
+  resetColor,
+} = require('./fancyText.js');
 
 const answers = [];
 
@@ -11,19 +15,21 @@ module.exports = async function getUserInput(prompts) {
 
   for (let i = 0; i < prompts.length; i += 1) {
     const [question, defaultAnswer] = prompts[i];
+    const colorfulQuestion = getStyledText(question, 'green', 'bright');
     const prompt = new Promise((resolve, reject) => {
       try {
-        rl.question(question, resolve);
-        greenBackgroundWhiteText();
-        rl.write(defaultAnswer);
         resetColor();
-        brightGreenText();
+        rl.question('', resolve);
+        rl.write(colorfulQuestion);
+        rl.write(getStyledText(defaultAnswer, 'white', 'bright'));
       } catch (err) {
         reject(console.log(err, err.stack));
       }
     });
 
-    const answer = await prompt;
+    const colorfulAnswer = await prompt;
+    const answer = colorfulAnswer.split('[1m')[2];
+    setBrightGreenText();
     answers.push(answer);
   }
 

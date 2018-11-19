@@ -1,4 +1,3 @@
-// TODO: user entered text is white
 const fs = require('fs');
 
 class Ansi {
@@ -18,9 +17,12 @@ class Ansi {
 
 const ansi = new Ansi();
 
+const getStyledText = (text, ...codes) => (
+  codes.reduce((codesStr, code) => `${codesStr}${ansi.codes[code]}`, '') + text
+);
+
 const changeTextStyle = (...codes) => {
-  const styles = codes.reduce((codesStr, code) => `${codesStr}${ansi.codes[code]}`, '');
-  process.stdout.write(styles);
+  process.stdout.write(getStyledText('', ...codes));
 };
 
 const hideCursor = () => process.stdout.write(ansi.codes.hideCursor);
@@ -32,12 +34,8 @@ const reset = () => {
   showCursor();
 };
 
-const brightGreenText = () => {
+const setBrightGreenText = () => {
   changeTextStyle('bright', 'green');
-};
-
-const greenBackgroundWhiteText = () => {
-  changeTextStyle('white', 'greenBg');
 };
 
 const brightGreenSpinner = () => {
@@ -49,7 +47,7 @@ const brightGreenSpinner = () => {
     const cursor = cursors[i % 4];
     reset();
     process.stdout.cursorTo(0);
-    brightGreenText();
+    setBrightGreenText();
     process.stdout.write(cursor);
     hideCursor();
   }, 200);
@@ -58,13 +56,13 @@ const brightGreenSpinner = () => {
 const spinnerCleanup = () => {
   process.stdout.cursorTo(0);
   reset();
-  brightGreenText();
+  setBrightGreenText();
 };
 
 const brightGreenBamCharByChar = async () => {
   const bamStr = fs.readFileSync('./ascii/bam.txt', 'utf8');
   const exclaimBamStr = fs.readFileSync('./ascii/exclaimBam.txt', 'utf8');
-  brightGreenText();
+  setBrightGreenText();
 
   for (let i = 0; i < bamStr.length; i += 1) {
     const char = bamStr[i];
@@ -98,8 +96,9 @@ process.on('uncaughtException', (e) => {
 module.exports = {
   brightGreenSpinner,
   spinnerCleanup,
-  brightGreenText,
+  getStyledText,
+  setBrightGreenText,
   brightGreenBamCharByChar,
-  greenBackgroundWhiteText,
   resetColor,
+  ansi,
 };

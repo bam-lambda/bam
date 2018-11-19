@@ -9,16 +9,15 @@ const deployLambda = require('../src/aws/deployLambda.js');
 const getUserInput = require('../src/util/getUserInput.js');
 const deployApi = require('../src/aws/deployApi.js');
 const {
-  brightGreenText,
+  setBrightGreenText,
   brightGreenBamCharByChar,
-  resetColor,
 } = require('../src/util/fancyText.js');
 
 const defaultRole = 'defaultBamRole';
 const [,, command, lambdaName] = process.argv;
 
 (async () => {
-  brightGreenText();
+  setBrightGreenText();
 
   if (command === 'create') {
     if (!fs.existsSync('./bam')) {
@@ -29,7 +28,6 @@ const [,, command, lambdaName] = process.argv;
     }
     createLambda(lambdaName);
   } else if (command === 'deploy') {
-    brightGreenText();
     const [description] = await getUserInput([['Please give a brief description of your lambda: ', '']]);
     await deployLambda(lambdaName, description);
     await deployApi(lambdaName);

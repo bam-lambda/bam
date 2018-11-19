@@ -6,7 +6,7 @@ const bamBam = require('../util/bamBam.js');
 
 const apiVersion = 'latest';
 
-module.exports = async function deployApi(lambdaName, path = '.', stageName = 'dev') {
+module.exports = async function deployApi(lambdaName, whitelistedIp, path = '.', stageName = 'dev') {
   const config = JSON.parse(fs.readFileSync(`${path}/bam/config.json`));
   const { region, accountNumber } = config;
   const lambda = new AWS.Lambda({ apiVersion, region });
@@ -16,6 +16,7 @@ module.exports = async function deployApi(lambdaName, path = '.', stageName = 'd
 
   // sdk promises
   const asyncCreateApi = promisify(api.createRestApi.bind(api));
+  const asyncUpdateApi = promisify(api.updateRestApi.bind(api));
   const asyncGetResources = promisify(api.getResources.bind(api));
   const asyncCreateResource = promisify(api.createResource.bind(api));
   const asyncAddPermission = promisify(lambda.addPermission.bind(lambda));
@@ -29,6 +30,39 @@ module.exports = async function deployApi(lambdaName, path = '.', stageName = 'd
   try {
     // create rest api
     const restApiId = (await asyncCreateApi({ name: lambdaName })).id;
+
+    if (whitelistedIp) {
+      // update restApi
+      const resourcePolicy = {
+        Version: '2012-10-17',
+        Statement: [
+          {
+            Effect: 'Allow',
+            Principal: '*',
+            Action: 'execute-api:Invoke',
+            Resource: `arn:aws:execute-api:${region}:${accountNumber}:${restApiId}/*/${httpMethod}/${lambdaName}`,
+            Condition: {
+              IpAddress: {
+                'aws:SourceIp': whitelistedIp,
+              },
+            },
+          },
+        ],
+      };
+      const resourcePolicyJSON = JSON.stringify(resourcePolicy);
+
+      const patchOperations = {
+        op: 'replace',
+        path: '/policy',
+        value: resourcePolicyJSON,
+      };
+      const restApiParams = {
+        restApiId,
+        patchOperations: [patchOperations],
+      };
+
+      await asyncUpdateApi(restApiParams);
+    }
 
     // get resources
     const parentId = (await asyncGetResources({ restApiId })).items[0].id;

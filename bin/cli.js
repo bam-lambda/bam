@@ -22,9 +22,14 @@ const [,, command, lambdaName] = process.argv;
     await spinner();
     createLambda(lambdaName);
   } else if (command === 'deploy') {
-    const [description] = await getUserInput([['Please give a brief description of your lambda: ', '']]);
+    const descriptionQuestion = 'Please give a brief description of your lambda: ';
+    const whitelistedIpQuestion = 'Please enter an IP address to restrict access to or press enter if endpoint is public: ';
+    const [description, whitelistedIp] = await getUserInput([[descriptionQuestion, ''], [whitelistedIpQuestion, '']]);
+    // other validations?
+    // allow for multiple ip addresses
+    const trimmedWhitelistedIp = whitelistedIp.replace(/\s+/, '');
     await deployLambda(lambdaName, description);
-    deployApi(lambdaName);
+    deployApi(lambdaName, trimmedWhitelistedIp);
   } else {
     console.log(`Command: ${command} is not valid.`);
   }

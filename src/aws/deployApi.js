@@ -6,7 +6,7 @@ const bamBam = require('../util/bamBam.js');
 const {
   bamLog,
   bamError,
-  brightGreenSpinner,
+  bamSpinner,
   spinnerCleanup,
   bamAscii,
 } = require('../util/fancyText.js');
@@ -31,7 +31,7 @@ module.exports = async function deployApi(lambdaName, path = '.', stageName = 'd
   const asyncPutMethodResponse = promisify(api.putMethodResponse.bind(api));
   const asyncCreateDeployment = promisify(api.createDeployment.bind(api));
 
-  const spinnerInterval = brightGreenSpinner();
+  const spinnerInterval = bamSpinner();
 
   // Sequence:
   try {
@@ -101,8 +101,8 @@ module.exports = async function deployApi(lambdaName, path = '.', stageName = 'd
     bamLog('API Gateway endpoint has been deployed:');
     bamLog(endpoint);
   } catch (err) {
-    bamError(err);
     clearInterval(spinnerInterval);
     spinnerCleanup();
+    bamError(err);
   }
 };

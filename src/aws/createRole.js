@@ -3,7 +3,7 @@ const { promisify } = require('util');
 const fs = require('fs');
 const { doesRoleExist } = require('./doesResourceExist.js');
 const {
-  brightGreenSpinner,
+  bamSpinner,
   spinnerCleanup,
   bamLog,
   bamError,
@@ -43,7 +43,7 @@ module.exports = async function createRole(defaultRole, path = '.') {
   const config = JSON.parse(fs.readFileSync(`${path}/bam/config.json`, 'utf8'));
 
   if (config.role === defaultRole && !(await doesRoleExist(defaultRole))) {
-    const spinnerInterval = brightGreenSpinner();
+    const spinnerInterval = bamSpinner();
     try {
       const roleData = await asyncCreateRole(roleParams);
       const attachedParams = getAttachParams(roleData.Role.RoleName);

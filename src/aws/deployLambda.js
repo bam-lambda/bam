@@ -7,7 +7,7 @@ const bamBam = require('../util/bamBam.js');
 const {
   bamLog,
   bamError,
-  brightGreenSpinner,
+  bamSpinner,
   spinnerCleanup,
 } = require('../util/fancyText.js');
 
@@ -19,7 +19,7 @@ module.exports = async function deployLambda(lambdaName, description, path = '.'
   const lambda = new AWS.Lambda({ apiVersion, region });
   const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
 
-  const spinnerInterval = brightGreenSpinner();
+  const spinnerInterval = bamSpinner();
 
   await installLambdaDependencies(lambdaName, path);
   const zippedFileName = await zipper(lambdaName, path);

@@ -37,7 +37,7 @@ const bamLog = text => console.log(bamText(text));
 const bamWarn = text => console.log(bamWarnText(text));
 const bamError = text => console.log(bamErrorText(text));
 
-const brightGreenSpinner = () => {
+const bamSpinner = () => {
   hideCursor();
   const spinnerChars = ['|', '/', '-', '\\'];
   let i = 0;
@@ -54,6 +54,7 @@ const brightGreenSpinner = () => {
 
 const spinnerCleanup = () => {
   process.stdout.cursorTo(0);
+  process.stdout.clearLine();
   resetStyledText();
 };
 
@@ -75,7 +76,7 @@ process.on('uncaughtException', (e) => {
 });
 
 module.exports = {
-  brightGreenSpinner,
+  bamSpinner,
   spinnerCleanup,
   bamText,
   bamAscii,

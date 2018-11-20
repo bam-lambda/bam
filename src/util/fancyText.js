@@ -3,37 +3,29 @@ const fs = require('fs');
 
 const bamTextStyles = ['green', 'bright'];
 
-class Ansi {
-  constructor() {
-    const escapeChar = '\x1b';
-    this.codes = {
-      showCursor: `${escapeChar}[?25h`,
-      resetColor: `${escapeChar}[0m`,
-      bright: `${escapeChar}[1m`,
-      green: `${escapeChar}[32m`,
-      yellow: `${escapeChar}[33m`,
-      red: `${escapeChar}[31m`,
-      white: `${escapeChar}[37m`,
-      greenBg: `${escapeChar}[42m`,
-      hideCursor: `${escapeChar}[?25l`,
-    };
-  }
-}
+const escapeChar = '\x1b';
+const textStyles = {
+  showCursor: `${escapeChar}[?25h`,
+  hideCursor: `${escapeChar}[?25l`,
+  reset: `${escapeChar}[0m`,
+  bright: `${escapeChar}[1m`,
+  green: `${escapeChar}[32m`,
+  yellow: `${escapeChar}[33m`,
+  red: `${escapeChar}[31m`,
+};
 
-const ansi = new Ansi();
-
-const hideCursor = () => process.stdout.write(ansi.codes.hideCursor);
-const showCursor = () => process.stdout.write(ansi.codes.showCursor);
-const resetColor = () => process.stdout.write(ansi.codes.resetColor);
+const hideCursor = () => process.stdout.write(textStyles.hideCursor);
+const showCursor = () => process.stdout.write(textStyles.showCursor);
+const resetColor = () => process.stdout.write(textStyles.reset);
 
 const resetStyledText = () => {
   resetColor();
   showCursor();
 };
 
-const getStyledText = (text, ...codes) => {
-  const stylesStr = codes.reduce((codesStr, code) => `${codesStr}${ansi.codes[code]}`, '');
-  return `${stylesStr}${text}${ansi.codes.resetColor}`;
+const getStyledText = (text, ...styles) => {
+  const stylesStr = styles.reduce((result, style) => `${result}${textStyles[style]}`, '');
+  return `${stylesStr}${text}${textStyles.reset}`;
 };
 
 const bamText = text => getStyledText(text, ...bamTextStyles);

@@ -20,7 +20,7 @@ const delay = require('../src/util/delay.js');
 
 const iam = new AWS.IAM();
 const roleName = 'testDefaultBamRole';
-const lambdaName = 'testBamLambda1';
+const lambdaName = 'testBamLambda';
 const stageName = 'test';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));

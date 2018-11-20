@@ -6,7 +6,6 @@ module.exports = async function zipper(lambdaName, path = '.') {
 
   try {
     await exec(`zip -r ${lambdaName} .`, { cwd: dir });
-    // console.log(`zipped file was created at ${dir}/${lambdaName}.zip`);
   } catch (err) {
     console.log(err, err.stack);
   }

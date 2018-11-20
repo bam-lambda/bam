@@ -6,6 +6,4 @@ module.exports = function createDirectory(name, path = '.') {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
   }
-
-  // console.log(`${name} directory created`);
 };

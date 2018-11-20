@@ -2,6 +2,7 @@ const fs = require('fs');
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const getRegion = require('../util/getRegion.js');
+const { bamLog } = require('../util/fancyText.js');
 
 module.exports = async function deleteApi(restApiId, path = '.') {
   const region = getRegion();
@@ -18,5 +19,5 @@ module.exports = async function deleteApi(restApiId, path = '.') {
   delete lambda.api;
   // write back to library
   fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
-  console.log('API has been deleted.');
+  bamLog('API Gateway endpoint has been deleted');
 };

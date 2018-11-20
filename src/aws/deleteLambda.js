@@ -4,6 +4,7 @@ const { promisify } = require('util');
 const rimraf = require('rimraf');
 
 const getRegion = require('../util/getRegion.js');
+const { bamLog, bamError } = require('../util/fancyText.js');
 
 const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
 
@@ -22,7 +23,7 @@ module.exports = async function deleteLambda(lambdaName, path = '.') {
   try {
     await asyncRimRaf(`${path}/bam/functions/${lambdaName}`);
   } catch (err) {
-    console.log(err);
+    bamError(err);
   }
 
   // read from library and remove property
@@ -31,5 +32,5 @@ module.exports = async function deleteLambda(lambdaName, path = '.') {
 
   // write back to library
   fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
-  console.log(`${lambdaName} has been deleted.`);
+  bamLog(`Lambda "${lambdaName}" has been deleted`);
 };

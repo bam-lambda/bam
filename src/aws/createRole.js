@@ -2,6 +2,12 @@ const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const fs = require('fs');
 const { doesRoleExist } = require('./doesResourceExist.js');
+const {
+  bamSpinner,
+  spinnerCleanup,
+  bamLog,
+  bamError,
+} = require('../util/fancyText.js');
 
 const iam = new AWS.IAM();
 const AWSLambdaBasicExecutionRolePolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
@@ -37,13 +43,18 @@ module.exports = async function createRole(defaultRole, path = '.') {
   const config = JSON.parse(fs.readFileSync(`${path}/bam/config.json`, 'utf8'));
 
   if (config.role === defaultRole && !(await doesRoleExist(defaultRole))) {
+    const spinnerInterval = bamSpinner();
     try {
       const roleData = await asyncCreateRole(roleParams);
       const attachedParams = getAttachParams(roleData.Role.RoleName);
       await asyncAttachPolicy(attachedParams);
-      // console.log('success: role created with policy');
+      clearInterval(spinnerInterval);
+      spinnerCleanup();
+      bamLog(`Role "${defaultRole}" has been created`);
     } catch (err) {
-      console.log(err, err.stack);
+      clearInterval(spinnerInterval);
+      spinnerCleanup();
+      bamError(err, err.stack);
     }
   }
 };

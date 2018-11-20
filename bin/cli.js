@@ -8,25 +8,17 @@ const createRole = require('../src/aws/createRole.js');
 const deployLambda = require('../src/aws/deployLambda.js');
 const getUserInput = require('../src/util/getUserInput.js');
 const deployApi = require('../src/aws/deployApi.js');
-const {
-  resetStyledText,
-  setBrightGreenText,
-  brightGreenBamCharByChar,
-} = require('../src/util/fancyText.js');
+const { bamWarn } = require('../src/util/fancyText.js');
 
-const defaultRole = 'defaultBamRole';
+const defaultRole = 'bamRole';
 const [,, command, lambdaName] = process.argv;
 
 (async () => {
-  resetStyledText();
-  setBrightGreenText();
-
   if (command === 'create') {
     if (!fs.existsSync('./bam')) {
-      await brightGreenBamCharByChar();
-      await init(defaultRole);
-      await createRole(defaultRole);
+      init(defaultRole);
       await getUserDefaults();
+      await createRole(defaultRole);
     }
     createLambda(lambdaName);
   } else if (command === 'deploy') {
@@ -34,12 +26,12 @@ const [,, command, lambdaName] = process.argv;
       question: 'Please give a brief description of your lambda: ',
       validator: () => (true),
       feedback: 'invalid description',
-      defaultAnswer: ''
+      defaultAnswer: '',
     };
     const [description] = await getUserInput([question]);
     await deployLambda(lambdaName, description);
     await deployApi(lambdaName);
   } else {
-    console.log(`Command: ${command} is not valid.`);
+    bamWarn(`Command: ${command} is not valid.`);
   }
 })();

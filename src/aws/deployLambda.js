@@ -4,7 +4,12 @@ const { promisify } = require('util');
 const zipper = require('../util/zipper.js');
 const installLambdaDependencies = require('../util/installLambdaDependencies.js');
 const bamBam = require('../util/bamBam.js');
-const { brightGreenSpinner, spinnerCleanup } = require('../util/fancyText.js');
+const {
+  bamLog,
+  bamWarn,
+  bamSpinner,
+  spinnerCleanup,
+} = require('../util/fancyText.js');
 
 const apiVersion = 'latest';
 
@@ -14,7 +19,7 @@ module.exports = async function deployLambda(lambdaName, description, path = '.'
   const lambda = new AWS.Lambda({ apiVersion, region });
   const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
 
-  const spinnerInterval = brightGreenSpinner();
+  const spinnerInterval = bamSpinner();
 
   await installLambdaDependencies(lambdaName, path);
   const zippedFileName = await zipper(lambdaName, path);
@@ -32,9 +37,7 @@ module.exports = async function deployLambda(lambdaName, description, path = '.'
       Description: description,
     };
 
-    const actionStr = `deploy ${lambdaName}`;
-    const successStr = `deployed ${lambdaName}`;
-    return bamBam(asyncLambdaCreateFunction, params, actionStr, successStr);
+    return bamBam(asyncLambdaCreateFunction, params);
   };
 
   const writeToLib = (data) => {
@@ -50,9 +53,14 @@ module.exports = async function deployLambda(lambdaName, description, path = '.'
   };
 
   const data = await createAwsLambda();
-  if (data) await writeToLib(data);
-
-  clearInterval(spinnerInterval);
-  spinnerCleanup();
-  console.log(`BAM! Lambda "${lambdaName}" has been deployed`);
+  if (data) {
+    await writeToLib(data);
+    clearInterval(spinnerInterval);
+    spinnerCleanup();
+    bamLog(`Lambda "${lambdaName}" has been created`);
+  } else {
+    clearInterval(spinnerInterval);
+    spinnerCleanup();
+    bamWarn(`Lambda "${lambdaName}" already exists`);
+  }
 };

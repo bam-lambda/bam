@@ -26,7 +26,7 @@ const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 
 describe('bam create lambda', () => {
   beforeEach(async () => {
-    jest.setTimeout(15000);
+    jest.setTimeout(20000);
     createDirectory('bam', path);
     createDirectory('functions', `${path}/bam/`);
     createJSONFile('config', `${path}/bam/`, config);

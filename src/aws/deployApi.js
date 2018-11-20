@@ -3,7 +3,13 @@ const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const uuid = require('uuid');
 const bamBam = require('../util/bamBam.js');
-const { brightGreenSpinner, spinnerCleanup } = require('../util/fancyText.js');
+const {
+  bamLog,
+  bamError,
+  bamSpinner,
+  spinnerCleanup,
+  bamAscii,
+} = require('../util/fancyText.js');
 
 const apiVersion = 'latest';
 
@@ -25,7 +31,7 @@ module.exports = async function deployApi(lambdaName, path = '.', stageName = 'd
   const asyncPutMethodResponse = promisify(api.putMethodResponse.bind(api));
   const asyncCreateDeployment = promisify(api.createDeployment.bind(api));
 
-  const spinnerInterval = brightGreenSpinner();
+  const spinnerInterval = bamSpinner();
 
   // Sequence:
   try {
@@ -48,9 +54,7 @@ module.exports = async function deployApi(lambdaName, path = '.', stageName = 'd
       Action: 'lambda:InvokeFunction',
       SourceArn: sourceArn,
     };
-    const actionStr = `add permission to ${lambdaName}`;
-    const successStr = `permission granted to invoke ${lambdaName}`;
-    await bamBam(asyncAddPermission, addPermissionParams, actionStr, successStr);
+    await bamBam(asyncAddPermission, addPermissionParams);
 
     // put method
     const putMethodParams = {
@@ -93,10 +97,12 @@ module.exports = async function deployApi(lambdaName, path = '.', stageName = 'd
     fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
     clearInterval(spinnerInterval);
     spinnerCleanup();
-    console.log(`BAM! Endpoint "${lambdaName}" has been deployed: ${endpoint}`);
+    bamLog(bamAscii);
+    bamLog('API Gateway endpoint has been deployed:');
+    bamLog(endpoint);
   } catch (err) {
-    console.log(err);
     clearInterval(spinnerInterval);
     spinnerCleanup();
+    bamError(err);
   }
 };

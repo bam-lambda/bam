@@ -3,7 +3,6 @@ const fs = require('fs');
 const AWS = require('aws-sdk');
 const rimraf = require('rimraf');
 
-const create = require('../src/commands/create.js');
 const createDirectory = require('../src/util/createDirectory');
 const deployLambda = require('../src/aws/deployLambda.js');
 const createJSONFile = require('../src/util/createJSONFile');
@@ -20,7 +19,7 @@ const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
 const path = './test';
 const config = configTemplate(roleName);
 config.accountNumber = process.env.AWS_ID;
-const testLambdaFile = fs.readFileSync('./templates/lambdaTemplate');
+const testLambdaFile = fs.readFileSync('./test/templates/testLambda.js');
 
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
@@ -28,7 +27,7 @@ const cwd = process.cwd();
 
 describe('bam create lambda', () => {
   beforeEach(async () => {
-    jest.setTimeout(20000);
+    jest.setTimeout(25000);
     createDirectory('.bam', path);
     createDirectory('functions', `${path}/.bam/`);
     createJSONFile('config', `${path}/.bam/`, config);

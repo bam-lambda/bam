@@ -3,7 +3,7 @@ const fs = require('fs');
 const AWS = require('aws-sdk');
 const rimraf = require('rimraf');
 
-const createLambda = require('../src/aws/createLambda.js');
+const create = require('../src/commands/create.js');
 const createDirectory = require('../src/util/createDirectory');
 const deployLambda = require('../src/aws/deployLambda.js');
 const createJSONFile = require('../src/util/createJSONFile');
@@ -20,9 +20,11 @@ const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
 const path = './test';
 const config = configTemplate(roleName);
 config.accountNumber = process.env.AWS_ID;
+const testLambdaFile = fs.readFileSync('./templates/lambdaTemplate');
 
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
+const cwd = process.cwd();
 
 describe('bam create lambda', () => {
   beforeEach(async () => {
@@ -32,13 +34,15 @@ describe('bam create lambda', () => {
     createJSONFile('config', `${path}/.bam/`, config);
     createJSONFile('library', `${path}/.bam/functions`, {});
     await createRole(roleName, path);
-    createLambda(lambdaName, path);
+    fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaFile);
+
     await deployLambda(lambdaName, 'test description', path);
   });
 
   afterEach(async () => {
     await deleteLambda(lambdaName, path);
     await asyncRimRaf(`${path}/.bam`);
+    fs.unlinkSync(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
   });

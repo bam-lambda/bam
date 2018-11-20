@@ -1,7 +1,8 @@
 const fs = require('fs');
 const rimraf = require('rimraf');
 
-const init = require('../src/util/init.js');
+const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
+const bamError = require('../src/util/fancyText.js');
 
 const roleName = 'testBamRole';
 const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
@@ -9,14 +10,14 @@ const path = './test';
 
 describe('bam init', () => {
   beforeEach(() => {
-    init(roleName, './test');
+    setupBamDirAndFiles(roleName, './test');
   });
 
   afterEach(async () => {
     try {
       await asyncRimRaf(`${path}/.bam`);
     } catch (err) {
-      console.log(err);
+      bamError(err);
     }
   });
 

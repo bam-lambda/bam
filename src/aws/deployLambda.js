@@ -6,7 +6,7 @@ const installLambdaDependencies = require('../util/installLambdaDependencies.js'
 const bamBam = require('../util/bamBam.js');
 const {
   bamLog,
-  bamError,
+  bamWarn,
   bamSpinner,
   spinnerCleanup,
 } = require('../util/fancyText.js');
@@ -52,12 +52,15 @@ module.exports = async function deployLambda(lambdaName, description, path = '.'
     fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
   };
 
-  // add try/catch here??
-  // if so, add bamError
   const data = await createAwsLambda();
-  if (data) await writeToLib(data);
-
-  clearInterval(spinnerInterval);
-  spinnerCleanup();
-  bamLog(`Lambda "${lambdaName}" has been created`);
+  if (data) {
+    await writeToLib(data);
+    clearInterval(spinnerInterval);
+    spinnerCleanup();
+    bamLog(`Lambda "${lambdaName}" has been created`);
+  } else {
+    clearInterval(spinnerInterval);
+    spinnerCleanup();
+    bamWarn(`Lambda "${lambdaName}" already exists`);
+  }
 };

@@ -1,13 +1,18 @@
+/* eslint no-console: 0 */
 const fs = require('fs');
+
+const bamTextStyles = ['green', 'bright'];
 
 class Ansi {
   constructor() {
-    const escapeChar = '\u001B';
+    const escapeChar = '\x1b';
     this.codes = {
       showCursor: `${escapeChar}[?25h`,
       resetColor: `${escapeChar}[0m`,
       bright: `${escapeChar}[1m`,
       green: `${escapeChar}[32m`,
+      yellow: `${escapeChar}[33m`,
+      red: `${escapeChar}[31m`,
       white: `${escapeChar}[37m`,
       greenBg: `${escapeChar}[42m`,
       hideCursor: `${escapeChar}[?25l`,
@@ -26,44 +31,41 @@ const resetStyledText = () => {
   showCursor();
 };
 
-const getStyledText = (text, ...codes) => (
-  codes.reduce((codesStr, code) => `${codesStr}${ansi.codes[code]}`, '') + text
-);
-
-const changeTextStyle = (...codes) => {
-  process.stdout.write(getStyledText('', ...codes));
+const getStyledText = (text, ...codes) => {
+  const stylesStr = codes.reduce((codesStr, code) => `${codesStr}${ansi.codes[code]}`, '');
+  return `${stylesStr}${text}${ansi.codes.resetColor}`;
 };
 
-const setBrightGreenText = () => {
-  changeTextStyle('bright', 'green');
-};
+const bamText = text => getStyledText(text, ...bamTextStyles);
+const bamWarnText = text => getStyledText(text, 'yellow');
+const bamErrorText = text => getStyledText(text, 'red');
+
+const bamWrite = text => process.stdout.write(bamText(text));
+const bamLog = text => console.log(bamText(text));
+const bamWarn = text => console.log(bamWarnText(text));
+const bamError = text => console.log(bamErrorText(text));
 
 const brightGreenSpinner = () => {
-  const cursors = ['|', '/', '-', '\\'];
+  hideCursor();
+  const spinnerChars = ['|', '/', '-', '\\'];
   let i = 0;
 
   return setInterval(() => {
-    i += 1;
-    const cursor = cursors[i % 4];
-    resetStyledText();
+    const spinnerChar = spinnerChars[i % 4];
     process.stdout.cursorTo(0);
-    setBrightGreenText();
-    process.stdout.write(cursor);
+    showCursor();
+    bamWrite(spinnerChar);
     hideCursor();
+    i += 1;
   }, 200);
 };
 
 const spinnerCleanup = () => {
   process.stdout.cursorTo(0);
   resetStyledText();
-  setBrightGreenText();
 };
 
-const brightGreenBam = () => {
-  const bamStr = fs.readFileSync('./ascii/bam.txt', 'utf8');
-  setBrightGreenText();
-  console.log(bamStr);
-};
+const bamAscii = fs.readFileSync('./ascii/bam.txt', 'utf8');
 
 // catch ctrl+c event and exit normally
 process.on('SIGINT', () => {
@@ -83,9 +85,9 @@ process.on('uncaughtException', (e) => {
 module.exports = {
   brightGreenSpinner,
   spinnerCleanup,
-  getStyledText,
-  setBrightGreenText,
-  brightGreenBam,
-  resetColor,
-  resetStyledText,
+  bamText,
+  bamAscii,
+  bamLog,
+  bamError,
+  bamWarn,
 };

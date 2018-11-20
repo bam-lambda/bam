@@ -2,7 +2,12 @@ const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const fs = require('fs');
 const { doesRoleExist } = require('./doesResourceExist.js');
-const { brightGreenSpinner, spinnerCleanup } = require('../util/fancyText.js');
+const {
+  brightGreenSpinner,
+  spinnerCleanup,
+  bamLog,
+  bamError,
+} = require('../util/fancyText.js');
 
 const iam = new AWS.IAM();
 const AWSLambdaBasicExecutionRolePolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
@@ -45,11 +50,11 @@ module.exports = async function createRole(defaultRole, path = '.') {
       await asyncAttachPolicy(attachedParams);
       clearInterval(spinnerInterval);
       spinnerCleanup();
-      console.log(`Role "${defaultRole}" has been created`);
+      bamLog(`Role "${defaultRole}" has been created`);
     } catch (err) {
       clearInterval(spinnerInterval);
       spinnerCleanup();
-      console.log(err, err.stack);
+      bamError(err, err.stack);
     }
   }
 };

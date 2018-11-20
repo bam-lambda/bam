@@ -8,19 +8,12 @@ const createRole = require('../src/aws/createRole.js');
 const deployLambda = require('../src/aws/deployLambda.js');
 const getUserInput = require('../src/util/getUserInput.js');
 const deployApi = require('../src/aws/deployApi.js');
-const {
-  resetStyledText,
-  setBrightGreenText,
-  brightGreenBam,
-} = require('../src/util/fancyText.js');
+const { bamWarn } = require('../src/util/fancyText.js');
 
-const defaultRole = 'defaultBamRole';
+const defaultRole = 'bamRole';
 const [,, command, lambdaName] = process.argv;
 
 (async () => {
-  resetStyledText();
-  setBrightGreenText();
-
   if (command === 'create') {
     if (!fs.existsSync('./bam')) {
       init(defaultRole);
@@ -38,8 +31,7 @@ const [,, command, lambdaName] = process.argv;
     const [description] = await getUserInput([question]);
     await deployLambda(lambdaName, description);
     await deployApi(lambdaName);
-    brightGreenBam();
   } else {
-    console.log(`Command: ${command} is not valid.`);
+    bamWarn(`Command: ${command} is not valid.`);
   }
 })();

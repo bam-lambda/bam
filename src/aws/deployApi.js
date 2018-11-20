@@ -3,7 +3,13 @@ const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const uuid = require('uuid');
 const bamBam = require('../util/bamBam.js');
-const { brightGreenSpinner, spinnerCleanup } = require('../util/fancyText.js');
+const {
+  bamLog,
+  bamError,
+  brightGreenSpinner,
+  spinnerCleanup,
+  bamAscii,
+} = require('../util/fancyText.js');
 
 const apiVersion = 'latest';
 
@@ -91,10 +97,11 @@ module.exports = async function deployApi(lambdaName, path = '.', stageName = 'd
     fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
     clearInterval(spinnerInterval);
     spinnerCleanup();
-    console.log('BAM! API Gateway endpoint has been deployed');
-    console.log(endpoint);
+    bamLog(bamAscii);
+    bamLog('API Gateway endpoint has been deployed:');
+    bamLog(endpoint);
   } catch (err) {
-    console.log(err);
+    bamError(err);
     clearInterval(spinnerInterval);
     spinnerCleanup();
   }

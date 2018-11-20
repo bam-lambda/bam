@@ -1,25 +1,16 @@
 const readline = require('readline');
-const {
-  setBrightGreenText,
-  getStyledText,
-  resetColor,
-} = require('./fancyText.js');
+
+const { bamText, bamWarn } = require('./fancyText.js');
 
 const answers = [];
 
 const asyncValidate = async (asyncCallback, validator, feedback, question, defaultAnswer) => {
-  let colorfulResult;
-  let result;
-
   while (true) {
-    colorfulResult = await asyncCallback(question, defaultAnswer);
-    [,, result] = colorfulResult.split('[1m');
-    if (await validator(result)) break;
-    setBrightGreenText();
-    console.log(feedback);
+    const result = await asyncCallback(question, defaultAnswer);
+    const validAnswer = await validator(result);
+    if (validAnswer) return result;
+    bamWarn(feedback);
   }
-
-  return result;
 };
 
 module.exports = async function getUserInput(prompts) {
@@ -31,10 +22,8 @@ module.exports = async function getUserInput(prompts) {
   // returns a pending prompt promise to handle single attempt at a question
   const pendingPrompt = (question, defaultAnswer) => (
     new Promise((resolve) => {
-      resetColor();
-      rl.question('', resolve);
-      rl.write(getStyledText(question, 'green', 'bright'));
-      rl.write(getStyledText(defaultAnswer, 'resetColor', 'bright'));
+      rl.question(bamText(question), resolve);
+      rl.write(defaultAnswer);
     })
   );
 
@@ -45,6 +34,5 @@ module.exports = async function getUserInput(prompts) {
   }
 
   rl.close();
-  setBrightGreenText();
   return answers;
 };

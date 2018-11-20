@@ -4,7 +4,12 @@ const { promisify } = require('util');
 const zipper = require('../util/zipper.js');
 const installLambdaDependencies = require('../util/installLambdaDependencies.js');
 const bamBam = require('../util/bamBam.js');
-const { brightGreenSpinner, spinnerCleanup } = require('../util/fancyText.js');
+const {
+  bamLog,
+  bamError,
+  brightGreenSpinner,
+  spinnerCleanup,
+} = require('../util/fancyText.js');
 
 const apiVersion = 'latest';
 
@@ -47,10 +52,12 @@ module.exports = async function deployLambda(lambdaName, description, path = '.'
     fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
   };
 
+  // add try/catch here??
+  // if so, add bamError
   const data = await createAwsLambda();
   if (data) await writeToLib(data);
 
   clearInterval(spinnerInterval);
   spinnerCleanup();
-  console.log(`Lambda "${lambdaName}" has been created`);
+  bamLog(`Lambda "${lambdaName}" has been created`);
 };

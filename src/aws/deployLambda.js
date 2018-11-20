@@ -32,9 +32,7 @@ module.exports = async function deployLambda(lambdaName, description, path = '.'
       Description: description,
     };
 
-    const actionStr = `deploy ${lambdaName}`;
-    const successStr = `deployed ${lambdaName}`;
-    return bamBam(asyncLambdaCreateFunction, params, actionStr, successStr);
+    return bamBam(asyncLambdaCreateFunction, params);
   };
 
   const writeToLib = (data) => {

@@ -59,7 +59,7 @@ const spinnerCleanup = () => {
   setBrightGreenText();
 };
 
-const brightGreenBamCharByChar = async () => {
+const brightGreenBam = () => {
   const bamStr = fs.readFileSync('./ascii/bam.txt', 'utf8');
   setBrightGreenText();
   console.log(bamStr);
@@ -85,7 +85,7 @@ module.exports = {
   spinnerCleanup,
   getStyledText,
   setBrightGreenText,
-  brightGreenBamCharByChar,
+  brightGreenBam,
   resetColor,
   resetStyledText,
 };

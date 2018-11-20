@@ -43,7 +43,7 @@ describe('bam create lambda', () => {
     await asyncDeleteRole({ RoleName: roleName });
   });
 
-  test('Zip file exists within ./test/bam/functions/{lambdaName}', () => {
+  test.only('Zip file exists within ./test/bam/functions/{lambdaName}', () => {
     const template = fs.existsSync(`${path}/bam/functions/${lambdaName}/${lambdaName}.zip`);
     expect(template).toBe(true);
   });

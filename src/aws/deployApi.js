@@ -48,9 +48,7 @@ module.exports = async function deployApi(lambdaName, path = '.', stageName = 'd
       Action: 'lambda:InvokeFunction',
       SourceArn: sourceArn,
     };
-    const actionStr = `add permission to ${lambdaName}`;
-    const successStr = `permission granted to invoke ${lambdaName}`;
-    await bamBam(asyncAddPermission, addPermissionParams, actionStr, successStr);
+    await bamBam(asyncAddPermission, addPermissionParams);
 
     // put method
     const putMethodParams = {
@@ -93,7 +91,8 @@ module.exports = async function deployApi(lambdaName, path = '.', stageName = 'd
     fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
     clearInterval(spinnerInterval);
     spinnerCleanup();
-    console.log(`BAM! Endpoint "${lambdaName}" has been deployed: ${endpoint}`);
+    console.log('BAM! API Gateway endpoint has been deployed');
+    console.log(endpoint);
   } catch (err) {
     console.log(err);
     clearInterval(spinnerInterval);

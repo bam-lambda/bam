@@ -8,13 +8,12 @@ const {
 const answers = [];
 
 const asyncValidate = async (asyncCallback, validator, feedback, question, defaultAnswer) => {
-  let valid = false,
-      colorfulResult,
-      result;
+  let colorfulResult;
+  let result;
 
   while (true) {
     colorfulResult = await asyncCallback(question, defaultAnswer);
-    result = colorfulResult.split('[1m')[2];
+    [,, result] = colorfulResult.split('[1m');
     if (await validator(result)) break;
     setBrightGreenText();
     console.log(feedback);
@@ -31,11 +30,11 @@ module.exports = async function getUserInput(prompts) {
 
   // returns a pending prompt promise to handle single attempt at a question
   const pendingPrompt = (question, defaultAnswer) => (
-    new Promise((resolve, reject) => {
-        resetColor();
-        rl.question('', resolve);
-        rl.write(getStyledText(question, 'green', 'bright'););
-        rl.write(getStyledText(defaultAnswer, 'resetColor', 'bright'));
+    new Promise((resolve) => {
+      resetColor();
+      rl.question('', resolve);
+      rl.write(getStyledText(question, 'green', 'bright'));
+      rl.write(getStyledText(defaultAnswer, 'resetColor', 'bright'));
     })
   );
 
@@ -46,5 +45,6 @@ module.exports = async function getUserInput(prompts) {
   }
 
   rl.close();
+  setBrightGreenText();
   return answers;
 };

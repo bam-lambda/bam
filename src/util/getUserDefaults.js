@@ -3,22 +3,22 @@ const getUserInput = require('./getUserInput.js');
 
 const { doesRoleExist } = require('../aws/doesResourceExist.js');
 
-const regions = ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2', 
-                 'ca-central-1', 'eu-central-1', 'eu-west-1', 'eu-west-2', 
-                 'eu-west-3', 'ap-northeast-1', 'ap-northeast-2', 'ap-northeast-3', 
+const regions = ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2',
+                 'ca-central-1', 'eu-central-1', 'eu-west-1', 'eu-west-2',
+                 'eu-west-3', 'ap-northeast-1', 'ap-northeast-2', 'ap-northeast-3',
                  'ap-southeast-1', 'ap-southeast-2', 'ap-south-1', 'sa-east-1'];
 
 const badNum = 'Valid account numbers are 12 numerical digits.';
 const badRegion = `Valid regions must be one of the following: ${regions.join(', ')}`;
 const badRole = 'The role name you supplied is not registered to the account provided.';
 
-const validNum = (r) => ( /^[0-9]{12}$/.test(r) );
-const validRegion = (r) => ( regions.includes(r) );
-const validRole = doesRoleExist;
+const validNum = r => /^[0-9]{12}$/.test(r);
+const validRegion = r => regions.includes(r);
 
 module.exports = async function getUserDefaults() {
   const config = JSON.parse(fs.readFileSync('./bam/config.json', 'utf8'));
   const defaultRole = config.role;
+  const validRole = userRole => userRole === defaultRole || doesRoleExist(userRole);
 
   const getUserInputs = async () => {
     const q1 = {
@@ -55,5 +55,4 @@ module.exports = async function getUserDefaults() {
 
   await getUserInputs();
   writeConfig();
-  // console.log('success: config file complete');
 };

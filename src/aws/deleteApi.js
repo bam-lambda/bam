@@ -18,5 +18,5 @@ module.exports = async function deleteApi(restApiId, path = '.') {
   delete lambda.api;
   // write back to library
   fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
-  console.log('API has been deleted.');
+  console.log('API Gateway endpoint has been deleted');
 };

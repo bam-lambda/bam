@@ -1,17 +1,14 @@
 const delay = require('./delay.js');
 const { displayGreenSpinningCursor } = require('./fancyText.js');
 
-module.exports = async function bamBam(asyncCallback, params, actionStr, successStr, retryError = 'InvalidParameterValueException') {
+module.exports = async function bamBam(asyncCallback, params, retryError = 'InvalidParameterValueException') {
   try {
-    // await displayGreenSpinningCursor();
-    // console.log(`trying to ${actionStr}`);
     const data = await asyncCallback(params);
-    // console.log(`success: ${successStr}`);
     return data;
   } catch (err) {
     if (err.code === retryError) {
       await delay(3000);
-      const deployed = await bamBam(asyncCallback, params, actionStr, successStr, retryError);
+      const deployed = await bamBam(asyncCallback, params, retryError);
       return deployed;
     }
 

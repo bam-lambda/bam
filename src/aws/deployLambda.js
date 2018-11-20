@@ -54,5 +54,5 @@ module.exports = async function deployLambda(lambdaName, description, path = '.'
 
   clearInterval(spinnerInterval);
   spinnerCleanup();
-  console.log(`BAM! Lambda "${lambdaName}" has been deployed`);
+  console.log(`Lambda "${lambdaName}" has been created`);
 };

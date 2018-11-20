@@ -31,5 +31,5 @@ module.exports = async function deleteLambda(lambdaName, path = '.') {
 
   // write back to library
   fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
-  console.log(`${lambdaName} has been deleted.`);
+  console.log(`Lambda "${lambdaName}" has been deleted`);
 };

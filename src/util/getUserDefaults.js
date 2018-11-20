@@ -15,8 +15,8 @@ const badRole = 'The role name you supplied is not registered to the account pro
 const validNum = r => /^[0-9]{12}$/.test(r);
 const validRegion = r => regions.includes(r);
 
-module.exports = async function getUserDefaults() {
-  const config = JSON.parse(fs.readFileSync('./bam/config.json', 'utf8'));
+module.exports = async function getUserDefaults(path) {
+  const config = JSON.parse(fs.readFileSync(`${path}/.bam/config.json`, 'utf8'));
   const defaultRole = config.role;
   const validRole = userRole => userRole === defaultRole || doesRoleExist(userRole);
 
@@ -50,7 +50,7 @@ module.exports = async function getUserDefaults() {
 
   const writeConfig = () => {
     const configStr = JSON.stringify(config);
-    fs.writeFileSync('./bam/config.json', configStr);
+    fs.writeFileSync(`${path}/.bam/config.json`, configStr);
   };
 
   await getUserInputs();

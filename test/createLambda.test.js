@@ -9,13 +9,13 @@ const path = './test';
 
 describe('bam create lambda', () => {
   beforeEach(() => {
-    createDirectory('bam', path);
-    createDirectory('functions', `${path}/bam/`);
+    createDirectory('.bam', path);
+    createDirectory('functions', `${path}/.bam/`);
   });
 
   afterEach(async () => {
     try {
-      await asyncRimRaf(`${path}/bam`);
+      await asyncRimRaf(`${path}/.bam`);
     } catch (err) {
       console.log(err);
     }
@@ -23,7 +23,7 @@ describe('bam create lambda', () => {
 
   test('index.js exists within functions directory', () => {
     createLambda('testLambda', path);
-    const template = fs.existsSync(`${path}/bam/functions/testLambda/index.js`);
+    const template = fs.existsSync(`${path}/.bam/functions/testLambda/index.js`);
     expect(template).toBe(true);
   });
 });

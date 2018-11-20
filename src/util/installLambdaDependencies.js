@@ -13,12 +13,12 @@ module.exports = async function installLambdaDependencies(lambdaName, path) {
   };
 
   const npmDependencies = () => {
-    const lambdaFile = fs.readFileSync(`${path}/bam/functions/${lambdaName}/index.js`, 'utf8');
+    const lambdaFile = fs.readFileSync(`${path}/.bam/functions/${lambdaName}/index.js`, 'utf8');
     const dependencies = lambdaFile.split('exports')[0].match(/require\([^)]+\)/g) || [];
     return dependencies.map(pkg => pkg.slice(9, -2)).filter(pkg => !isNativeModule(pkg));
   };
 
-  const dir = `${path}/bam/functions/${lambdaName}`;
+  const dir = `${path}/.bam/functions/${lambdaName}`;
   const packages = npmDependencies();
 
   const installPackages = async () => {

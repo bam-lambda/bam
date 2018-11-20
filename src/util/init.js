@@ -1,11 +1,9 @@
-const createDirectory = require('./createDirectory.js');
-const createJSONFile = require('./createJSONFile.js');
-const configTemplate = require('../../templates/configTemplate.js');
+const getUserDefaults = require('./getUserDefaults.js');
+const createRole = require('../aws/createRole.js');
+const setupBamDirAndFiles = require('./setupBamDirAndFiles.js');
 
-module.exports = function init(roleName, path = '.') {
-  const configJSON = configTemplate(roleName);
-  createDirectory('bam', path);
-  createDirectory('functions', `${path}/bam`);
-  createJSONFile('config', `${path}/bam`, configJSON);
-  createJSONFile('library', `${path}/bam/functions`, {});
+module.exports = async function init(roleName, path) {
+  setupBamDirAndFiles(roleName, path);
+  await getUserDefaults(path);
+  await createRole(roleName, path);
 };

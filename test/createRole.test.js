@@ -20,6 +20,7 @@ const path = './test';
 
 describe('createRole', () => {
   beforeEach(() => {
+    jest.setTimeout(10000);
     createDirectory('.bam', 'test');
     const config = configTemplate(roleName);
     createJSONFile('config', `${path}/.bam`, config);

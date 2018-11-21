@@ -1,7 +1,7 @@
 const fs = require('fs');
 const { bamWarn } = require('../util/fancyText.js');
 
-const lambdaTemplate = fs.readFileSync('./templates/lambdaTemplate.js', 'utf8');
+const lambdaTemplate = fs.readFileSync(`${__dirname}/../../templates/lambdaTemplate.js`, 'utf8');
 
 module.exports = function create(lambdaName, path) {
   const cwd = process.cwd();

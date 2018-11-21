@@ -58,7 +58,7 @@ const spinnerCleanup = () => {
   resetStyledText();
 };
 
-const bamAscii = fs.readFileSync('./ascii/bam.txt', 'utf8');
+const bamAscii = fs.readFileSync(`${__dirname}/../../ascii/bam.txt`, 'utf8');
 
 // catch ctrl+c event and exit normally
 process.on('SIGINT', () => {

@@ -8,7 +8,7 @@ const { bamLog, bamError } = require('../util/fancyText.js');
 
 const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
 
-module.exports = async function deleteLambda(lambdaName, path = '.') {
+module.exports = async function deleteLambda(lambdaName, path) {
   const region = getRegion();
   const apiVersion = 'latest';
 
@@ -21,16 +21,16 @@ module.exports = async function deleteLambda(lambdaName, path = '.') {
 
   // delete from local directories
   try {
-    await asyncRimRaf(`${path}/bam/functions/${lambdaName}`);
+    await asyncRimRaf(`${path}/.bam/functions/${lambdaName}`);
   } catch (err) {
     bamError(err);
   }
 
   // read from library and remove property
-  const functions = JSON.parse(fs.readFileSync(`${path}/bam/functions/library.json`));
+  const functions = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
   delete functions[lambdaName];
 
   // write back to library
-  fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
+  fs.writeFileSync(`${path}/.bam/functions/library.json`, JSON.stringify(functions));
   bamLog(`Lambda "${lambdaName}" has been deleted`);
 };

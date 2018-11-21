@@ -10,7 +10,7 @@ const createRole = require('../src/aws/createRole.js');
 const configTemplate = require('../templates/configTemplate.js');
 
 const iam = new AWS.IAM();
-const roleName = 'testDefaultBamRole';
+const roleName = 'testBamRole';
 const policyName = 'AWSLambdaBasicExecutionRole';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
@@ -20,24 +20,24 @@ const path = './test';
 
 describe('createRole', () => {
   beforeEach(() => {
-    createDirectory('bam', 'test');
+    createDirectory('.bam', 'test');
     const config = configTemplate(roleName);
-    createJSONFile('config', `${path}/bam`, config);
+    createJSONFile('config', `${path}/.bam`, config);
   });
 
   afterEach(async () => {
     try {
-      await asyncRimRaf(`${path}/bam`);
+      await asyncRimRaf(`${path}/.bam`);
     } catch (err) {
       console.log(err);
     }
   });
 
   test('defaultRole is not created if user uses own role', async () => {
-    const config = JSON.parse(fs.readFileSync(`${path}/bam/config.json`, 'utf8'));
+    const config = JSON.parse(fs.readFileSync(`${path}/.bam/config.json`, 'utf8'));
     config.accountNumber = process.env.AWS_ID;
     config.role = 'otherTestRole';
-    fs.writeFileSync(`${path}/bam/config.json`, JSON.stringify(config));
+    fs.writeFileSync(`${path}/.bam/config.json`, JSON.stringify(config));
     await createRole(roleName, path);
     const role = await doesRoleExist(roleName);
     expect(role).toBe(false);
@@ -45,9 +45,9 @@ describe('createRole', () => {
 
   describe('aws integration', () => {
     beforeEach(() => {
-      const config = JSON.parse(fs.readFileSync(`${path}/bam/config.json`, 'utf8'));
+      const config = JSON.parse(fs.readFileSync(`${path}/.bam/config.json`, 'utf8'));
       config.accountNumber = process.env.AWS_ID;
-      fs.writeFileSync(`${path}/bam/config.json`, JSON.stringify(config));
+      fs.writeFileSync(`${path}/.bam/config.json`, JSON.stringify(config));
     });
 
     afterEach(async () => {
@@ -55,7 +55,7 @@ describe('createRole', () => {
       await asyncDeleteRole({ RoleName: roleName });
     });
 
-    test('testDefaultBamRole is created', async () => {
+    test('testBamRole is created', async () => {
       let role = await doesRoleExist(roleName);
       expect(role).toBe(false);
       await createRole(roleName, path);
@@ -63,7 +63,7 @@ describe('createRole', () => {
       expect(role).toBe(true);
     });
 
-    test('testDefaultBamRole is not created if exist', async () => {
+    test('testBamRole is not created if exist', async () => {
       await createRole(roleName, path);
       const result = await createRole(roleName, path);
       expect(result).toBeUndefined();

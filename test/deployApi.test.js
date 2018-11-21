@@ -9,7 +9,6 @@ const configTemplate = require('../templates/configTemplate');
 const createRole = require('../src/aws/createRole');
 const createJSONFile = require('../src/util/createJSONFile');
 
-const createLambda = require('../src/aws/createLambda.js');
 const deployLambda = require('../src/aws/deployLambda.js');
 const deployApi = require('../src/aws/deployApi.js');
 
@@ -19,7 +18,7 @@ const deleteApi = require('../src/aws/deleteApi');
 const delay = require('../src/util/delay.js');
 
 const iam = new AWS.IAM();
-const roleName = 'testDefaultBamRole';
+const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
 const stageName = 'test';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
@@ -27,6 +26,8 @@ const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
 const path = './test';
 const config = configTemplate(roleName);
 config.accountNumber = process.env.AWS_ID;
+const testLambdaFile = fs.readFileSync('./test/templates/testLambda.js');
+const cwd = process.cwd();
 
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
@@ -34,20 +35,21 @@ const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 describe('bam deploy api', () => {
   beforeEach(async () => {
     jest.setTimeout(60000);
-    createDirectory('bam', path);
-    createDirectory('functions', `${path}/bam/`);
-    createJSONFile('config', `${path}/bam`, config);
-    createJSONFile('library', `${path}/bam/functions`, {});
+    createDirectory('.bam', path);
+    createDirectory('functions', `${path}/.bam/`);
+    createJSONFile('config', `${path}/.bam`, config);
+    createJSONFile('library', `${path}/.bam/functions`, {});
     await createRole(roleName, path);
-    createLambda(lambdaName, path);
+    fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaFile);
   });
 
   afterEach(async () => {
-    const library = JSON.parse(fs.readFileSync(`${path}/bam/functions/library.json`));
+    const library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
     const { restApiId } = library[lambdaName].api;
     await deleteApi(restApiId, path);
     await deleteLambda(lambdaName, path);
-    await asyncRimRaf(`${path}/bam`);
+    await asyncRimRaf(`${path}/.bam`);
+    fs.unlinkSync(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
     await delay(30000);
@@ -57,7 +59,7 @@ describe('bam deploy api', () => {
     await deployLambda(lambdaName, 'test description', path);
     await deployApi(lambdaName, path, stageName);
 
-    const library = JSON.parse(fs.readFileSync(`${path}/bam/functions/library.json`));
+    const library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
     const url = library[lambdaName].api.endpoint;
     let responseStatus;
 
@@ -77,11 +79,11 @@ describe('bam deploy api', () => {
     expect(responseStatus).toEqual(200);
   });
 
-  test('Api metadata exists within ./test/bam/functions/library.json', async () => {
+  test('Api metadata exists within ./test/.bam/functions/library.json', async () => {
     await deployLambda(lambdaName, 'test description', path);
     await deployApi(lambdaName, path, stageName);
 
-    const library = JSON.parse(fs.readFileSync(`${path}/bam/functions/library.json`));
+    const library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
     const { api } = library[lambdaName];
     expect(api).toBeTruthy();
   });
@@ -90,7 +92,7 @@ describe('bam deploy api', () => {
     await deployLambda(lambdaName, 'test description', path);
     await deployApi(lambdaName, path, stageName);
 
-    const library = JSON.parse(fs.readFileSync(`${path}/bam/functions/library.json`));
+    const library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
     const { restApiId } = library[lambdaName].api;
     const apiExists = await doesApiExist(restApiId);
     expect(apiExists).toBe(true);
@@ -98,11 +100,11 @@ describe('bam deploy api', () => {
 
   test('Response contains query param in body', async () => {
     const testLambdaWithQueryParams = fs.readFileSync(`${path}/templates/testLambdaWithQueryParams.js`);
-    fs.writeFileSync(`${path}/bam/functions/${lambdaName}/index.js`, testLambdaWithQueryParams);
+    fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaWithQueryParams);
     await deployLambda(lambdaName, 'test description', path);
     await deployApi(lambdaName, path, stageName);
 
-    const library = JSON.parse(fs.readFileSync(`${path}/bam/functions/library.json`));
+    const library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
     const url = `${library[lambdaName].api.endpoint}?name=John`;
     let responseBody;
 
@@ -128,13 +130,13 @@ describe('bam deploy api', () => {
   describe('lambda with dependencies', () => {
     beforeEach(async () => {
       const testLambdaWithDependencies = fs.readFileSync(`${path}/templates/testLambdaWithDependencies.js`);
-      fs.writeFileSync(`${path}/bam/functions/${lambdaName}/index.js`, testLambdaWithDependencies);
+      fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaWithDependencies);
       await deployLambda(lambdaName, 'test description', path);
       await deployApi(lambdaName, path, stageName);
     });
 
     test('Response contains output from dependencies in body', async () => {
-      const library = JSON.parse(fs.readFileSync(`${path}/bam/functions/library.json`));
+      const library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
       const url = library[lambdaName].api.endpoint;
       let responseBody;
 
@@ -159,26 +161,26 @@ describe('bam deploy api', () => {
     });
 
     test('package.json file is created', async () => {
-      const packageJSONExists = fs.existsSync(`${path}/bam/functions/${lambdaName}/package.json`);
-      const packageLockJSONExists = fs.existsSync(`${path}/bam/functions/${lambdaName}/package-lock.json`);
+      const packageJSONExists = fs.existsSync(`${path}/.bam/functions/${lambdaName}/package.json`);
+      const packageLockJSONExists = fs.existsSync(`${path}/.bam/functions/${lambdaName}/package-lock.json`);
       expect(packageJSONExists).toBe(true);
       expect(packageLockJSONExists).toBe(true);
     });
 
     test('node modules directory is created', async () => {
-      const nodeModulesDirExists = fs.existsSync(`${path}/bam/functions/${lambdaName}/node_modules`);
+      const nodeModulesDirExists = fs.existsSync(`${path}/.bam/functions/${lambdaName}/node_modules`);
       expect(nodeModulesDirExists).toBe(true);
     });
 
     test('node modules directory contains dependencies', async () => {
-      const uuid = fs.existsSync(`${path}/bam/functions/${lambdaName}/node_modules/uuid`);
-      const moment = fs.existsSync(`${path}/bam/functions/${lambdaName}/node_modules/moment`);
+      const uuid = fs.existsSync(`${path}/.bam/functions/${lambdaName}/node_modules/uuid`);
+      const moment = fs.existsSync(`${path}/.bam/functions/${lambdaName}/node_modules/moment`);
       expect(uuid).toBe(true);
       expect(moment).toBe(true);
     });
 
     test('node modules directory does not contain native node modules', async () => {
-      const util = fs.existsSync(`${path}/bam/functions/${lambdaName}/node_modules/util`);
+      const util = fs.existsSync(`${path}/.bam/functions/${lambdaName}/node_modules/util`);
       expect(util).toBe(false);
     });
   });
@@ -186,13 +188,13 @@ describe('bam deploy api', () => {
   describe('lambda with dependencies after exports.handler', () => {
     beforeEach(async () => {
       const testLambdaWithIncorrectDependencies = fs.readFileSync('./test/templates/testLambdaWithIncorrectDependencies.js');
-      fs.writeFileSync(`${path}/bam/functions/${lambdaName}/index.js`, testLambdaWithIncorrectDependencies);
+      fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaWithIncorrectDependencies);
       await deployLambda(lambdaName, 'test description', path);
       await deployApi(lambdaName, path, stageName);
     });
 
     test('node modules directory does not contain modules listed after exports.handler', async () => {
-      const moment = fs.existsSync(`${path}/bam/functions/${lambdaName}/node_modules/moment`);
+      const moment = fs.existsSync(`${path}/.bam/functions/${lambdaName}/node_modules/moment`);
       expect(moment).toBe(false);
     });
   });

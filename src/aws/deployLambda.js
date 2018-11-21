@@ -1,6 +1,7 @@
 const fs = require('fs');
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
+const createDirectory = require('../util/createDirectory');
 const zipper = require('../util/zipper.js');
 const installLambdaDependencies = require('../util/installLambdaDependencies.js');
 const bamBam = require('../util/bamBam.js');
@@ -13,14 +14,20 @@ const {
 
 const apiVersion = 'latest';
 
-module.exports = async function deployLambda(lambdaName, description, path = '.') {
-  const config = JSON.parse(fs.readFileSync(`${path}/bam/config.json`));
+module.exports = async function deployLambda(lambdaName, description, path) {
+  const config = JSON.parse(fs.readFileSync(`${path}/.bam/config.json`));
   const { accountNumber, region, role } = config;
   const lambda = new AWS.Lambda({ apiVersion, region });
   const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
 
-  const spinnerInterval = bamSpinner();
+  const createDeploymentPackage = () => {
+    const cwd = process.cwd();
+    createDirectory(lambdaName, `${path}/.bam/functions`);
+    fs.copyFileSync(`${cwd}/${lambdaName}.js`, `${path}/.bam/functions/${lambdaName}/index.js`);
+  };
 
+  const spinnerInterval = bamSpinner();
+  createDeploymentPackage();
   await installLambdaDependencies(lambdaName, path);
   const zippedFileName = await zipper(lambdaName, path);
   const zipContents = fs.readFileSync(zippedFileName);
@@ -45,14 +52,15 @@ module.exports = async function deployLambda(lambdaName, description, path = '.'
     const arn = data.FunctionArn;
 
     // read contents from library
-    const functions = JSON.parse(fs.readFileSync(`${path}/bam/functions/library.json`));
+    const functions = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
     functions[name] = { arn, description };
 
     // write back to library
-    fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
+    fs.writeFileSync(`${path}/.bam/functions/library.json`, JSON.stringify(functions));
   };
 
   const data = await createAwsLambda();
+
   if (data) {
     await writeToLib(data);
     clearInterval(spinnerInterval);

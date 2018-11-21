@@ -35,12 +35,12 @@ const getAttachParams = roleName => (
 const asyncCreateRole = promisify(iam.createRole.bind(iam));
 const asyncAttachPolicy = promisify(iam.attachRolePolicy.bind(iam));
 
-module.exports = async function createRole(defaultRole, path = '.') {
+module.exports = async function createRole(defaultRole, path) {
   const roleParams = {
     RoleName: defaultRole,
     AssumeRolePolicyDocument: JSON.stringify(rolePolicy),
   };
-  const config = JSON.parse(fs.readFileSync(`${path}/bam/config.json`, 'utf8'));
+  const config = JSON.parse(fs.readFileSync(`${path}/.bam/config.json`, 'utf8'));
 
   if (config.role === defaultRole && !(await doesRoleExist(defaultRole))) {
     const spinnerInterval = bamSpinner();

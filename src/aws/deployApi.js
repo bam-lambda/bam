@@ -13,8 +13,8 @@ const {
 
 const apiVersion = 'latest';
 
-module.exports = async function deployApi(lambdaName, path = '.', stageName = 'dev') {
-  const config = JSON.parse(fs.readFileSync(`${path}/bam/config.json`));
+module.exports = async function deployApi(lambdaName, path, stageName = 'dev') {
+  const config = JSON.parse(fs.readFileSync(`${path}/.bam/config.json`));
   const { region, accountNumber } = config;
   const lambda = new AWS.Lambda({ apiVersion, region });
   const api = new AWS.APIGateway({ apiVersion, region });
@@ -92,9 +92,9 @@ module.exports = async function deployApi(lambdaName, path = '.', stageName = 'd
     const endpoint = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}/${lambdaName}`;
 
     // write to library
-    const functions = JSON.parse(fs.readFileSync(`${path}/bam/functions/library.json`));
+    const functions = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
     functions[lambdaName].api = { endpoint, restApiId };
-    fs.writeFileSync(`${path}/bam/functions/library.json`, JSON.stringify(functions));
+    fs.writeFileSync(`${path}/.bam/functions/library.json`, JSON.stringify(functions));
     clearInterval(spinnerInterval);
     spinnerCleanup();
     bamLog(bamAscii);

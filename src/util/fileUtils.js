@@ -6,7 +6,15 @@ const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 const copyFile = promisify(fs.copyFile);
 const unlink = promisify(fs.unlink);
-const exists = promisify(fs.exists);
+
+const exists = async path => (
+  new Promise((res) => {
+    fs.stat(path, (err) => {
+      if (err === null) res(true);
+      res(false);
+    });
+  })
+);
 
 const readConfig = async (path) => {
   const config = await readFile(`${path}/.bam/config.json`);
@@ -15,7 +23,7 @@ const readConfig = async (path) => {
 
 const writeConfig = async (path, config) => {
   const configJSON = JSON.stringify(config);
-  await writeFile(`${path}/.bam/functions/config.json`, configJSON);
+  await writeFile(`${path}/.bam/config.json`, configJSON);
 };
 
 const readFuncLibrary = async (path) => {

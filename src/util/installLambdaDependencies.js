@@ -1,6 +1,7 @@
-const fs = require('fs');
 const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
+
+const { exists, readFile, writeFile } = require('./fileUtils');
 
 const packageTemplateObj = {
   dependencies: {},
@@ -12,8 +13,8 @@ module.exports = async function installLambdaDependencies(lambdaName, path) {
     return !(nativeModules.indexOf(name) === -1);
   };
 
-  const npmDependencies = () => {
-    const lambdaFile = fs.readFileSync(`${path}/.bam/functions/${lambdaName}/index.js`, 'utf8');
+  const npmDependencies = async () => {
+    const lambdaFile = await readFile(`${path}/.bam/functions/${lambdaName}/index.js`, 'utf8');
     const dependencies = lambdaFile.split('exports')[0].match(/require\([^)]+\)/g) || [];
     return dependencies.map(pkg => pkg.slice(9, -2)).filter(pkg => !isNativeModule(pkg));
   };
@@ -29,10 +30,11 @@ module.exports = async function installLambdaDependencies(lambdaName, path) {
 
   if (packages.length) {
     const packageFilePath = `${dir}/package.json`;
+    const packageFileExists = await exists(packageFilePath);
 
-    if (!fs.existsSync(packageFilePath)) {
+    if (!packageFileExists) {
       const templateJson = JSON.stringify(packageTemplateObj);
-      fs.writeFileSync(packageFilePath, templateJson);
+      await writeFile(packageFilePath, templateJson);
     }
 
     await installPackages();

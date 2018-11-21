@@ -1,15 +1,16 @@
-const fs = require('fs');
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
-const rimraf = require('rimraf');
 
 const getRegion = require('../util/getRegion.js');
 const { bamLog, bamError } = require('../util/fancyText.js');
-
-const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
+const {
+  readFuncLibrary,
+  writeFuncLibrary,
+  promisifiedRimraf,
+} = require('../util/fileUtils');
 
 module.exports = async function deleteLambda(lambdaName, path) {
-  const region = getRegion();
+  const region = await getRegion();
   const apiVersion = 'latest';
 
   // delete from AWS
@@ -21,16 +22,16 @@ module.exports = async function deleteLambda(lambdaName, path) {
 
   // delete from local directories
   try {
-    await asyncRimRaf(`${path}/.bam/functions/${lambdaName}`);
+    await promisifiedRimraf(`${path}/.bam/functions/${lambdaName}`);
   } catch (err) {
     bamError(err);
   }
 
   // read from library and remove property
-  const functions = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
+  const functions = await readFuncLibrary(path);
   delete functions[lambdaName];
 
   // write back to library
-  fs.writeFileSync(`${path}/.bam/functions/library.json`, JSON.stringify(functions));
+  await writeFuncLibrary(path, functions);
   bamLog(`Lambda "${lambdaName}" has been deleted`);
 };

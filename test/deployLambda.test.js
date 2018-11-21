@@ -11,6 +11,17 @@ const configTemplate = require('../templates/configTemplate');
 const createRole = require('../src/aws/createRole');
 const { doesLambdaExist } = require('../src/aws/doesResourceExist');
 
+const {
+  writeFile,
+  unlink,
+  exists,
+  readFuncLibrary,
+  writeFuncLibrary,
+  readConfig,
+  writeConfig,
+  promisifiedRimraf,
+} = require('../src/util/fileUtils');
+
 const iam = new AWS.IAM();
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
@@ -25,7 +36,7 @@ const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 const cwd = process.cwd();
 
-describe('bam create lambda', () => {
+describe('bam create lambda', async () => {
   beforeEach(async () => {
     jest.setTimeout(25000);
     createDirectory('.bam', path);
@@ -33,20 +44,20 @@ describe('bam create lambda', () => {
     createJSONFile('config', `${path}/.bam/`, config);
     createJSONFile('library', `${path}/.bam/functions`, {});
     await createRole(roleName, path);
-    fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaFile);
+    await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
     await deployLambda(lambdaName, 'test description', path);
   });
 
   afterEach(async () => {
     await deleteLambda(lambdaName, path);
     await asyncRimRaf(`${path}/.bam`);
-    fs.unlinkSync(`${cwd}/${lambdaName}.js`);
+    await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
   });
 
-  test('Zip file exists within ./test/.bam/functions/{lambdaName}', () => {
-    const template = fs.existsSync(`${path}/.bam/functions/${lambdaName}/${lambdaName}.zip`);
+  test('Zip file exists within ./test/.bam/functions/{lambdaName}', async () => {
+    const template = await exists(`${path}/.bam/functions/${lambdaName}/${lambdaName}.zip`);
     expect(template).toBe(true);
   });
 
@@ -55,8 +66,8 @@ describe('bam create lambda', () => {
     expect(lambda).toBe(true);
   });
 
-  test('Lambda metadata exists within ./test/.bam/functions/library.json', () => {
-    const library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
+  test('Lambda metadata exists within ./test/.bam/functions/library.json', async () => {
+    const library = await readFuncLibrary(path);
     const lambda = library[lambdaName];
     expect(lambda).toBeTruthy();
   });

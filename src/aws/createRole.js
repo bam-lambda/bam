@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
-const fs = require('fs');
+const { readFile } = require('../util/fileUtils');
 const { doesRoleExist } = require('./doesResourceExist.js');
 const {
   bamSpinner,
@@ -40,7 +40,8 @@ module.exports = async function createRole(defaultRole, path) {
     RoleName: defaultRole,
     AssumeRolePolicyDocument: JSON.stringify(rolePolicy),
   };
-  const config = JSON.parse(fs.readFileSync(`${path}/.bam/config.json`, 'utf8'));
+  const configJSON = await readFile(`${path}/.bam/config.json`, 'utf8');
+  const config = JSON.parse(configJSON);
 
   if (config.role === defaultRole && !(await doesRoleExist(defaultRole))) {
     const spinnerInterval = bamSpinner();

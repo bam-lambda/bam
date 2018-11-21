@@ -1,39 +1,41 @@
-const fs = require('fs');
-const rimraf = require('rimraf');
+const { exists, promisifiedRimraf } = require('../src/util/fileUtils');
 
 const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
 const bamError = require('../src/util/fancyText.js');
 
 const roleName = 'testBamRole';
-const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
 const path = './test';
 
-describe('bam init', () => {
-  beforeEach(() => {
-    setupBamDirAndFiles(roleName, './test');
+describe('bam init', async () => {
+  beforeEach(async () => {
+    await setupBamDirAndFiles(roleName, './test');
   });
 
   afterEach(async () => {
     try {
-      await asyncRimRaf(`${path}/.bam`);
+      await promisifiedRimraf(`${path}/.bam`);
     } catch (err) {
       bamError(err);
     }
   });
 
-  test('bam directory has been created', () => {
-    expect(fs.existsSync('./test/.bam')).toBe(true);
+  test('bam directory has been created', async () => {
+    const bamDirExists = await exists('./test/.bam');
+    expect(bamDirExists).toBe(true);
   });
 
-  test('bam directory contains config.json', () => {
-    expect(fs.existsSync('./test/.bam/config.json')).toBe(true);
+  test('bam directory contains config.json', async () => {
+    const configExists = await exists('./test/.bam/config.json');
+    expect(configExists).toBe(true);
   });
 
-  test('functions directory has been created', () => {
-    expect(fs.existsSync('./test/.bam/functions')).toBe(true);
+  test('functions directory has been created', async () => {
+    const functionsDirExists = await exists('./test/.bam/functions');
+    expect(functionsDirExists).toBe(true);
   });
 
-  test('functions directory contains library.json', () => {
-    expect(fs.existsSync('./test/.bam/functions/library.json')).toBe(true);
+  test('functions directory contains library.json', async () => {
+    const libraryExists = await exists('./test/.bam/functions/library.json');
+    expect(libraryExists).toBe(true);
   });
 });

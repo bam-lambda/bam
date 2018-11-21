@@ -16,13 +16,22 @@ const deleteLambda = require('../src/aws/deleteLambda');
 const { doesApiExist } = require('../src/aws/doesResourceExist');
 const deleteApi = require('../src/aws/deleteApi');
 const delay = require('../src/util/delay.js');
+const {
+  writeFile,
+  unlink,
+  readFuncLibrary,
+  writeFuncLibrary,
+  readConfig,
+  writeConfig,
+  promisifiedRimraf,
+} = require('../src/util/fileUtils');
+
 
 const iam = new AWS.IAM();
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
 const stageName = 'test';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
-const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
 const path = './test';
 const config = configTemplate(roleName);
 config.accountNumber = process.env.AWS_ID;
@@ -40,16 +49,16 @@ describe('bam deploy api', () => {
     createJSONFile('config', `${path}/.bam`, config);
     createJSONFile('library', `${path}/.bam/functions`, {});
     await createRole(roleName, path);
-    fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaFile);
+    await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
   });
 
   afterEach(async () => {
-    const library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
+    const library = await readFuncLibrary(path);
     const { restApiId } = library[lambdaName].api;
     await deleteApi(restApiId, path);
     await deleteLambda(lambdaName, path);
-    await asyncRimRaf(`${path}/.bam`);
-    fs.unlinkSync(`${cwd}/${lambdaName}.js`);
+    await promisifiedRimraf(`${path}/.bam`);
+    await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
     await delay(30000);
@@ -59,7 +68,7 @@ describe('bam deploy api', () => {
     await deployLambda(lambdaName, 'test description', path);
     await deployApi(lambdaName, path, stageName);
 
-    const library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
+    const library = await readFuncLibrary(path);
     const url = library[lambdaName].api.endpoint;
     let responseStatus;
 

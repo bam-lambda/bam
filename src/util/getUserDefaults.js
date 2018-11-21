@@ -1,4 +1,4 @@
-const fs = require('fs');
+const { readConfig, writeConfig } = require('./fileUtils');
 const getUserInput = require('./getUserInput.js');
 
 const { doesRoleExist } = require('../aws/doesResourceExist.js');
@@ -16,7 +16,7 @@ const validNum = r => /^[0-9]{12}$/.test(r);
 const validRegion = r => regions.includes(r);
 
 module.exports = async function getUserDefaults(path) {
-  const config = JSON.parse(fs.readFileSync(`${path}/.bam/config.json`, 'utf8'));
+  const config = await readConfig(path);
   const defaultRole = config.role;
   const validRole = userRole => userRole === defaultRole || doesRoleExist(userRole);
 
@@ -48,11 +48,6 @@ module.exports = async function getUserDefaults(path) {
     [config.accountNumber, config.region, config.role] = userDefaults;
   };
 
-  const writeConfig = () => {
-    const configStr = JSON.stringify(config);
-    fs.writeFileSync(`${path}/.bam/config.json`, configStr);
-  };
-
   await getUserInputs();
-  writeConfig();
+  await writeConfig(path);
 };

@@ -128,7 +128,7 @@ describe('bam deploy api', () => {
     }
   });
 
-  describe.skip('lambda with dependencies', () => {
+  describe('lambda with dependencies', () => {
     beforeEach(async () => {
       const testLambdaWithDependencies = await readFile(`${path}/templates/testLambdaWithDependencies.js`);
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependencies);

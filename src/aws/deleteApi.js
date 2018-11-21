@@ -17,6 +17,7 @@ module.exports = async function deleteApi(restApiId, path) {
   const functions = await readFuncLibrary(path);
   const lambda = Object.values(functions).find(obj => obj.api && obj.api.restApiId === restApiId);
   delete lambda.api;
+
   // write back to library
   await writeFuncLibrary(path, functions);
   bamLog('API Gateway endpoint has been deleted');

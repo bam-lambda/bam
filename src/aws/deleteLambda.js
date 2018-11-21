@@ -18,7 +18,12 @@ module.exports = async function deleteLambda(lambdaName, path) {
   const asyncLambdaDeleteFunction = promisify(lambda.deleteFunction.bind(lambda, {
     FunctionName: lambdaName,
   }));
-  await asyncLambdaDeleteFunction();
+
+  try {
+    await asyncLambdaDeleteFunction();
+  } catch (err) {
+    console.log(err, err.stack);
+  }
 
   // delete from local directories
   try {

@@ -20,7 +20,7 @@ module.exports = async function installLambdaDependencies(lambdaName, path) {
   };
 
   const dir = `${path}/.bam/functions/${lambdaName}`;
-  const packages = npmDependencies();
+  const packages = await npmDependencies();
 
   const installPackages = async () => {
     for (let i = 0; i < packages.length; i += 1) {

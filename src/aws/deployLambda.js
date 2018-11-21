@@ -33,7 +33,7 @@ module.exports = async function deployLambda(lambdaName, description, path) {
   const zipContents = fs.readFileSync(zippedFileName);
 
   const createAwsLambda = async () => {
-    const params = {
+    const createFunctionParams = {
       Code: {
         ZipFile: zipContents,
       },
@@ -44,7 +44,7 @@ module.exports = async function deployLambda(lambdaName, description, path) {
       Description: description,
     };
 
-    return bamBam(asyncLambdaCreateFunction, params);
+    return bamBam(asyncLambdaCreateFunction, { params: [createFunctionParams] });
   };
 
   const writeToLib = (data) => {

@@ -17,6 +17,7 @@ module.exports = async function deleteApi(restApiId, path) {
   const functions = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
   const lambda = Object.values(functions).find(obj => obj.api && obj.api.restApiId === restApiId);
   delete lambda.api;
+
   // write back to library
   fs.writeFileSync(`${path}/.bam/functions/library.json`, JSON.stringify(functions));
   bamLog('API Gateway endpoint has been deleted');

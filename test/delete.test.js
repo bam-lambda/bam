@@ -5,11 +5,12 @@ const rimraf = require('rimraf');
 
 const createDirectory = require('../src/util/createDirectory');
 const deployLambda = require('../src/aws/deployLambda.js');
+const deployApi = require('../src/aws/deployApi.js');
 const createJSONFile = require('../src/util/createJSONFile');
 const destroy = require('../src/commands/destroy');
 const configTemplate = require('../templates/configTemplate');
 const createRole = require('../src/aws/createRole');
-const { doesLambdaExist } = require('../src/aws/doesResourceExist');
+const { doesLambdaExist, doesApiExist } = require('../src/aws/doesResourceExist');
 
 const iam = new AWS.IAM();
 const roleName = 'testBamRole';
@@ -35,6 +36,7 @@ describe('bam delete lambda', () => {
     await createRole(roleName, path);
     fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaFile);
     await deployLambda(lambdaName, 'test description', path);
+    await deployApi(lambdaName, path);
   });
 
   afterEach(async () => {
@@ -51,14 +53,6 @@ describe('bam delete lambda', () => {
     expect(template).toBe(false);
   });
 
-  test('Lambda does not exists on AWS', async () => {
-    let lambda = await doesLambdaExist(lambdaName);
-    expect(lambda).toBe(true);
-    await destroy(lambdaName, path);
-    lambda = await doesLambdaExist(lambdaName);
-    expect(lambda).toBe(false);
-  });
-
   test('Lambda metadata is removed from ./test/.bam/functions/library.json', async () => {
     let library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
     let lambda = library[lambdaName];
@@ -69,5 +63,23 @@ describe('bam delete lambda', () => {
     library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
     lambda = library[lambdaName];
     expect(lambda).toBeUndefined();
+  });
+
+  test('Lambda does not exists on AWS', async () => {
+    let lambda = await doesLambdaExist(lambdaName);
+    expect(lambda).toBe(true);
+    await destroy(lambdaName, path);
+    lambda = await doesLambdaExist(lambdaName);
+    expect(lambda).toBe(false);
+  });
+
+  test('API endpoint does not exists on AWS', async () => {
+    const library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
+    const { restApiId } = library[lambdaName].api;
+    let endpoint = await doesApiExist(restApiId);
+    expect(endpoint).toBe(true);
+    await destroy(lambdaName, path);
+    endpoint = await doesApiExist(restApiId);
+    expect(endpoint).toBe(false);
   });
 });

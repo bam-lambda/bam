@@ -1,6 +1,9 @@
 const fs = require('fs');
 const rimraf = require('rimraf');
 
+const deleteApi = require('../aws/deleteApi.js');
+const bamBam = require('../util/bamBam.js');
+
 const deleteAwsLambda = require('../aws/deleteLambda');
 const {
   bamLog,
@@ -14,6 +17,15 @@ const cwd = process.cwd();
 
 module.exports = async function destroy(lambdaName, path) {
   const spinnerInterval = bamSpinner();
+
+  const library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
+  const { restApiId } = library[lambdaName].api;
+  const bamBamParams = {
+    params: [restApiId, path],
+    retryError: 'TooManyRequestsException',
+    interval: 30000,
+  };
+  await bamBam(deleteApi, bamBamParams);
   await deleteAwsLambda(lambdaName);
 
   // delete from local directories

@@ -1,11 +1,10 @@
-const createDirectory = require('./createDirectory.js');
-const createJSONFile = require('./createJSONFile.js');
+const { createDirectory, createJSONFile } = require('./fileUtils');
 const configTemplate = require('../../templates/configTemplate.js');
 
-module.exports = function setupBamDirAndFiles(roleName, path) {
+module.exports = async function setupBamDirAndFiles(roleName, path) {
   const configJSON = configTemplate(roleName);
-  createDirectory('.bam', path);
-  createDirectory('functions', `${path}/.bam`);
-  createJSONFile('config', `${path}/.bam`, configJSON);
-  createJSONFile('library', `${path}/.bam/functions`, {});
+  await createDirectory('.bam', path);
+  await createDirectory('functions', `${path}/.bam`);
+  await createJSONFile('config', `${path}/.bam`, configJSON);
+  await createJSONFile('library', `${path}/.bam/functions`, {});
 };

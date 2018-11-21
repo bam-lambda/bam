@@ -1,20 +1,25 @@
-const fs = require('fs');
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const uuid = require('uuid');
 const bamBam = require('../util/bamBam.js');
 const {
+  readFuncLibrary,
+  writeFuncLibrary,
+  readConfig,
+  readFile,
+} = require('../util/fileUtils');
+
+const {
   bamLog,
   bamError,
   bamSpinner,
   spinnerCleanup,
-  bamAscii,
 } = require('../util/fancyText.js');
 
 const apiVersion = 'latest';
 
 module.exports = async function deployApi(lambdaName, path, stageName = 'dev') {
-  const config = JSON.parse(fs.readFileSync(`${path}/.bam/config.json`));
+  const config = await readConfig(path);
   const { region, accountNumber } = config;
   const lambda = new AWS.Lambda({ apiVersion, region });
   const api = new AWS.APIGateway({ apiVersion, region });
@@ -92,12 +97,12 @@ module.exports = async function deployApi(lambdaName, path, stageName = 'dev') {
     const endpoint = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}/${lambdaName}`;
 
     // write to library
-    const functions = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
+    const functions = await readFuncLibrary(path);
     functions[lambdaName].api = { endpoint, restApiId };
-    fs.writeFileSync(`${path}/.bam/functions/library.json`, JSON.stringify(functions));
+    await writeFuncLibrary(path, functions);
     clearInterval(spinnerInterval);
     spinnerCleanup();
-    bamLog(bamAscii);
+    bamLog(await readFile(`${__dirname}/../../ascii/bam.txt`, 'utf8'));
     bamLog('API Gateway endpoint has been deployed:');
     bamLog(endpoint);
   } catch (err) {

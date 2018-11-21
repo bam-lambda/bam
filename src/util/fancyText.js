@@ -1,6 +1,4 @@
 /* eslint no-console: 0 */
-const fs = require('fs');
-
 const bamTextStyles = ['green', 'bright'];
 
 const escapeChar = '\x1b';
@@ -58,8 +56,6 @@ const spinnerCleanup = () => {
   resetStyledText();
 };
 
-const bamAscii = fs.readFileSync(`${__dirname}/../../ascii/bam.txt`, 'utf8');
-
 // catch ctrl+c event and exit normally
 process.on('SIGINT', () => {
   resetStyledText();
@@ -79,7 +75,6 @@ module.exports = {
   bamSpinner,
   spinnerCleanup,
   bamText,
-  bamAscii,
   bamLog,
   bamError,
   bamWarn,

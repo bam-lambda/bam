@@ -15,7 +15,7 @@ const homedir = os.homedir();
 
 (async () => {
   if (!fs.existsSync(`${homedir}/.bam`)) {
-    init(defaultRole, homedir);
+    await init(defaultRole, homedir);
   }
 
   if (command === 'create') {

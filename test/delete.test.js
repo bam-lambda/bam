@@ -28,7 +28,7 @@ const cwd = process.cwd();
 
 describe('bam delete lambda', () => {
   beforeEach(async () => {
-    jest.setTimeout(25000);
+    jest.setTimeout(60000);
     createDirectory('.bam', path);
     createDirectory('functions', `${path}/.bam/`);
     createJSONFile('config', `${path}/.bam/`, config);

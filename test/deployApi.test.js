@@ -9,7 +9,6 @@ const configTemplate = require('../templates/configTemplate');
 const createRole = require('../src/aws/createRole');
 const createJSONFile = require('../src/util/createJSONFile');
 
-const createLambda = require('../src/aws/createLambda.js');
 const deployLambda = require('../src/aws/deployLambda.js');
 const deployApi = require('../src/aws/deployApi.js');
 
@@ -27,6 +26,8 @@ const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
 const path = './test';
 const config = configTemplate(roleName);
 config.accountNumber = process.env.AWS_ID;
+const testLambdaFile = fs.readFileSync('./test/templates/testLambda.js');
+const cwd = process.cwd();
 
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
@@ -39,7 +40,7 @@ describe('bam deploy api', () => {
     createJSONFile('config', `${path}/.bam`, config);
     createJSONFile('library', `${path}/.bam/functions`, {});
     await createRole(roleName, path);
-    createLambda(lambdaName, path);
+    fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaFile);
   });
 
   afterEach(async () => {
@@ -48,6 +49,7 @@ describe('bam deploy api', () => {
     await deleteApi(restApiId, path);
     await deleteLambda(lambdaName, path);
     await asyncRimRaf(`${path}/.bam`);
+    fs.unlinkSync(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
     await delay(30000);
@@ -98,7 +100,7 @@ describe('bam deploy api', () => {
 
   test('Response contains query param in body', async () => {
     const testLambdaWithQueryParams = fs.readFileSync(`${path}/templates/testLambdaWithQueryParams.js`);
-    fs.writeFileSync(`${path}/.bam/functions/${lambdaName}/index.js`, testLambdaWithQueryParams);
+    fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaWithQueryParams);
     await deployLambda(lambdaName, 'test description', path);
     await deployApi(lambdaName, path, stageName);
 
@@ -128,7 +130,7 @@ describe('bam deploy api', () => {
   describe('lambda with dependencies', () => {
     beforeEach(async () => {
       const testLambdaWithDependencies = fs.readFileSync(`${path}/templates/testLambdaWithDependencies.js`);
-      fs.writeFileSync(`${path}/.bam/functions/${lambdaName}/index.js`, testLambdaWithDependencies);
+      fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaWithDependencies);
       await deployLambda(lambdaName, 'test description', path);
       await deployApi(lambdaName, path, stageName);
     });
@@ -186,7 +188,7 @@ describe('bam deploy api', () => {
   describe('lambda with dependencies after exports.handler', () => {
     beforeEach(async () => {
       const testLambdaWithIncorrectDependencies = fs.readFileSync('./test/templates/testLambdaWithIncorrectDependencies.js');
-      fs.writeFileSync(`${path}/.bam/functions/${lambdaName}/index.js`, testLambdaWithIncorrectDependencies);
+      fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaWithIncorrectDependencies);
       await deployLambda(lambdaName, 'test description', path);
       await deployApi(lambdaName, path, stageName);
     });

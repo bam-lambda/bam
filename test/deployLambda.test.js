@@ -34,7 +34,6 @@ describe('bam create lambda', () => {
     createJSONFile('library', `${path}/.bam/functions`, {});
     await createRole(roleName, path);
     fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaFile);
-
     await deployLambda(lambdaName, 'test description', path);
   });
 

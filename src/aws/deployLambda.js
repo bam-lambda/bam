@@ -20,6 +20,18 @@ module.exports = async function deployLambda(lambdaName, description, path) {
   const lambda = new AWS.Lambda({ apiVersion, region });
   const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
 
+  const createDeploymentPackage = () => {
+    const cwd = process.cwd();
+    createDirectory(lambdaName, `${path}/.bam/functions`);
+    fs.copyFileSync(`${cwd}/${lambdaName}.js`, `${path}/.bam/functions/${lambdaName}/index.js`);
+  };
+
+  const spinnerInterval = bamSpinner();
+  createDeploymentPackage();
+  await installLambdaDependencies(lambdaName, path);
+  const zippedFileName = await zipper(lambdaName, path);
+  const zipContents = fs.readFileSync(zippedFileName);
+
   const createAwsLambda = async () => {
     const params = {
       Code: {
@@ -47,17 +59,6 @@ module.exports = async function deployLambda(lambdaName, description, path) {
     fs.writeFileSync(`${path}/.bam/functions/library.json`, JSON.stringify(functions));
   };
 
-  const createDeploymentPackage = () => {
-    const cwd = process.cwd();
-    createDirectory(lambdaName, `${path}/.bam/functions`);
-    fs.copyFileSync(`${cwd}/${lambdaName}.js`, `${path}/.bam/functions/${lambdaName}/index.js`);
-  };
-
-  const spinnerInterval = bamSpinner();
-  createDeploymentPackage();
-  await installLambdaDependencies(lambdaName, path);
-  const zippedFileName = await zipper(lambdaName, path);
-  const zipContents = fs.readFileSync(zippedFileName);
   const data = await createAwsLambda();
 
   if (data) {

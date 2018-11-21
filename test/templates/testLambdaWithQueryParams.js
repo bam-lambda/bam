@@ -1,5 +1,8 @@
-exports.handler = async () => {
-  const html = '<h1>This is a test</h1>';
+exports.handler = async (event) => {
+  const queryParams = event.queryStringParameters;
+  const { name } = queryParams;
+
+  const html = `<h1>${name}</h1>`;
 
   return {
     statusCode: 200,

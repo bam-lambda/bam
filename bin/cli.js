@@ -4,6 +4,7 @@ const os = require('os');
 const init = require('../src/util/init.js');
 const deploy = require('../src/commands/deploy.js');
 const create = require('../src/commands/create.js');
+const get = require('../src/commands/get.js');
 const version = require('../src/commands/version.js');
 const help = require('../src/commands/help.js');
 const config = require('../src/commands/config.js');
@@ -26,6 +27,8 @@ const homedir = os.homedir();
     await create(lambdaName, homedir);
   } else if (command === 'deploy') {
     await deploy(lambdaName, homedir);
+  } else if (command === 'get') {
+    await get(lambdaName, homedir);
   } else if (command === 'version' || command === '-v') {
     await version();
   } else if (command === 'help' || command === '-h' || command === 'man') {

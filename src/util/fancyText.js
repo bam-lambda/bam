@@ -52,7 +52,7 @@ const bamSpinner = () => {
 
 const spinnerCleanup = () => {
   process.stdout.cursorTo(0);
-  process.stdout.clearLine();
+  // process.stdout.clearLine();
   resetStyledText();
 };
 

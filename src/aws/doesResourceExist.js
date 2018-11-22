@@ -37,7 +37,7 @@ const doesLambdaExist = async (lambdaName) => {
     await asyncGetFunction({ FunctionName: lambdaName });
     return true;
   } catch (err) {
-    console.log(err, err.stack);
+    // console.log(err, err.stack);
     return false;
   }
 };

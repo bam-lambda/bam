@@ -6,6 +6,7 @@ const deploy = require('../src/commands/deploy.js');
 const create = require('../src/commands/create.js');
 const list = require('../src/commands/list.js');
 const version = require('../src/commands/version.js');
+const destroy = require('../src/commands/destroy.js');
 const help = require('../src/commands/help.js');
 const config = require('../src/commands/config.js');
 const { bamWarn } = require('../src/util/fancyText.js');
@@ -23,10 +24,11 @@ const homedir = os.homedir();
   }
 
   if (command === 'create') {
-    // are these awaits nec?
     await create(lambdaName, homedir);
   } else if (command === 'deploy') {
     await deploy(lambdaName, homedir);
+  } else if (command === 'delete') {
+    await destroy(lambdaName, homedir);
   } else if (command === 'list') {
     await list(homedir);
   } else if (command === 'version' || command === '-v') {

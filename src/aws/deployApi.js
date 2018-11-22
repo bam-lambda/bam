@@ -59,7 +59,7 @@ module.exports = async function deployApi(lambdaName, path, stageName = 'dev') {
       Action: 'lambda:InvokeFunction',
       SourceArn: sourceArn,
     };
-    await bamBam(asyncAddPermission, addPermissionParams);
+    await bamBam(asyncAddPermission, { params: [addPermissionParams] });
 
     // put method
     const putMethodParams = {

@@ -1,7 +1,6 @@
 /* eslint no-console: 0 */
-const fs = require('fs');
-
 const bamTextStyles = ['green', 'bright'];
+const log = console.log;
 
 const escapeChar = '\x1b';
 const textStyles = {
@@ -33,9 +32,9 @@ const bamWarnText = text => getStyledText(text, 'yellow');
 const bamErrorText = text => getStyledText(text, 'red');
 
 const bamWrite = text => process.stdout.write(bamText(text));
-const bamLog = text => console.log(bamText(text));
-const bamWarn = text => console.log(bamWarnText(text));
-const bamError = text => console.log(bamErrorText(text));
+const bamLog = text => log(bamText(text));
+const bamWarn = text => log(bamWarnText(text));
+const bamError = text => log(bamErrorText(text));
 
 const bamSpinner = () => {
   hideCursor();
@@ -58,28 +57,26 @@ const spinnerCleanup = () => {
   resetStyledText();
 };
 
-const bamAscii = fs.readFileSync(`${__dirname}/../../ascii/bam.txt`, 'utf8');
-
 // catch ctrl+c event and exit normally
 process.on('SIGINT', () => {
   resetStyledText();
-  console.log('Ctrl-C...');
+  log('Ctrl-C...');
   process.exit(2);
 });
 
 // catch uncaught exceptions, trace, then exit normally
 process.on('uncaughtException', (e) => {
   resetStyledText();
-  console.log('Uncaught Exception...');
-  console.log(e.stack);
+  log('Uncaught Exception...');
+  log(e.stack);
   process.exit(99);
 });
 
 module.exports = {
   bamSpinner,
   spinnerCleanup,
+  log,
   bamText,
-  bamAscii,
   bamLog,
   bamError,
   bamWarn,

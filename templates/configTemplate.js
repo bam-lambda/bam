@@ -1,8 +1,10 @@
 const getRegion = require('../src/util/getRegion.js');
 
-module.exports = function configTemplate(roleName) {
+module.exports = async function configTemplate(roleName) {
+  const region = await getRegion();
+
   return {
     role: roleName,
-    region: getRegion(),
+    region,
   };
 };

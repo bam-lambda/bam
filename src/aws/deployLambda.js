@@ -1,10 +1,10 @@
-const fs = require('fs');
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
-const createDirectory = require('../util/createDirectory');
+const { createDirectory } = require('../util/fileUtils');
 const zipper = require('../util/zipper.js');
 const installLambdaDependencies = require('../util/installLambdaDependencies.js');
 const bamBam = require('../util/bamBam.js');
+
 const {
   bamLog,
   bamWarn,
@@ -12,25 +12,33 @@ const {
   spinnerCleanup,
 } = require('../util/fancyText.js');
 
+const {
+  readFuncLibrary,
+  writeFuncLibrary,
+  readConfig,
+  copyFile,
+  readFile,
+} = require('../util/fileUtils');
+
 const apiVersion = 'latest';
 
 module.exports = async function deployLambda(lambdaName, description, path) {
-  const config = JSON.parse(fs.readFileSync(`${path}/.bam/config.json`));
+  const config = await readConfig(path);
   const { accountNumber, region, role } = config;
   const lambda = new AWS.Lambda({ apiVersion, region });
   const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
 
-  const createDeploymentPackage = () => {
+  const createDeploymentPackage = async () => {
     const cwd = process.cwd();
-    createDirectory(lambdaName, `${path}/.bam/functions`);
-    fs.copyFileSync(`${cwd}/${lambdaName}.js`, `${path}/.bam/functions/${lambdaName}/index.js`);
+    await createDirectory(lambdaName, `${path}/.bam/functions`);
+    await copyFile(`${cwd}/${lambdaName}.js`, `${path}/.bam/functions/${lambdaName}/index.js`);
   };
 
   const spinnerInterval = bamSpinner();
-  createDeploymentPackage();
+  await createDeploymentPackage();
   await installLambdaDependencies(lambdaName, path);
   const zippedFileName = await zipper(lambdaName, path);
-  const zipContents = fs.readFileSync(zippedFileName);
+  const zipContents = await readFile(zippedFileName);
 
   const createAwsLambda = async () => {
     const createFunctionParams = {
@@ -44,19 +52,17 @@ module.exports = async function deployLambda(lambdaName, description, path) {
       Description: description,
     };
 
-    return bamBam(asyncLambdaCreateFunction, { params: [createFunctionParams] });
+    const data = await bamBam(asyncLambdaCreateFunction, { params: [createFunctionParams] });
+    return data;
   };
 
-  const writeToLib = (data) => {
+  const writeToLib = async (data) => {
     const name = data.FunctionName;
     const arn = data.FunctionArn;
 
-    // read contents from library
-    const functions = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
+    const functions = await readFuncLibrary(path);
     functions[name] = { arn, description };
-
-    // write back to library
-    fs.writeFileSync(`${path}/.bam/functions/library.json`, JSON.stringify(functions));
+    await writeFuncLibrary(path, functions);
   };
 
   const data = await createAwsLambda();

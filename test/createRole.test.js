@@ -1,10 +1,14 @@
 const { promisify } = require('util');
 const AWS = require('aws-sdk');
-const fs = require('fs');
-const rimraf = require('rimraf');
 
-const createDirectory = require('../src/util/createDirectory.js');
-const createJSONFile = require('../src/util/createJSONFile.js');
+const {
+  promisifiedRimraf,
+  createDirectory,
+  createJSONFile,
+  readConfig,
+  writeConfig,
+} = require('../src/util/fileUtils');
+
 const { doesRoleExist, doesPolicyExist } = require('../src/aws/doesResourceExist.js');
 const createRole = require('../src/aws/createRole.js');
 const configTemplate = require('../templates/configTemplate.js');
@@ -15,40 +19,35 @@ const policyName = 'AWSLambdaBasicExecutionRole';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
-const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
 const path = './test';
 
-describe('createRole', () => {
-  beforeEach(() => {
+describe('createRole', async () => {
+  beforeEach(async () => {
     jest.setTimeout(10000);
-    createDirectory('.bam', 'test');
-    const config = configTemplate(roleName);
-    createJSONFile('config', `${path}/.bam`, config);
+    await createDirectory('.bam', path);
+    const config = await configTemplate(roleName);
+    await createJSONFile('config', `${path}/.bam`, config);
   });
 
   afterEach(async () => {
-    try {
-      await asyncRimRaf(`${path}/.bam`);
-    } catch (err) {
-      console.log(err);
-    }
+    await promisifiedRimraf(`${path}/.bam`);
   });
 
   test('defaultRole is not created if user uses own role', async () => {
-    const config = JSON.parse(fs.readFileSync(`${path}/.bam/config.json`, 'utf8'));
+    const config = await readConfig(path);
     config.accountNumber = process.env.AWS_ID;
     config.role = 'otherTestRole';
-    fs.writeFileSync(`${path}/.bam/config.json`, JSON.stringify(config));
+    await writeConfig(path, config);
     await createRole(roleName, path);
     const role = await doesRoleExist(roleName);
     expect(role).toBe(false);
   });
 
-  describe('aws integration', () => {
-    beforeEach(() => {
-      const config = JSON.parse(fs.readFileSync(`${path}/.bam/config.json`, 'utf8'));
+  describe('aws integration', async () => {
+    beforeEach(async () => {
+      const config = await readConfig(path);
       config.accountNumber = process.env.AWS_ID;
-      fs.writeFileSync(`${path}/.bam/config.json`, JSON.stringify(config));
+      await writeConfig(path, config);
     });
 
     afterEach(async () => {

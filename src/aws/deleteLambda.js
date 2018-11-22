@@ -11,6 +11,6 @@ module.exports = async function deleteLambda(lambdaName) {
   const asyncLambdaDeleteFunction = promisify(lambda.deleteFunction.bind(lambda, {
     FunctionName: lambdaName,
   }));
-  
+
   await asyncLambdaDeleteFunction();
 };

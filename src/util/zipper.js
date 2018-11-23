@@ -2,7 +2,7 @@ const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
 const StreamZip = require('node-stream-zip');
 
-const { bamError, bamLog } = require('./fancyText');
+const { bamError } = require('./fancyText');
 
 const cwd = process.cwd();
 
@@ -28,7 +28,7 @@ const zipper = async (lambdaName, path) => {
   try {
     await exec(`zip -r ${lambdaName} .`, { cwd: dir });
   } catch (err) {
-    console.log(err, err.stack);
+    bamError(err, err.stack);
   }
 
   return `${dir}/${lambdaName}.zip`;

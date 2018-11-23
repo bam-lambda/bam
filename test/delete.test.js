@@ -20,7 +20,7 @@ const {
 
 const iam = new AWS.IAM();
 const roleName = 'testBamRole';
-const lambdaName = 'testE';
+const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
 

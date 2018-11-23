@@ -1,8 +1,9 @@
 const { promisify } = require('util');
 const https = require('https');
-const exec = promisify(require('child_process').exec);
 const AWS = require('aws-sdk');
-const fs = require('fs');
+const stream = require('stream');
+
+const finished = promisify(stream.finished);
 
 const {
   bamLog,
@@ -11,8 +12,15 @@ const {
   bamSpinner,
   spinnerCleanup,
 } = require('../util/fancyText');
+
+const { unzipper } = require('../util/zipper');
 const { doesLambdaExist } = require('../aws/doesResourceExist');
-const { readConfig, writeFile, readFile } = require('../util/fileUtils');
+const {
+  readConfig,
+  createWriteStream,
+  createDirectory,
+  promisifiedRimraf,
+} = require('../util/fileUtils');
 
 const apiVersion = 'latest';
 const cwd = process.cwd();
@@ -20,11 +28,21 @@ const blankLambdaNameMsg = 'Lambda name must not be blank';
 const lambdaDoesNotExistMsg = lambdaName => `Lambda "${lambdaName}" does not exist on AWS`;
 const isEmptyStr = str => str === undefined || str.trim() === '';
 
-const asyncHttpsGet = endpoint => (
-  new Promise((resolve) => {
-    https.get(endpoint, resolve);
-  })
-);
+const addLambdaFileToCwd = async (lambdaName, location) => {
+  const zipFileName = `${lambdaName}.zip`;
+  await createDirectory(lambdaName, cwd);
+  const file = createWriteStream(`${lambdaName}/${zipFileName}`);
+  return new Promise((res) => {
+    https.get(location, async (response) => {
+      response.pipe(file);
+      finished(file, async () => {
+        await unzipper(lambdaName);
+        await promisifiedRimraf(`${lambdaName}`);
+        res();
+      });
+    });
+  });
+};
 
 // path only needed for aws func -> remove when that is extracted
 module.exports = async function get(lambdaName, path) {
@@ -50,16 +68,10 @@ module.exports = async function get(lambdaName, path) {
     try {
       const func = await getLambdaFunction(getFunctionParams);
       const { Location } = func.Code;
-      // const funcZip = await asyncHttpsGet(Location);
-const file = fs.createWriteStream(`${lambdaName}.zip`);
-const request = https.get(Location, function(response) {
-  response.pipe(file);
-});
-// await doing above & then unzip
-      // exec(`unzip ${cwd}/${lambdaName}.zip`, { cwd });
-
+      await addLambdaFileToCwd(lambdaName, Location);
       clearInterval(spinnerInterval);
       spinnerCleanup();
+      bamLog(`File: "${lambdaName}".js is now in your current directory`);
     } catch (err) {
       clearInterval(spinnerInterval);
       spinnerCleanup();

@@ -1,7 +1,28 @@
 const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
+const StreamZip = require('node-stream-zip');
 
-module.exports = async function zipper(lambdaName, path) {
+const { bamError, bamLog } = require('./fancyText');
+
+const cwd = process.cwd();
+
+const unzipper = async (lambdaName) => {
+  const zip = new StreamZip({
+    file: `${cwd}/${lambdaName}/${lambdaName}.zip`,
+    storeEntries: true,
+  });
+
+  return new Promise((res) => {
+    zip.on('ready', () => {
+      zip.extract('index.js', `${cwd}/${lambdaName}.js`, () => {
+        zip.close();
+        res();
+      });
+    });
+  });
+};
+
+const zipper = async (lambdaName, path) => {
   const dir = `${path}/.bam/functions/${lambdaName}`;
 
   try {
@@ -12,3 +33,5 @@ module.exports = async function zipper(lambdaName, path) {
 
   return `${dir}/${lambdaName}.zip`;
 };
+
+module.exports = { zipper, unzipper };

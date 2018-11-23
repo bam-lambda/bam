@@ -20,5 +20,6 @@ module.exports = async function deleteApi(restApiId, path) {
 
   // write back to library
   await writeFuncLibrary(path, functions);
+  process.stdout.cursorTo(0);
   bamLog('API Gateway endpoint has been deleted');
 };

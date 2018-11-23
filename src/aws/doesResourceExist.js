@@ -23,7 +23,6 @@ const doesPolicyExist = async (roleName, policyName) => {
     const result = await asyncListRolePolicies({ RoleName: roleName });
     return result.AttachedPolicies[0].PolicyName === policyName;
   } catch (err) {
-    console.log(err, err.stack);
     return false;
   }
 };
@@ -37,7 +36,6 @@ const doesLambdaExist = async (lambdaName) => {
     await asyncGetFunction({ FunctionName: lambdaName });
     return true;
   } catch (err) {
-    // console.log(err, err.stack);
     return false;
   }
 };
@@ -51,7 +49,6 @@ const doesApiExist = async (restApiId) => {
     await asyncGetRestApi({ restApiId });
     return true;
   } catch (err) {
-    console.log(err, err.stack);
     return false;
   }
 };

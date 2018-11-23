@@ -1,6 +1,6 @@
 /* eslint no-console: 0 */
 const bamTextStyles = ['green', 'bright'];
-const log = console.log;
+const { log } = console;
 
 const escapeChar = '\x1b';
 const textStyles = {

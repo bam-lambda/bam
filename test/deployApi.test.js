@@ -4,10 +4,8 @@ const AWS = require('aws-sdk');
 
 const configTemplate = require('../templates/configTemplate');
 const createRole = require('../src/aws/createRole');
-
 const deployLambda = require('../src/aws/deployLambda.js');
 const deployApi = require('../src/aws/deployApi.js');
-
 const deleteLambda = require('../src/aws/deleteLambda');
 const { doesApiExist } = require('../src/aws/doesResourceExist');
 const deleteApi = require('../src/aws/deleteApi');

@@ -28,7 +28,7 @@ const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 const cwd = process.cwd();
 
-describe('bam create lambda', () => {
+describe('bam deploy lambda', () => {
   beforeEach(async () => {
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     const config = await configTemplate(roleName);

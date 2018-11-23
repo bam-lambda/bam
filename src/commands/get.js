@@ -1,9 +1,6 @@
 const { promisify } = require('util');
 const https = require('https');
 const AWS = require('aws-sdk');
-const stream = require('stream');
-
-const finished = promisify(stream.finished);
 
 const {
   bamLog,
@@ -20,12 +17,15 @@ const {
   createWriteStream,
   createDirectory,
   promisifiedRimraf,
+  readdir,
+  exists,
 } = require('../util/fileUtils');
 
 const apiVersion = 'latest';
 const cwd = process.cwd();
 const blankLambdaNameMsg = 'Lambda name must not be blank';
 const lambdaDoesNotExistMsg = lambdaName => `Lambda "${lambdaName}" does not exist on AWS`;
+const lambdaExistsMsg = lambdaName => `A directory or file matching "${lambdaName}" already exists in this directory`;
 const isEmptyStr = str => str === undefined || str.trim() === '';
 
 const addLambdaFileToCwd = async (lambdaName, location) => {
@@ -35,7 +35,7 @@ const addLambdaFileToCwd = async (lambdaName, location) => {
   return new Promise((res) => {
     https.get(location, async (response) => {
       response.pipe(file);
-      finished(file, async () => {
+      file.on('finish', async () => {
         await unzipper(lambdaName);
         await promisifiedRimraf(`${lambdaName}`);
         res();
@@ -47,17 +47,26 @@ const addLambdaFileToCwd = async (lambdaName, location) => {
 // path only needed for aws func -> remove when that is extracted
 module.exports = async function get(lambdaName, path) {
   const spinnerInterval = bamSpinner();
-  const lambdaExists = doesLambdaExist(lambdaName);
+  const lambdaExistsOnAws = doesLambdaExist(lambdaName);
+  const lambdaNameExistsInCwd = async () => {
+    const files = await readdir(cwd);
+    return files.some((file) => {
+      const fileWithoutExtension = file.split('.')[0];
+      return fileWithoutExtension === lambdaName;
+    });
+  };
+  const lambdaNameExistsLocally = await lambdaNameExistsInCwd();
+  let warn = true;
+  let msg;
 
   if (isEmptyStr(lambdaName)) {
-    clearInterval(spinnerInterval);
-    spinnerCleanup();
-    bamWarn(blankLambdaNameMsg);
-  } else if (!(await lambdaExists)) {
-    clearInterval(spinnerInterval);
-    spinnerCleanup();
-    bamWarn(lambdaDoesNotExistMsg(lambdaName));
+    msg = blankLambdaNameMsg;
+  } else if (lambdaNameExistsLocally) {
+    msg = lambdaExistsMsg(lambdaName);
+  } else if (!(await lambdaExistsOnAws)) {
+    msg = lambdaDoesNotExistMsg(lambdaName);
   } else {
+    warn = false;
     const config = await readConfig(path);
     const { region } = config;
 
@@ -69,20 +78,21 @@ module.exports = async function get(lambdaName, path) {
       const func = await getLambdaFunction(getFunctionParams);
       const { Location } = func.Code;
       await addLambdaFileToCwd(lambdaName, Location);
-      clearInterval(spinnerInterval);
-      spinnerCleanup();
-      bamLog(`File: "${lambdaName}".js is now in your current directory`);
+      msg = `File: "${lambdaName}".js is now in your current directory`;
     } catch (err) {
       clearInterval(spinnerInterval);
       spinnerCleanup();
       bamError(err);
     }
-    // pull lambda code
-    // create .js file w/ lambda code
-    // make sure there is not currently a file by that name
-    // add to cwd
   }
 
+  clearInterval(spinnerInterval);
+  spinnerCleanup();
+  warn ? bamWarn(msg) : bamLog(msg);
+  // pull lambda code
+  // create .js file w/ lambda code
+  // make sure there is not currently a file by that name
+  // add to cwd
   // clearInterval(spinnerInterval);
   // spinnerCleanup();
 };

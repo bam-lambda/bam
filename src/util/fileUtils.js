@@ -8,6 +8,7 @@ const writeFile = promisify(fs.writeFile);
 const copyFile = promisify(fs.copyFile);
 const unlink = promisify(fs.unlink);
 const rename = promisify(fs.rename);
+const readdir = promisify(fs.readdir);
 const { createWriteStream } = fs;
 
 const exists = async path => (
@@ -66,6 +67,7 @@ module.exports = {
   unlink,
   rename,
   exec,
+  readdir,
   createWriteStream,
   exists,
   createDirectory,

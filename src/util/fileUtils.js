@@ -54,8 +54,6 @@ const createJSONFile = async (fileName, path, json) => {
 
 const promisifiedRimraf = dir => new Promise(res => rimraf(dir, res));
 
-// add creatDirectory & createJSON
-
 module.exports = {
   readFile,
   writeFile,

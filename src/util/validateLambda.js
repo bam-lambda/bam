@@ -27,24 +27,16 @@ const lambdaExistsOnAws = async (name) => {
   return status;
 };
 
-const basicValidation = async (name, warnings) => {
-  let msg;
-  if (!lambdaHasValidName(name)) {
-    msg = warnings.invalidSyntax;
-  } else if (await lambdaExistsOnAws(name)) {
-    msg = warnings.alreadyExists;
-  }
-  return msg;
-};
-
 const validateLambdaDeployment = async (name) => {
   const warnings = customizeWarnings(name);
   let msg;
 
-  if (!(await lambdaExistsInCwd(name))) {
+  if (!lambdaHasValidName(name)) {
+    msg = warnings.invalidSyntax;
+  } else if (!(await lambdaExistsInCwd(name))) {
     msg = warnings.doesNotExist;
-  } else {
-    msg = await basicValidation(name, warnings);
+  } else if (await lambdaExistsOnAws(name)) {
+    msg = warnings.alreadyExists;
   }
 
   return msg;
@@ -56,8 +48,10 @@ const validateLambdaCreation = async (name) => {
 
   if (await lambdaExistsInCwd(name)) {
     msg = warnings.nameIsTaken;
-  } else {
-    msg = await basicValidation(name, warnings);
+  } else if (!lambdaHasValidName(name)) {
+    msg = warnings.invalidSyntax;
+  } else if (await lambdaExistsOnAws(name)) {
+    msg = warnings.alreadyExists;
   }
 
   return msg;

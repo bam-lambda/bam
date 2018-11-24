@@ -22,48 +22,42 @@ const lambdaHasValidName = name => (
   (/^[a-zA-Z0-9-_]+$/).test(name) && name.length <= 64
 );
 
-const lambdaExistsInBamFunctions = async (name, path) => {
-  const status = await exists(`${path}/.bam/functions/${name}`);
-  return status;
-};
-
 const lambdaExistsOnAws = async (name) => {
   const status = await doesLambdaExist(name);
   return status;
 };
 
-const basicValidation = async (name, path, warnings) => {
+const basicValidation = async (name, warnings) => {
   let msg;
   if (!lambdaHasValidName(name)) {
     msg = warnings.invalidSyntax;
-  } else if ((await lambdaExistsInBamFunctions(name, path) && await lambdaExistsOnAws(name))
-           || await lambdaExistsOnAws(name)) {
+  } else if (await lambdaExistsOnAws(name)) {
     msg = warnings.alreadyExists;
   }
   return msg;
 };
 
-const validateLambdaDeployment = async (name, path) => {
+const validateLambdaDeployment = async (name) => {
   const warnings = customizeWarnings(name);
   let msg;
 
   if (!(await lambdaExistsInCwd(name))) {
     msg = warnings.doesNotExist;
   } else {
-    msg = await basicValidation(name, path, warnings);
+    msg = await basicValidation(name, warnings);
   }
 
   return msg;
 };
 
-const validateLambdaCreation = async (name, path) => {
+const validateLambdaCreation = async (name) => {
   const warnings = customizeWarnings(name);
   let msg;
 
   if (await lambdaExistsInCwd(name)) {
     msg = warnings.nameIsTaken;
   } else {
-    msg = await basicValidation(name, path, warnings);
+    msg = await basicValidation(name, warnings);
   }
 
   return msg;

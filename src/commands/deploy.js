@@ -5,7 +5,7 @@ const { bamWarn } = require('../util/fancyText.js');
 const { validateLambdaDeployment } = require('../util/validateLambda.js');
 
 module.exports = async function deploy(lambdaName, path) {
-  const invalidLambdaMsg = await validateLambdaDeployment(lambdaName, path, true);
+  const invalidLambdaMsg = await validateLambdaDeployment(lambdaName);
 
   if (invalidLambdaMsg) {
     bamWarn(invalidLambdaMsg);

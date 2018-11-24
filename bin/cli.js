@@ -13,7 +13,7 @@ const { bamWarn } = require('../src/util/fancyText.js');
 const { exists } = require('../src/util/fileUtils.js');
 
 const defaultRole = 'bamRole';
-const [,, command, lambdaName] = process.argv;
+const [,, command, lambdaName = ''] = process.argv;
 const homedir = os.homedir();
 
 (async () => {
@@ -24,7 +24,7 @@ const homedir = os.homedir();
   }
 
   if (command === 'create') {
-    await create(lambdaName, homedir);
+    await create(lambdaName);
   } else if (command === 'deploy') {
     await deploy(lambdaName, homedir);
   } else if (command === 'delete') {

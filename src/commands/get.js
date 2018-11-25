@@ -14,7 +14,6 @@ const {
   readConfig,
   createWriteStream,
   createDirectory,
-  promisifiedRimraf,
   readdir,
 } = require('../util/fileUtils');
 
@@ -36,7 +35,7 @@ const lambdaNameExistsInCwd = async (lambdaName) => {
   });
 };
 
-const addLambdaFileToCwd = async (lambdaName, location) => {
+const addLambdaFolderToCwd = async (lambdaName, location) => {
   const zipFileName = `${lambdaName}.zip`;
   await createDirectory(lambdaName, cwd);
   const file = createWriteStream(`${lambdaName}/${zipFileName}`);
@@ -45,7 +44,6 @@ const addLambdaFileToCwd = async (lambdaName, location) => {
       response.pipe(file);
       file.on('finish', async () => {
         await unzipper(lambdaName);
-        await promisifiedRimraf(`${lambdaName}`);
         res();
       });
     });
@@ -78,8 +76,8 @@ module.exports = async function get(lambdaName, path) {
     try {
       const func = await getLambdaFunction(getFunctionParams);
       const { Location } = func.Code;
-      await addLambdaFileToCwd(lambdaName, Location);
-      msg = `File: "${lambdaName}".js is now in your current directory`;
+      await addLambdaFolderToCwd(lambdaName, Location);
+      msg = `Folder: "${lambdaName}" is now in your current directory`;
     } catch (err) {
       clearInterval(spinnerInterval);
       spinnerCleanup();

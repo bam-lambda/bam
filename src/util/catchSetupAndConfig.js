@@ -4,6 +4,7 @@ const { bamLog, bamWarn } = require('./fancyText.js');
 const { exists, isConfigured } = require('./fileUtils.js');
 
 module.exports = async function catchSetupAndConfig(defaultRole, path, command) {
+  if (!['create', 'deploy', 'redeploy', 'list', 'get', 'config'].includes(command)) return true;
   const bamDirExists = await exists(`${path}/.bam`);
   if (!bamDirExists) {
     const isInitialized = await init(defaultRole, path);

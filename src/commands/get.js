@@ -12,10 +12,8 @@ const {
 
 const {
   readConfig,
-  writeFile,
   createWriteStream,
   createDirectory,
-  promisifiedRimraf,
   readdir,
 } = require('../util/fileUtils');
 

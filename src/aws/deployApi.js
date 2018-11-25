@@ -13,8 +13,7 @@ const {
   bamLog,
   bamError,
   bamSpinner,
-  spinnerCleanup,
-} = require('../util/fancyText.js');
+} = require('../util/logger');
 
 const apiVersion = 'latest';
 
@@ -36,7 +35,7 @@ module.exports = async function deployApi(lambdaName, path, stageName = 'dev') {
   const asyncPutMethodResponse = promisify(api.putMethodResponse.bind(api));
   const asyncCreateDeployment = promisify(api.createDeployment.bind(api));
 
-  const spinnerInterval = bamSpinner();
+  bamSpinner.start();
 
   // Sequence:
   try {
@@ -100,14 +99,13 @@ module.exports = async function deployApi(lambdaName, path, stageName = 'dev') {
     const functions = await readFuncLibrary(path);
     functions[lambdaName].api = { endpoint, restApiId };
     await writeFuncLibrary(path, functions);
-    clearInterval(spinnerInterval);
-    spinnerCleanup();
-    bamLog(await readFile(`${__dirname}/../../ascii/bam.txt`, 'utf8'));
+    bamSpinner.stop();
+    const bamAscii = await readFile(`${__dirname}/../../ascii/bam.txt`, 'utf8');
+    bamLog(bamAscii);
     bamLog('API Gateway endpoint has been deployed:');
     bamLog(endpoint);
   } catch (err) {
-    clearInterval(spinnerInterval);
-    spinnerCleanup();
+    bamSpinner.stop();
     bamError(err);
   }
 };

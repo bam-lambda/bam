@@ -1,5 +1,5 @@
 const deployLambda = require('../aws/deployLambda.js');
-const getUserInput = require('../util/getUserInput.js');
+const getUserInput = require('../util/getUserInput');
 const deployApi = require('../aws/deployApi.js');
 
 module.exports = async function deploy(lambdaName, path) {

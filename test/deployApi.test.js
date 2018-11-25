@@ -11,7 +11,8 @@ const deployApi = require('../src/aws/deployApi.js');
 const deleteLambda = require('../src/aws/deleteLambda');
 const { doesApiExist } = require('../src/aws/doesResourceExist');
 const deleteApi = require('../src/aws/deleteApi');
-const delay = require('../src/util/delay.js');
+const delay = require('../src/util/delay');
+const { bamErr } = require('../src/util/logger');
 
 const {
   writeFile,
@@ -80,7 +81,7 @@ describe('bam deploy api', () => {
       const response = await asyncHttpsGet(url);
       responseStatus = response.statusCode;
     } catch (err) {
-      console.log(err, err.stack);
+      bamErr(err);
     }
 
     expect(responseStatus).toEqual(200);
@@ -119,12 +120,11 @@ describe('bam deploy api', () => {
       const response = await asyncHttpsGet(url);
       response.setEncoding('utf8');
       response.on('data', (data) => {
-        console.log(data);
         responseBody = data;
         expect(responseBody).toMatch('John');
       });
     } catch (err) {
-      console.log(err, err.stack);
+      bamErr(err);
     }
   });
 
@@ -151,7 +151,7 @@ describe('bam deploy api', () => {
           expect(responseBody).toMatch('cool');
         });
       } catch (err) {
-        console.log(err, err.stack);
+        bamErr(err);
       }
     });
 

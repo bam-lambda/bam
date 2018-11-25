@@ -128,69 +128,69 @@ describe('bam deploy api', () => {
     }
   });
 
-  describe('lambda with dependencies', () => {
-    beforeEach(async () => {
-      const testLambdaWithDependencies = await readFile(`${path}/templates/testLambdaWithDependencies.js`);
-      await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependencies);
-      await deployLambda(lambdaName, 'test description', path);
-      await deployApi(lambdaName, path, stageName);
-    });
-
-    test('Response contains output from dependencies in body', async () => {
-      const library = await readFuncLibrary(path);
-      const url = library[lambdaName].api.endpoint;
-      let responseBody;
-
-      try {
-        const response = await asyncHttpsGet(url);
-        response.setEncoding('utf8');
-        response.on('data', (data) => {
-          responseBody = data;
-          expect(responseBody).toMatch('uuid');
-          expect(responseBody).toMatch('2016-12');
-          expect(responseBody).toMatch('cool');
-        });
-      } catch (err) {
-        console.log(err, err.stack);
-      }
-    });
-
-    test('package.json file is created', async () => {
-      const packageJSONExists = await exists(`${path}/.bam/functions/${lambdaName}/package.json`);
-      const packageLockJSONExists = await exists(`${path}/.bam/functions/${lambdaName}/package-lock.json`);
-      expect(packageJSONExists).toBe(true);
-      expect(packageLockJSONExists).toBe(true);
-    });
-
-    test('node modules directory is created', async () => {
-      const nodeModulesDirExists = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`);
-      expect(nodeModulesDirExists).toBe(true);
-    });
-
-    test('node modules directory contains dependencies', async () => {
-      const uuid = await exists(`${path}/.bam/functions/${lambdaName}/node_modules/uuid`);
-      const moment = await exists(`${path}/.bam/functions/${lambdaName}/node_modules/moment`);
-      expect(uuid).toBe(true);
-      expect(moment).toBe(true);
-    });
-
-    test('node modules directory does not contain native node modules', async () => {
-      const util = await exists(`${path}/.bam/functions/${lambdaName}/node_modules/util`);
-      expect(util).toBe(false);
-    });
-  });
-
-  describe('lambda with dependencies after exports.handler', () => {
-    beforeEach(async () => {
-      const testLambdaWithIncorrectDependencies = await readFile('./test/templates/testLambdaWithIncorrectDependencies.js');
-      await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithIncorrectDependencies);
-      await deployLambda(lambdaName, 'test description', path);
-      await deployApi(lambdaName, path, stageName);
-    });
-
-    test('node modules directory does not contain modules listed after exports.handler', async () => {
-      const moment = await exists(`${path}/.bam/functions/${lambdaName}/node_modules/moment`);
-      expect(moment).toBe(false);
-    });
-  });
+//  describe('lambda with dependencies', () => {
+//    beforeEach(async () => {
+//      const testLambdaWithDependencies = await readFile(`${path}/templates/testLambdaWithDependencies.js`);
+//      await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependencies);
+//      await deployLambda(lambdaName, 'test description', path);
+//      await deployApi(lambdaName, path, stageName);
+//    });
+//
+//    test('Response contains output from dependencies in body', async () => {
+//      const library = await readFuncLibrary(path);
+//      const url = library[lambdaName].api.endpoint;
+//      let responseBody;
+//
+//      try {
+//        const response = await asyncHttpsGet(url);
+//        response.setEncoding('utf8');
+//        response.on('data', (data) => {
+//          responseBody = data;
+//          expect(responseBody).toMatch('uuid');
+//          expect(responseBody).toMatch('2016-12');
+//          expect(responseBody).toMatch('cool');
+//        });
+//      } catch (err) {
+//        console.log(err, err.stack);
+//      }
+//    });
+//
+//    test('package.json file is created', async () => {
+//      const packageJSONExists = await exists(`${path}/.bam/functions/${lambdaName}/package.json`);
+//      const packageLockJSONExists = await exists(`${path}/.bam/functions/${lambdaName}/package-lock.json`);
+//      expect(packageJSONExists).toBe(true);
+//      expect(packageLockJSONExists).toBe(true);
+//    });
+//
+//    test('node modules directory is created', async () => {
+//      const nodeModulesDirExists = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`);
+//      expect(nodeModulesDirExists).toBe(true);
+//    });
+//
+//    test('node modules directory contains dependencies', async () => {
+//      const uuid = await exists(`${path}/.bam/functions/${lambdaName}/node_modules/uuid`);
+//      const moment = await exists(`${path}/.bam/functions/${lambdaName}/node_modules/moment`);
+//      expect(uuid).toBe(true);
+//      expect(moment).toBe(true);
+//    });
+//
+//    test('node modules directory does not contain native node modules', async () => {
+//      const util = await exists(`${path}/.bam/functions/${lambdaName}/node_modules/util`);
+//      expect(util).toBe(false);
+//    });
+//  });
+//
+//  describe('lambda with dependencies after exports.handler', () => {
+//    beforeEach(async () => {
+//      const testLambdaWithIncorrectDependencies = await readFile('./test/templates/testLambdaWithIncorrectDependencies.js');
+//      await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithIncorrectDependencies);
+//      await deployLambda(lambdaName, 'test description', path);
+//      await deployApi(lambdaName, path, stageName);
+//    });
+//
+//    test('node modules directory does not contain modules listed after exports.handler', async () => {
+//      const moment = await exists(`${path}/.bam/functions/${lambdaName}/node_modules/moment`);
+//      expect(moment).toBe(false);
+//    });
+//  });
 });

@@ -26,6 +26,11 @@ const writeConfig = async (path, config) => {
   await writeFile(`${path}/.bam/config.json`, configJSON);
 };
 
+const isConfigured = async (path) => {
+  const config = await readConfig(path);
+  return config.accountNumber && config.region && config.role;
+}
+
 const readFuncLibrary = async (path) => {
   const libraryJSON = await readFile(`${path}/.bam/functions/library.json`);
   return JSON.parse(libraryJSON);
@@ -66,6 +71,7 @@ module.exports = {
   createJSONFile,
   readConfig,
   writeConfig,
+  isConfigured,
   readFuncLibrary,
   writeFuncLibrary,
   promisifiedRimraf,

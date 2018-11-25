@@ -1,13 +1,12 @@
 const deleteApi = require('../aws/deleteApi.js');
-const bamBam = require('../util/bamBam.js');
+const bamBam = require('../util/bamBam');
 const deleteAwsLambda = require('../aws/deleteLambda');
 
 const {
   bamLog,
   bamError,
   bamSpinner,
-  spinnerCleanup,
-} = require('../util/fancyText.js');
+} = require('../util/logger');
 
 const {
   promisifiedRimraf,
@@ -20,7 +19,7 @@ const {
 const cwd = process.cwd();
 
 module.exports = async function destroy(lambdaName, path) {
-  const spinnerInterval = bamSpinner();
+  bamSpinner.start();
 
   const library = await readFuncLibrary(path);
   const { restApiId } = library[lambdaName].api;
@@ -50,7 +49,6 @@ module.exports = async function destroy(lambdaName, path) {
   // write back to library
   await writeFuncLibrary(path, library);
 
-  clearInterval(spinnerInterval);
-  spinnerCleanup();
+  bamSpinner.stop();
   bamLog(`Lambda "${lambdaName}" has been deleted`);
 };

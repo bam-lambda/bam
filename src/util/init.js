@@ -1,6 +1,6 @@
-const getUserDefaults = require('./getUserDefaults.js');
-const createRole = require('../aws/createRole.js');
-const setupBamDirAndFiles = require('./setupBamDirAndFiles.js');
+const getUserDefaults = require('./getUserDefaults');
+const createRole = require('../aws/createRole');
+const setupBamDirAndFiles = require('./setupBamDirAndFiles');
 
 module.exports = async function init(roleName, path) {
   await setupBamDirAndFiles(roleName, path);

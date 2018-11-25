@@ -1,7 +1,7 @@
 const { exists, promisifiedRimraf } = require('../src/util/fileUtils');
 
 const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
-const bamError = require('../src/util/fancyText.js');
+const { bamError } = require('../src/util/logger');
 
 const roleName = 'testBamRole';
 const path = './test';

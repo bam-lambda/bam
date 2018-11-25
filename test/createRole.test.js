@@ -63,7 +63,7 @@ describe('createRole', async () => {
       expect(role).toBe(true);
     });
 
-    test('testBamRole is not created if exist', async () => {
+    test('testBamRole is not created if already exists', async () => {
       await createRole(roleName, path);
       const result = await createRole(roleName, path);
       expect(result).toBeUndefined();

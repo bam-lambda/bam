@@ -1,6 +1,6 @@
 const readline = require('readline');
 
-const { bamText, bamWarn } = require('./fancyText.js');
+const { bamText, bamWarn } = require('./logger');
 
 const answers = [];
 

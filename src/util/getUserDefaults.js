@@ -1,7 +1,7 @@
 const { readConfig, writeConfig } = require('./fileUtils');
-const getUserInput = require('./getUserInput.js');
+const getUserInput = require('./getUserInput');
 
-const { doesRoleExist } = require('../aws/doesResourceExist.js');
+const { doesRoleExist } = require('../aws/doesResourceExist');
 
 const regions = ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2',
   'ca-central-1', 'eu-central-1', 'eu-west-1', 'eu-west-2',

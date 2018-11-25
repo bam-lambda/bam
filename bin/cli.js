@@ -3,15 +3,17 @@ const os = require('os');
 
 const deploy = require('../src/commands/deploy.js');
 const create = require('../src/commands/create.js');
+const get = require('../src/commands/get.js');
 const list = require('../src/commands/list.js');
 const version = require('../src/commands/version.js');
 const destroy = require('../src/commands/destroy.js');
 const help = require('../src/commands/help.js');
 const config = require('../src/commands/config.js');
-const { bamWarn } = require('../src/util/fancyText.js');
+
+const { bamWarn } = require('../src/util/logger.js');
 const catchSetupAndConfig = require('../src/util/catchSetupAndConfig.js');
 
-const [,, command, lambdaName] = process.argv;
+const [,, command, lambdaName = ''] = process.argv;
 const homedir = os.homedir();
 
 (async () => {
@@ -19,9 +21,11 @@ const homedir = os.homedir();
   if (!shouldContinue) return;
 
   if (command === 'create') {
-    await create(lambdaName, homedir);
+    await create(lambdaName);
   } else if (command === 'deploy') {
     await deploy(lambdaName, homedir);
+  } else if (command === 'get') {
+    await get(lambdaName, homedir);
   } else if (command === 'delete') {
     await destroy(lambdaName, homedir);
   } else if (command === 'list') {

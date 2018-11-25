@@ -5,14 +5,16 @@ const { log } = console;
 const {
   getStyledText,
   resetStyledText,
+  warningColor,
+  errorColor,
+  bamTextStyles,
 } = require('./fancyText');
 
-const bamTextStyles = ['green', 'bright'];
 const resetCursorPosition = () => process.stdout.cursorTo(0);
 
 const bamText = text => getStyledText(text, ...bamTextStyles);
-const bamWarnText = text => getStyledText(text, 'yellow');
-const bamErrorText = text => getStyledText(text, 'red');
+const bamWarnText = text => getStyledText(text, warningColor);
+const bamErrorText = text => getStyledText(text, errorColor);
 
 const bamWrite = text => process.stdout.write(bamText(text));
 const bamLog = text => log(bamText(text));

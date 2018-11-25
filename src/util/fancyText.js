@@ -9,6 +9,10 @@ const textStyles = {
   red: `${escapeChar}[31m`,
 };
 
+const warningColor = 'yellow';
+const errorColor = 'red';
+const bamTextStyles = ['green', 'bright'];
+
 const showCursor = () => process.stdout.write(textStyles.showCursor);
 const resetColor = () => process.stdout.write(textStyles.reset);
 
@@ -25,4 +29,7 @@ const getStyledText = (text, ...styles) => {
 module.exports = {
   getStyledText,
   resetStyledText,
+  warningColor,
+  errorColor,
+  bamTextStyles,
 };

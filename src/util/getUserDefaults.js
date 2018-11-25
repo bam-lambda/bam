@@ -49,5 +49,5 @@ module.exports = async function getUserDefaults(path) {
   };
 
   await getUserInputs();
-  await writeConfig(path);
+  await writeConfig(path, config);
 };

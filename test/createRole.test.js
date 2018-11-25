@@ -23,6 +23,7 @@ const path = './test';
 
 describe('createRole', async () => {
   beforeEach(async () => {
+    jest.setTimeout(10000);
     await createDirectory('.bam', path);
     const config = await configTemplate(roleName);
     await createJSONFile('config', `${path}/.bam`, config);

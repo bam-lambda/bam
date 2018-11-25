@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const { createDirectory } = require('../util/fileUtils');
-const zipper = require('../util/zipper.js');
+const { zipper } = require('../util/zipper.js');
 const installLambdaDependencies = require('../util/installLambdaDependencies.js');
 const bamBam = require('../util/bamBam.js');
 

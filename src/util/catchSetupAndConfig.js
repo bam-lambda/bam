@@ -2,8 +2,9 @@ const getUserDefaults = require('./getUserDefaults.js');
 const init = require('./init.js');
 const { bamLog, bamWarn } = require('./fancyText.js');
 const { exists, isConfigured } = require('./fileUtils.js');
+const defaultRole = 'bamRole';
 
-module.exports = async function catchSetupAndConfig(defaultRole, path, command) {
+module.exports = async function catchSetupAndConfig(path, command) {
   if (!['create', 'deploy', 'redeploy', 'list', 'get', 'config'].includes(command)) return true;
   const bamDirExists = await exists(`${path}/.bam`);
   if (!bamDirExists) {

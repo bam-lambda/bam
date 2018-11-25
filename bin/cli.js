@@ -16,7 +16,7 @@ const [,, command, lambdaName] = process.argv;
 const homedir = os.homedir();
 
 (async () => {
-  const shouldContinue = await catchSetupAndConfig(defaultRole, homedir, command);
+  const shouldContinue = await catchSetupAndConfig(homedir, command);
   if (!shouldContinue) return;
 
   if (command === 'create') {

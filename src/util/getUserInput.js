@@ -4,11 +4,14 @@ const { bamText, bamWarn } = require('./logger');
 
 const answers = [];
 
-const asyncValidate = async (asyncCallback, validator, feedback, question, defaultAnswer) => {
+const asyncValidate = async (asyncCallback, validator, feedback, question, defaultAnswer, quitStr='q') => {
   while (true) {
     const result = await asyncCallback(question, defaultAnswer);
+    if (result === quitStr) return undefined;
     const validAnswer = await validator(result);
-    if (validAnswer) return result;
+    if (validAnswer) {
+      return result;
+    }
     bamWarn(feedback);
   }
 };
@@ -30,6 +33,10 @@ module.exports = async function getUserInput(prompts) {
   for (let i = 0; i < prompts.length; i += 1) {
     const { question, validator, feedback, defaultAnswer } = prompts[i];
     const answer = await asyncValidate(pendingPrompt, validator, feedback, question, defaultAnswer);
+    if (answer === undefined) { // did not receive answer - user quit early
+      rl.close();
+      return undefined;
+    }
     answers.push(answer);
   }
 

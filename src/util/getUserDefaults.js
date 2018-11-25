@@ -44,10 +44,12 @@ module.exports = async function getUserDefaults(path) {
 
     const configPrompts = [getAccountNumber, getRegion, getRole];
 
-    const userDefaults = await getUserInput(configPrompts);
-    [config.accountNumber, config.region, config.role] = userDefaults;
+    const userDefaults = await getUserInput(configPrompts); // undefined if user quits prompts
+    if (userDefaults) [config.accountNumber, config.region, config.role] = userDefaults;
+    return userDefaults;
   };
 
-  await getUserInputs();
+  const inputs = await getUserInputs();
   await writeConfig(path, config);
+  return !!inputs; // inputs completely received (user did not quit early)
 };

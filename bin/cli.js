@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 const os = require('os');
 
-const init = require('../src/util/init.js');
 const deploy = require('../src/commands/deploy.js');
 const create = require('../src/commands/create.js');
 const get = require('../src/commands/get.js');
@@ -10,19 +9,16 @@ const version = require('../src/commands/version.js');
 const destroy = require('../src/commands/destroy.js');
 const help = require('../src/commands/help.js');
 const config = require('../src/commands/config.js');
-const { bamWarn } = require('../src/util/logger');
-const { exists } = require('../src/util/fileUtils.js');
 
-const defaultRole = 'bamRole';
+const { bamWarn } = require('../src/util/logger.js');
+const catchSetupAndConfig = require('../src/util/catchSetupAndConfig.js');
+
 const [,, command, lambdaName = ''] = process.argv;
 const homedir = os.homedir();
 
 (async () => {
-  const bamDirExists = await exists(`${homedir}/.bam`);
-  if (!bamDirExists) {
-    await init(defaultRole, homedir);
-    if (command === 'config') return; // don't config twice
-  }
+  const shouldContinue = await catchSetupAndConfig(homedir, command);
+  if (!shouldContinue) return;
 
   if (command === 'create') {
     await create(lambdaName);

@@ -1,5 +1,5 @@
 const { exists, writeFile, readFile } = require('../util/fileUtils');
-const { bamWarn } = require('../util/logger');
+const { bamWarn, bamLog } = require('../util/logger');
 
 module.exports = async function create(lambdaName, path) {
   const cwd = process.cwd();
@@ -13,4 +13,5 @@ module.exports = async function create(lambdaName, path) {
   }
 
   await writeFile(`${cwd}/${lambdaName}.js`, lambdaTemplate);
+  bamLog(`Template file "${lambdaName}.js" was created.`);
 };

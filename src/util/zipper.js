@@ -1,7 +1,7 @@
 const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
 
-const { bamError } = require('./fancyText');
+const { bamError } = require('./logger');
 
 const cwd = process.cwd();
 
@@ -21,7 +21,7 @@ const zipper = async (lambdaName, path) => {
   try {
     await exec(`zip -r ${lambdaName} .`, { cwd: dir });
   } catch (err) {
-    bamError(err, err.stack);
+    bamError(err);
   }
 
   return `${dir}/${lambdaName}.zip`;

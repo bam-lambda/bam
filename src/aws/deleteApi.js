@@ -1,10 +1,11 @@
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
-const getRegion = require('../util/getRegion.js');
-const { bamLog } = require('../util/fancyText.js');
+const getRegion = require('../util/getRegion');
+const { bamLog, bamSpinner } = require('../util/logger');
 const { readFuncLibrary, writeFuncLibrary } = require('../util/fileUtils');
 
 module.exports = async function deleteApi(restApiId, path) {
+  bamSpinner.start();
   const region = await getRegion();
   const apiVersion = 'latest';
 
@@ -20,6 +21,6 @@ module.exports = async function deleteApi(restApiId, path) {
 
   // write back to library
   await writeFuncLibrary(path, functions);
-  process.stdout.cursorTo(0);
+  bamSpinner.stop();
   bamLog('API Gateway endpoint has been deleted');
 };

@@ -10,7 +10,7 @@ const version = require('../src/commands/version.js');
 const destroy = require('../src/commands/destroy.js');
 const help = require('../src/commands/help.js');
 const config = require('../src/commands/config.js');
-const { bamWarn } = require('../src/util/fancyText.js');
+const { bamWarn } = require('../src/util/logger');
 const { exists } = require('../src/util/fileUtils.js');
 
 const defaultRole = 'bamRole';

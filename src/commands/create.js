@@ -1,5 +1,5 @@
-const { exists, writeFile, readFile } = require('../util/fileUtils.js');
-const { bamWarn } = require('../util/fancyText.js');
+const { exists, writeFile, readFile } = require('../util/fileUtils');
+const { bamWarn } = require('../util/logger');
 
 module.exports = async function create(lambdaName, path) {
   const cwd = process.cwd();

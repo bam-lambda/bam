@@ -1,5 +1,5 @@
 const { readFuncLibrary } = require('../util/fileUtils');
-const { bamText, log } = require('../util/fancyText');
+const { bamText, log } = require('../util/logger');
 
 module.exports = async function list(path) {
   const indent = ' '.repeat(4);

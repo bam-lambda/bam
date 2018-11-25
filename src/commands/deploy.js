@@ -9,7 +9,7 @@ module.exports = async function deploy(lambdaName, path) {
     feedback: 'invalid description',
     defaultAnswer: '',
   };
-  const [description] = await getUserInput([question]);
+  const [description] = await getUserInput([question]) || ['']; // in case user quits
   await deployLambda(lambdaName, description, path);
   await deployApi(lambdaName, path);
 };

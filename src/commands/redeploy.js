@@ -30,7 +30,6 @@ module.exports = async function redeploy(lambdaName, path) { // currently update
 
   if (!existsLocally) {
     bamWarn(`Bam is not locally tracking any function "${lambdaName}". Recommend using "bam deploy ${lambdaName}" instead of redeploy`);
-    return;
   }
 
   // check if lambdaName in AWS
@@ -45,7 +44,7 @@ module.exports = async function redeploy(lambdaName, path) { // currently update
 
   // overwrite local deployment package if redeploy successful
   const overwriteLocalPkg = async () => {
-    await asyncRimRaf(`${path}/.bam/functions/${lambdaName}`);
+    if (existsLocally) await asyncRimRaf(`${path}/.bam/functions/${lambdaName}`);
     fs.renameSync(`${path}/.bam/functions/${lambdaName}-temp`, `${path}/.bam/functions/${lambdaName}`);
   }
 

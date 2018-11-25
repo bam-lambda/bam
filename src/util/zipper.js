@@ -1,25 +1,18 @@
 const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
-const StreamZip = require('node-stream-zip');
 
 const { bamError } = require('./fancyText');
 
 const cwd = process.cwd();
 
 const unzipper = async (lambdaName) => {
-  const zip = new StreamZip({
-    file: `${cwd}/${lambdaName}/${lambdaName}.zip`,
-    storeEntries: true,
-  });
+  const file = `${cwd}/${lambdaName}/${lambdaName}.zip`;
 
-  return new Promise((res) => {
-    zip.on('ready', () => {
-      zip.extract('index.js', `${cwd}/${lambdaName}.js`, () => {
-        zip.close();
-        res();
-      });
-    });
-  });
+  try {
+    await exec(`unzip ${file}`, { cwd: `${cwd}/${lambdaName}` });
+  } catch (err) {
+    bamError(err, err.stack);
+  }
 };
 
 const zipper = async (lambdaName, path) => {

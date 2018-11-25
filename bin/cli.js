@@ -11,7 +11,6 @@ const config = require('../src/commands/config.js');
 const { bamWarn } = require('../src/util/fancyText.js');
 const catchSetupAndConfig = require('../src/util/catchSetupAndConfig.js');
 
-const defaultRole = 'bamRole';
 const [,, command, lambdaName] = process.argv;
 const homedir = os.homedir();
 

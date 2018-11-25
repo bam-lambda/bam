@@ -19,7 +19,7 @@ const lambdaExistsInCwd = async (name) => {
 };
 
 const lambdaHasValidName = name => (
-  (/^[a-zA-Z0-9-_]+$/).test(name) && name.length <= 64
+  (/^[a-zA-Z0-9-_]+$/).test(name) && name.length < 64
 );
 
 const lambdaExistsOnAws = async (name) => {
@@ -50,8 +50,6 @@ const validateLambdaCreation = async (name) => {
     msg = warnings.nameIsTaken;
   } else if (!lambdaHasValidName(name)) {
     msg = warnings.invalidSyntax;
-  } else if (await lambdaExistsOnAws(name)) {
-    msg = warnings.alreadyExists;
   }
 
   return msg;

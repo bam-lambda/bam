@@ -1,11 +1,15 @@
 const fs = require('fs');
 const { promisify } = require('util');
 const rimraf = require('rimraf');
+const exec = promisify(require('child_process').exec);
 
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 const copyFile = promisify(fs.copyFile);
 const unlink = promisify(fs.unlink);
+const rename = promisify(fs.rename);
+const readdir = promisify(fs.readdir);
+const { createWriteStream } = fs;
 
 const exists = async path => (
   new Promise((res) => {
@@ -59,6 +63,10 @@ module.exports = {
   writeFile,
   copyFile,
   unlink,
+  rename,
+  exec,
+  readdir,
+  createWriteStream,
   exists,
   createDirectory,
   createJSONFile,

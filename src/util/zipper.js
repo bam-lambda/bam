@@ -3,7 +3,19 @@ const exec = promisify(require('child_process').exec);
 
 const { bamError } = require('./logger');
 
-module.exports = async function zipper(lambdaName, path) {
+const cwd = process.cwd();
+
+const unzipper = async (lambdaName) => {
+  const file = `${cwd}/${lambdaName}/${lambdaName}.zip`;
+
+  try {
+    await exec(`unzip ${file}`, { cwd: `${cwd}/${lambdaName}` });
+  } catch (err) {
+    bamError(err, err.stack);
+  }
+};
+
+const zipper = async (lambdaName, path) => {
   const dir = `${path}/.bam/functions/${lambdaName}`;
 
   try {
@@ -14,3 +26,5 @@ module.exports = async function zipper(lambdaName, path) {
 
   return `${dir}/${lambdaName}.zip`;
 };
+
+module.exports = { zipper, unzipper };

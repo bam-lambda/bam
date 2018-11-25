@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 
-const getRegion = require('../util/getRegion.js');
+const getRegion = require('../util/getRegion');
 
 module.exports = async function deleteLambda(lambdaName) {
   const region = await getRegion();

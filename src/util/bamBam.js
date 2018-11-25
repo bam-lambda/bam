@@ -1,19 +1,26 @@
-const delay = require('./delay.js');
-const { bamError, bamLog } = require('./fancyText.js');
+const delay = require('./delay');
+const { bamError, bamLog, resetCursorPosition } = require('./logger');
+
+const defaultObj = {
+  params: [],
+  retryError: 'InvalidParameterValueException',
+  interval: 3000,
+  calls: 0,
+};
 
 module.exports = async function bamBam(asyncCallback, {
   params = [],
   retryError = 'InvalidParameterValueException',
   interval = 3000,
   calls = 0,
-} = { retryError: 'InvalidParameterValueException', interval: 3000, calls: 0 }) {
+} = defaultObj) {
   try {
     const data = await asyncCallback(...params);
     return data;
   } catch (err) {
     if (err.code === retryError) {
       if (err.code === 'TooManyRequestsException' && calls === 0) {
-        process.stdout.cursorTo(0);
+        resetCursorPosition();
         bamLog('AWS is causing a delay. This will not take more than a minute.');
       }
 

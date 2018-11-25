@@ -1,8 +1,8 @@
-const deployLambda = require('../aws/deployLambda.js');
-const deployApi = require('../aws/deployApi.js');
-const getUserInput = require('../util/getUserInput.js');
-const { bamWarn } = require('../util/fancyText.js');
-const { validateLambdaDeployment } = require('../util/validateLambda.js');
+const deployLambda = require('../aws/deployLambda');
+const deployApi = require('../aws/deployApi');
+const getUserInput = require('../util/getUserInput');
+const { bamWarn } = require('../util/logger');
+const { validateLambdaDeployment } = require('../util/validateLambda');
 
 module.exports = async function deploy(lambdaName, path) {
   const invalidLambdaMsg = await validateLambdaDeployment(lambdaName);

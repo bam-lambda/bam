@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const { createDirectory } = require('../util/fileUtils');
-const zipper = require('../util/zipper.js');
+const { zipper } = require('../util/zipper.js');
 const installLambdaDependencies = require('../util/installLambdaDependencies.js');
 const bamBam = require('../util/bamBam.js');
 
@@ -9,8 +9,7 @@ const {
   bamLog,
   bamWarn,
   bamSpinner,
-  spinnerCleanup,
-} = require('../util/fancyText.js');
+} = require('../util/logger');
 
 const {
   readFuncLibrary,
@@ -34,7 +33,7 @@ module.exports = async function deployLambda(lambdaName, description, path) {
     await copyFile(`${cwd}/${lambdaName}.js`, `${path}/.bam/functions/${lambdaName}/index.js`);
   };
 
-  const spinnerInterval = bamSpinner();
+  bamSpinner.start();
   await createDeploymentPackage();
   await installLambdaDependencies(lambdaName, path);
   const zippedFileName = await zipper(lambdaName, path);
@@ -69,12 +68,10 @@ module.exports = async function deployLambda(lambdaName, description, path) {
 
   if (data) {
     await writeToLib(data);
-    clearInterval(spinnerInterval);
-    spinnerCleanup();
+    bamSpinner.stop();
     bamLog(`Lambda "${lambdaName}" has been created`);
   } else {
-    clearInterval(spinnerInterval);
-    spinnerCleanup();
+    bamSpinner.stop();
     bamWarn(`Lambda "${lambdaName}" already exists`);
   }
 };

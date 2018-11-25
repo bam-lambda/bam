@@ -1,5 +1,5 @@
 const { createDirectory, createJSONFile } = require('./fileUtils');
-const configTemplate = require('../../templates/configTemplate.js');
+const configTemplate = require('../../templates/configTemplate');
 
 module.exports = async function setupBamDirAndFiles(roleName, path) {
   const configJSON = await configTemplate(roleName);

@@ -28,6 +28,34 @@ const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 const cwd = process.cwd();
 
+// clean up after
+(() => {
+  // attach user callback to the process event emitter
+  // if no callback, it will still exit gracefully on Ctrl-C
+  process.on('cleanup', () => {
+    resetCursorPosition();
+    resetStyledText();
+  });
+
+  // do app specific cleaning before exiting
+  process.on('exit', () => {
+    process.emit('cleanup');
+  });
+
+  // catch ctrl+c event and exit normally
+  process.on('SIGINT', () => {
+    log('Ctrl-C...');
+    process.exit(2);
+  });
+
+  // catch uncaught exceptions, trace, then exit normally
+  process.on('uncaughtException', (e) => {
+    bamError('Uncaught Exception...');
+    log(e.stack);
+    process.exit(99);
+  });
+})();
+
 describe('bam delete lambda', () => {
   beforeEach(async () => {
     jest.setTimeout(60000);

@@ -1,8 +1,5 @@
-const {
-  exists,
-  unlink,
-} = require('../src/util/fileUtils.js');
-const create = require('../src/commands/create.js');
+const { exists, unlink } = require('../src/util/fileUtils');
+const create = require('../src/commands/create');
 
 const path = './test';
 const cwd = process.cwd();

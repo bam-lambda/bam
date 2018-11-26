@@ -3,6 +3,7 @@ const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const uuid = require('uuid');
 const bamBam = require('../util/bamBam.js');
+const { writeApi } = require('../util/writeToLib');
 const {
   bamLog,
   bamError,
@@ -92,9 +93,8 @@ module.exports = async function deployApi(lambdaName, path, stageName = 'dev') {
     const endpoint = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}/${lambdaName}`;
 
     // write to library
-    const functions = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
-    functions[lambdaName].api = { endpoint, restApiId };
-    fs.writeFileSync(`${path}/.bam/functions/library.json`, JSON.stringify(functions));
+    await writeApi(endpoint, lambdaName, restApiId, path);
+
     clearInterval(spinnerInterval);
     spinnerCleanup();
     bamLog(bamAscii);

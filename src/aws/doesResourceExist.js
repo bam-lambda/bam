@@ -32,7 +32,7 @@ const doesLambdaExist = async (lambdaName) => {
   const asyncGetFunction = promisify(lambda.getFunction.bind(lambda));
 
   try {
-    await asyncGetFunction({ FunctionName: lambdaName });
+    const data = await asyncGetFunction({ FunctionName: lambdaName });
     return true;
   } catch (err) {
     return false;

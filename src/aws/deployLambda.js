@@ -5,6 +5,7 @@ const createDirectory = require('../util/createDirectory');
 const zipper = require('../util/zipper.js');
 const installLambdaDependencies = require('../util/installLambdaDependencies.js');
 const bamBam = require('../util/bamBam.js');
+const { writeLambda } = require('../util/writeToLib');
 const {
   bamLog,
   bamWarn,
@@ -47,25 +48,15 @@ module.exports = async function deployLambda(lambdaName, description, path) {
     return bamBam(asyncLambdaCreateFunction, params);
   };
 
-  const writeToLib = (data) => {
-    const name = data.FunctionName;
-    const arn = data.FunctionArn;
-
-    // read contents from library
-    const functions = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
-    functions[name] = { arn, description };
-
-    // write back to library
-    fs.writeFileSync(`${path}/.bam/functions/library.json`, JSON.stringify(functions));
-  };
-
   const data = await createAwsLambda();
 
   if (data) {
-    await writeToLib(data);
+    //await writeToLib(data);
+    await writeLambda(data, path)
     clearInterval(spinnerInterval);
     spinnerCleanup();
     bamLog(`Lambda "${lambdaName}" has been created`);
+    return data;
   } else {
     clearInterval(spinnerInterval);
     spinnerCleanup();

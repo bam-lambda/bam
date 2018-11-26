@@ -1,6 +1,11 @@
 const updateLambda = require('../aws/updateLambda');
-const getUserInput = require('../util/getUserInput');
-const { writeLambda, promisifiedRimraf, exists, rename, readFuncLibrary } = require('../util/fileUtils');
+const {
+  writeLambda,
+  promisifiedRimraf,
+  exists,
+  rename,
+  readFuncLibrary,
+} = require('../util/fileUtils');
 const deployApi = require('../aws/deployApi.js');
 const { doesLambdaExist, doesApiExist } = require('../aws/doesResourceExist');
 const getLambda = require('../aws/getLambda');
@@ -8,7 +13,6 @@ const {
   bamLog,
   bamWarn,
   bamError,
-  bamSpinner,
 } = require('../util/logger');
 
 // redeploys lambda that already exists on AWS, whether or not local directory exists
@@ -34,7 +38,7 @@ module.exports = async function redeploy(lambdaName, path) { // currently update
   }
 
   // check if lambdaName in ~/.bam/functions
-  const existsLocally = await exists(`${path}/.bam/functions/${lambdaName}`);  
+  const existsLocally = await exists(`${path}/.bam/functions/${lambdaName}`);
 
   // helper methods
 
@@ -42,33 +46,33 @@ module.exports = async function redeploy(lambdaName, path) { // currently update
   const overwriteLocalPkg = async () => {
     if (existsLocally) await promisifiedRimraf(`${path}/.bam/functions/${lambdaName}`);
     await rename(`${path}/.bam/functions/${lambdaName}-temp`, `${path}/.bam/functions/${lambdaName}`);
-  }
+  };
 
   // write to library if lambda was not locally tracked
   const syncLocalToCloudLambda = async () => {
-    if (!existsLocally) {     
+    if (!existsLocally) {
       const { Configuration } = await getLambda(lambdaName);
       await writeLambda(Configuration, path);
     }
-  }
+  };
 
   // create and integrate fresh new api gateway if lambda is not locally tracked
   // or if lambda exists locally but api doesn't exist in cloud
   const getApiId = async () => {
-    const library = await readFuncLibrary(path);   
+    const library = await readFuncLibrary(path);
     return library[lambdaName] && library[lambdaName].api && library[lambdaName].api.restApiId;
   };
 
   const provideNewApiIfNeeded = async () => {
     const apiId = await getApiId();
     const apiExists = await doesApiExist(apiId);
-    if (!existsLocally || !apiId || !apiExists) {     
+    if (!existsLocally || !apiId || !apiExists) {
       await deployApi(lambdaName, path);
     }
   };
 
   // revert to prior state (i.e. remove temp package) if AWS error
-  const revertToPriorState = async () =>{
+  const revertToPriorState = async () => {
     await promisifiedRimraf(`${path}/.bam/functions/${lambdaName}-temp`);
   };
 
@@ -77,7 +81,7 @@ module.exports = async function redeploy(lambdaName, path) { // currently update
 
   if (data) {
     await overwriteLocalPkg();
-    await syncLocalToCloudLambda(); // lambda should be written to lib by now  
+    await syncLocalToCloudLambda(); // lambda should be written to lib by now
     await provideNewApiIfNeeded();
     bamLog(`Lambda "${lambdaName}" has been updated`);
   } else {

@@ -1,12 +1,15 @@
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
-const { createDirectory, readFile, copyFile, readConfig } = require('../util/fileUtils');
+const {
+  createDirectory,
+  readFile,
+  copyFile,
+  readConfig,
+} = require('../util/fileUtils');
 const { zipper } = require('../util/zipper');
 const installLambdaDependencies = require('../util/installLambdaDependencies');
 const bamBam = require('../util/bamBam');
 const {
-  bamLog,
-  bamWarn,
   bamSpinner,
 } = require('../util/logger');
 
@@ -14,7 +17,7 @@ const apiVersion = 'latest';
 
 module.exports = async function updateLambda(lambdaName, path) {
   const config = await readConfig(path);
-  const { accountNumber, region, role } = config;
+  const { region } = config;
   const lambda = new AWS.Lambda({ apiVersion, region });
   const asyncLambdaUpdateFunctionCode = promisify(lambda.updateFunctionCode.bind(lambda));
 
@@ -40,6 +43,6 @@ module.exports = async function updateLambda(lambdaName, path) {
   };
 
   const data = await updateAwsLambda();
-  bamSpinner.stop(); 
+  bamSpinner.stop();
   return data;
 };

@@ -45,7 +45,7 @@ const writeFuncLibrary = async (path, functions) => {
   await writeFile(`${path}/.bam/functions/library.json`, functionsJSON);
 };
 
-const writeLambda = async (data, path, description='') => {
+const writeLambda = async (data, path, description = '') => {
   const name = data.FunctionName;
   const arn = data.FunctionArn;
 

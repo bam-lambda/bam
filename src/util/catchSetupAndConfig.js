@@ -2,6 +2,7 @@ const getUserDefaults = require('./getUserDefaults.js');
 const init = require('./init.js');
 const { bamLog, bamWarn } = require('./fancyText.js');
 const { exists, isConfigured } = require('./fileUtils.js');
+
 const defaultRole = 'bamRole';
 
 module.exports = async function catchSetupAndConfig(path, command) {

@@ -12,8 +12,6 @@ const {
 } = require('../util/logger');
 
 const {
-  readFuncLibrary,
-  writeFuncLibrary,
   writeLambda,
   readConfig,
   copyFile,
@@ -63,8 +61,8 @@ module.exports = async function deployLambda(lambdaName, description, path) {
     bamSpinner.stop();
     bamLog(`Lambda "${lambdaName}" has been created`);
     return data;
-  } else {
-    bamSpinner.stop();
-    bamWarn(`Lambda "${lambdaName}" already exists`);
   }
+
+  bamSpinner.stop();
+  bamWarn(`Lambda "${lambdaName}" already exists`);
 };

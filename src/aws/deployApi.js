@@ -1,10 +1,8 @@
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const uuid = require('uuid');
-const bamBam = require('../util/bamBam.js');
+const bamBam = require('../util/bamBam');
 const {
-  readFuncLibrary,
-  writeFuncLibrary,
   writeApi,
   readConfig,
   readFile,
@@ -12,8 +10,8 @@ const {
 
 const {
   bamLog,
-  bamError,
   bamSpinner,
+  bamError,
 } = require('../util/logger');
 
 const apiVersion = 'latest';
@@ -39,7 +37,7 @@ module.exports = async function deployApi(lambdaName, path, stageName = 'dev') {
   bamSpinner.start();
 
   // Sequence:
-  //try {
+  try {
     // create rest api
     const restApiId = (await asyncCreateApi({ name: lambdaName })).id;
 
@@ -103,8 +101,8 @@ module.exports = async function deployApi(lambdaName, path, stageName = 'dev') {
     bamLog(bamAscii);
     bamLog('API Gateway endpoint has been deployed:');
     bamLog(endpoint);
-//  } catch (err) {
-//    bamSpinner.stop();
-//    bamError(err);
-//  }
+  } catch (err) {
+    bamSpinner.stop();
+    bamError(err);
+  }
 };

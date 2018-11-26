@@ -27,7 +27,7 @@ module.exports = async function destroy(lambdaName, path) {
     params: [restApiId, path],
     retryError: 'TooManyRequestsException',
     interval: 30000,
-  };  
+  };
   await bamBam(deleteApi, bamBamParams);
   await deleteAwsLambda(lambdaName);
 

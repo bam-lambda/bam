@@ -24,11 +24,11 @@ module.exports = async function deploy(lambdaName, path) {
     if (input === undefined) {
       bamWarn('Lambda deployment aborted');
       return;
-    } else {
-      const [description] = input;
-      await deployLambda(lambdaName, description, path);
-      await deployApi(lambdaName, path);
     }
+
+    const [description] = input;
+    await deployLambda(lambdaName, description, path);
+    await deployApi(lambdaName, path);
   } catch (err) {
     bamWarn(err);
   }

@@ -18,7 +18,8 @@ const [,, command, lambdaName = ''] = process.argv;
 const homedir = os.homedir();
 
 (async () => {
-  const shouldContinue = await catchSetupAndConfig(homedir, command); // TODO: add new commands to catchSetupAndConfig
+  // TODO: add new commands to catchSetupAndConfig
+  const shouldContinue = await catchSetupAndConfig(homedir, command);
   if (!shouldContinue) return;
 
   if (command === 'create') {

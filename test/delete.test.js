@@ -28,8 +28,6 @@ const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 const cwd = process.cwd();
 
-const delay = require('../src/util/delay');
-
 describe('bam delete lambda', () => {
   beforeEach(async () => {
     jest.setTimeout(60000);
@@ -50,7 +48,6 @@ describe('bam delete lambda', () => {
     await promisifiedRimraf(`${path}/.bam`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
-delay(30000);    
   });
 
   test('Lambda directory does not exists within ./test/.bam/functions', async () => {
@@ -83,7 +80,6 @@ delay(30000);
 
   test('API endpoint does not exists on AWS', async () => {
     const library = await readFuncLibrary(path);
-console.log(library)    
     const { restApiId } = library[lambdaName].api;
     let endpoint = await doesApiExist(restApiId);
     expect(endpoint).toBe(true);

@@ -2,16 +2,17 @@ const https = require('https');
 const AWS = require('aws-sdk');
 
 const { promisify } = require('util');
-const { 
-  createDirectory, 
-  createJSONFile, 
+const {
+  createDirectory,
+  createJSONFile,
   promisifiedRimraf,
   exists,
   readFile,
   writeFile,
   writeLambda,
-  readFuncLibrary, 
-  unlink } = require('../src/util/fileUtils');
+  readFuncLibrary,
+  unlink,
+} = require('../src/util/fileUtils');
 const configTemplate = require('../templates/configTemplate');
 const createRole = require('../src/aws/createRole');
 
@@ -22,7 +23,6 @@ const updateLambda = require('../src/aws/updateLambda');
 const redeploy = require('../src/commands/redeploy');
 
 const deleteLambda = require('../src/aws/deleteLambda');
-const { doesApiExist } = require('../src/aws/doesResourceExist');
 const deleteApi = require('../src/aws/deleteApi');
 const delay = require('../src/util/delay');
 const { bamError } = require('../src/util/logger');
@@ -86,7 +86,7 @@ describe('bam redeploy lambda', () => {
 
     try {
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
-      await updateLambda(lambdaName, path);      
+      await updateLambda(lambdaName, path);
       const response = await asyncHttpsGet(url);
       responseStatus = response.statusCode;
     } catch (err) {
@@ -115,8 +115,8 @@ describe('bam redeploy lambda', () => {
     try {
       const preResponse = await asyncHttpsGet(url);
       preResponse.setEncoding('utf8');
-      preResponse.on('data', (data) => {
-        responseBody = data;
+      preResponse.on('data', (response) => {
+        responseBody = response;
         expect(responseBody).toMatch('<h1>This is a test</h1>');
       });
 
@@ -126,8 +126,8 @@ describe('bam redeploy lambda', () => {
 
       const postResponse = await asyncHttpsGet(url);
       postResponse.setEncoding('utf8');
-      postResponse.on('data', (data) => {
-        responseBody = data;
+      postResponse.on('data', (response) => {
+        responseBody = response;
         expect(responseBody).toMatch('uuid');
         expect(responseBody).toMatch('2016-12');
         expect(responseBody).toMatch('cool');
@@ -142,14 +142,14 @@ describe('bam redeploy lambda', () => {
     await writeLambda(data, path, 'test description');
     await deployApi(lambdaName, path, stageName);
 
-    let nodeModules = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`); 
+    let nodeModules = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`);
     expect(nodeModules).toBe(false);
 
     const testLambdaWithDependenciesFile = await readFile('./test/templates/testLambdaWithDependencies.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
     await redeploy(lambdaName, path);
 
-    nodeModules = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`); 
+    nodeModules = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`);
     expect(nodeModules).toBe(true);
-  });  
+  });
 });

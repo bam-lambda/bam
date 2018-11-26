@@ -99,8 +99,8 @@ module.exports = async function deployApi(lambdaName, path, stageName = 'dev') {
     const functions = await readFuncLibrary(path);
     functions[lambdaName].api = { endpoint, restApiId };
     await writeFuncLibrary(path, functions);
-    bamSpinner.stop();
     const bamAscii = await readFile(`${__dirname}/../../ascii/bam.txt`, 'utf8');
+    bamSpinner.stop();
     bamLog(bamAscii);
     bamLog('API Gateway endpoint has been deployed:');
     bamLog(endpoint);

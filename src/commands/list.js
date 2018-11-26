@@ -40,7 +40,7 @@ const getBamFunctionsList = (functionsLocalAndOnAws, library) => {
   return `${indentFurther}${functionsList}`;
 };
 
-const getAwsFunctionsList = async (functionsOnAws, functionsLocalAndOnAws) => {
+const getAwsFunctionsList = (functionsOnAws, functionsLocalAndOnAws) => {
   const functionsOnlyOnAws = functionsOnAws.filter(funcName => (
     !functionsLocalAndOnAws.includes(funcName)));
   return functionsOnlyOnAws.map(funcName => (
@@ -54,7 +54,7 @@ module.exports = async function list(path) {
   const functionsLocalAndOnAws = Object.keys(library).filter(funcName => (
     functionsOnAws.includes(funcName)
   ));
-  const awsFunctionsList = await getAwsFunctionsList(functionsOnAws, functionsLocalAndOnAws);
+  const awsFunctionsList = getAwsFunctionsList(functionsOnAws, functionsLocalAndOnAws);
   const bamFunctionsList = getBamFunctionsList(functionsLocalAndOnAws, library);
 
   logInColor(`\n${indent}Lambdas deployed from this machine using BAM:`, 'green');

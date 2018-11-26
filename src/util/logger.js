@@ -1,4 +1,6 @@
 const { log } = console;
+const delay = require('./delay');
+const { readFile } = require('./fileUtils');
 
 const {
   getStyledText,
@@ -39,9 +41,10 @@ const bamSpinner = (() => {
       intervalId = spinner();
     },
     stop() {
-      resetCursorPosition();
-      resetStyledText();
       clearInterval(intervalId);
+      resetCursorPosition();
+      // log(' ');
+      resetStyledText();
     },
   };
 })();

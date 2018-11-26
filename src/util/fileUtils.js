@@ -33,7 +33,7 @@ const writeConfig = async (path, config) => {
 const isConfigured = async (path) => {
   const config = await readConfig(path);
   return config.accountNumber && config.region && config.role;
-}
+};
 
 const readFuncLibrary = async (path) => {
   const libraryJSON = await readFile(`${path}/.bam/functions/library.json`);

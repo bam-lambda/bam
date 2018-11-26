@@ -7,8 +7,7 @@ const {
   bamWarn,
   bamError,
   bamSpinner,
-  spinnerCleanup,
-} = require('../util/fancyText');
+} = require('../util/logger');
 
 const {
   readConfig,
@@ -52,7 +51,7 @@ const addLambdaFolderToCwd = async (lambdaName, location) => {
 
 // path only needed for aws func -> remove when that is extracted
 module.exports = async function get(lambdaName, path) {
-  const spinnerInterval = bamSpinner();
+  bamSpinner.start();
   const lambdaExistsOnAws = doesLambdaExist(lambdaName);
   const lambdaNameExistsLocally = lambdaNameExistsInCwd(lambdaName);
   let warn = true;
@@ -79,15 +78,13 @@ module.exports = async function get(lambdaName, path) {
       await addLambdaFolderToCwd(lambdaName, Location);
       msg = `Folder: "${lambdaName}" is now in your current directory`;
     } catch (err) {
-      clearInterval(spinnerInterval);
-      spinnerCleanup();
+      bamSpinner.stop();
       bamError(err);
       return;
     }
   }
 
-  clearInterval(spinnerInterval);
-  spinnerCleanup();
+  bamSpinner.stop();
 
   if (warn) {
     bamWarn(msg);

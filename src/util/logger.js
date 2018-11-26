@@ -67,7 +67,7 @@ process.on('SIGINT', () => {
 process.on('uncaughtException', (e) => {
   bamError('Uncaught Exception...');
   log(e.stack);
-  process.exit(99);
+  process.exit(1);
 });
 
 module.exports = {

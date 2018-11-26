@@ -1,17 +1,17 @@
-const fs = require('fs');
-const { bamWarn } = require('../util/fancyText.js');
+const { writeFile, readFile } = require('../util/fileUtils');
+const { bamWarn, bamLog } = require('../util/logger');
+const { validateLambdaCreation } = require('../util/validateLambda');
 
-const lambdaTemplate = fs.readFileSync(`${__dirname}/../../templates/lambdaTemplate.js`, 'utf8');
+module.exports = async function create(lambdaName) {
+  const invalidLambdaMsg = await validateLambdaCreation(lambdaName);
 
-module.exports = function create(lambdaName, path) {
-  const cwd = process.cwd();
-
-  // display error to warn user if lambdaName has already been used
-  const alreadyExists = fs.existsSync(`${path}/.bam/functions/${lambdaName}`);
-  if (alreadyExists) {
-    bamWarn(`The name ${lambdaName} is already being used. Please select another.`);
+  if (invalidLambdaMsg) {
+    bamWarn(invalidLambdaMsg);
     return;
   }
 
-  fs.writeFileSync(`${cwd}/${lambdaName}.js`, lambdaTemplate);
+  const cwd = process.cwd();
+  const lambdaTemplate = await readFile(`${__dirname}/../../templates/lambdaTemplate.js`, 'utf8');
+  await writeFile(`${cwd}/${lambdaName}.js`, lambdaTemplate);
+  bamLog(`Template file "${lambdaName}.js" was created.`);
 };

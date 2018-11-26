@@ -4,7 +4,11 @@ const { createDirectory } = require('../util/fileUtils');
 const { zipper } = require('../util/zipper.js');
 const installLambdaDependencies = require('../util/installLambdaDependencies.js');
 const bamBam = require('../util/bamBam.js');
+<<<<<<< HEAD
+const { writeLambda } = require('../util/writeToLib');
+=======
 
+>>>>>>> 8b12b3e687bb90a2069e9237683c06ec98b930d3
 const {
   bamLog,
   bamWarn,
@@ -14,7 +18,6 @@ const {
 const {
   readFuncLibrary,
   writeFuncLibrary,
-  writeLambda,
   readConfig,
   copyFile,
   readFile,
@@ -56,11 +59,30 @@ module.exports = async function deployLambda(lambdaName, description, path) {
     return data;
   };
 
+<<<<<<< HEAD
   const data = await createAwsLambda();
 
   if (data) {
-    await writeLambda(data, path);
+    //await writeToLib(data);
+    await writeLambda(data, path)
+    clearInterval(spinnerInterval);
+    spinnerCleanup();
+=======
+  const writeToLib = async (data) => {
+    const name = data.FunctionName;
+    const arn = data.FunctionArn;
+
+    const functions = await readFuncLibrary(path);
+    functions[name] = { arn, description };
+    await writeFuncLibrary(path, functions);
+  };
+
+  const data = await createAwsLambda();
+
+  if (data) {
+    await writeToLib(data);
     bamSpinner.stop();
+>>>>>>> 8b12b3e687bb90a2069e9237683c06ec98b930d3
     bamLog(`Lambda "${lambdaName}" has been created`);
     return data;
   } else {

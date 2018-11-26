@@ -1,7 +1,9 @@
-const fs = require('fs');
+const { readFile } = require('../util/fileUtils');
+const { bamLog } = require('../util/logger');
 
-module.exports = function version() {
-  const packageJSONText = JSON.parse(fs.readFileSync(`${__dirname}/../../package.json`));
+module.exports = async function version() {
+  const packageJSON = await readFile(`${__dirname}/../../package.json`);
+  const packageJSONText = JSON.parse(packageJSON);
   const versionNumber = packageJSONText.version;
-  console.log(versionNumber);
+  bamLog(versionNumber);
 };

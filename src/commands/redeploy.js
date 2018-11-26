@@ -1,19 +1,15 @@
-const updateLambda = require('../aws/updateLambda.js');
-const getUserInput = require('../util/getUserInput.js');
-const { writeLambda } = require('../util/writeToLib.js');
+const updateLambda = require('../aws/updateLambda');
+const getUserInput = require('../util/getUserInput');
+const { writeLambda, promisifiedRimraf, exists, rename, readFuncLibrary } = require('../util/fileUtils');
 const deployApi = require('../aws/deployApi.js');
-const { doesLambdaExist, doesApiExist } = require('../aws/doesResourceExist.js');
-const getLambda = require('../aws/getLambda.js');
-const fs = require('fs');
-const rimraf = require('rimraf');
-const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
+const { doesLambdaExist, doesApiExist } = require('../aws/doesResourceExist');
+const getLambda = require('../aws/getLambda');
 const {
   bamLog,
   bamWarn,
   bamError,
   bamSpinner,
-  spinnerCleanup,
-} = require('../util/fancyText.js');
+} = require('../util/logger');
 
 // redeploys lambda that already exists on AWS, whether or not local directory exists
 module.exports = async function redeploy(lambdaName, path) { // currently updates code only (not role)
@@ -23,7 +19,8 @@ module.exports = async function redeploy(lambdaName, path) { // currently update
   }
   // check if lambdaName.js exists in current working dir
   const cwd = process.cwd();
-  if (!fs.existsSync(`${cwd}/${lambdaName}.js`)) {
+  const existsInCwd = await exists(`${cwd}/${lambdaName}.js`);
+  if (!existsInCwd) {
     bamError(`No such file ${lambdaName}.js in current directory ${cwd}`);
     return;
   }
@@ -37,14 +34,14 @@ module.exports = async function redeploy(lambdaName, path) { // currently update
   }
 
   // check if lambdaName in ~/.bam/functions
-  const existsLocally = fs.existsSync(`${path}/.bam/functions/${lambdaName}`);  
+  const existsLocally = await exists(`${path}/.bam/functions/${lambdaName}`);  
 
   // helper methods
 
   // overwrite local deployment package if redeploy successful
   const overwriteLocalPkg = async () => {
-    if (existsLocally) await asyncRimRaf(`${path}/.bam/functions/${lambdaName}`);
-    fs.renameSync(`${path}/.bam/functions/${lambdaName}-temp`, `${path}/.bam/functions/${lambdaName}`);
+    if (existsLocally) await promisifiedRimraf(`${path}/.bam/functions/${lambdaName}`);
+    await rename(`${path}/.bam/functions/${lambdaName}-temp`, `${path}/.bam/functions/${lambdaName}`);
   }
 
   // write to library if lambda was not locally tracked
@@ -58,7 +55,7 @@ module.exports = async function redeploy(lambdaName, path) { // currently update
   // create and integrate fresh new api gateway if lambda is not locally tracked
   // or if lambda exists locally but api doesn't exist in cloud
   const getApiId = async () => {
-    const library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));   
+    const library = await readFuncLibrary(path);   
     return library[lambdaName] && library[lambdaName].api && library[lambdaName].api.restApiId;
   };
 
@@ -66,13 +63,13 @@ module.exports = async function redeploy(lambdaName, path) { // currently update
     const apiId = await getApiId();
     const apiExists = await doesApiExist(apiId);
     if (!existsLocally || !apiId || !apiExists) {     
-      deployApi(lambdaName, path);
+      await deployApi(lambdaName, path);
     }
   };
 
   // revert to prior state (i.e. remove temp package) if AWS error
   const revertToPriorState = async () =>{
-    await asyncRimRaf(`${path}/.bam/functions/${lambdaName}-temp`);
+    await promisifiedRimraf(`${path}/.bam/functions/${lambdaName}-temp`);
   };
 
   // update lambda code
@@ -84,7 +81,7 @@ module.exports = async function redeploy(lambdaName, path) { // currently update
     await provideNewApiIfNeeded();
     bamLog(`Lambda "${lambdaName}" has been updated`);
   } else {
-    revertToPriorState();
+    await revertToPriorState();
     bamError(`Lambda "${lambdaName}" could not be updated in the cloud. Reverted to previous local state`);
   }
 };

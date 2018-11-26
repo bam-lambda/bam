@@ -1,3 +1,5 @@
+const { bamLog } = require('../util/logger');
+
 module.exports = function help() {
-  console.log('TODO: add documentation');
+  bamLog('TODO: add documentation');
 };

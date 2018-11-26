@@ -1,7 +1,7 @@
-const fs = require('fs');
-const getUserInput = require('./getUserInput.js');
+const { readConfig, writeConfig } = require('./fileUtils');
+const getUserInput = require('./getUserInput');
 
-const { doesRoleExist } = require('../aws/doesResourceExist.js');
+const { doesRoleExist } = require('../aws/doesResourceExist');
 
 const regions = ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2',
   'ca-central-1', 'eu-central-1', 'eu-west-1', 'eu-west-2',
@@ -16,7 +16,7 @@ const validNum = r => /^[0-9]{12}$/.test(r);
 const validRegion = r => regions.includes(r);
 
 module.exports = async function getUserDefaults(path) {
-  const config = JSON.parse(fs.readFileSync(`${path}/.bam/config.json`, 'utf8'));
+  const config = await readConfig(path);
   const defaultRole = config.role;
   const validRole = userRole => userRole === defaultRole || doesRoleExist(userRole);
 
@@ -44,15 +44,12 @@ module.exports = async function getUserDefaults(path) {
 
     const configPrompts = [getAccountNumber, getRegion, getRole];
 
-    const userDefaults = await getUserInput(configPrompts);
-    [config.accountNumber, config.region, config.role] = userDefaults;
+    const userDefaults = await getUserInput(configPrompts); // undefined if user quits prompts
+    if (userDefaults) [config.accountNumber, config.region, config.role] = userDefaults;
+    return userDefaults;
   };
 
-  const writeConfig = () => {
-    const configStr = JSON.stringify(config);
-    fs.writeFileSync(`${path}/.bam/config.json`, configStr);
-  };
-
-  await getUserInputs();
-  writeConfig();
+  const inputs = await getUserInputs();
+  await writeConfig(path, config);
+  return !!inputs; // inputs completely received (user did not quit early)
 };

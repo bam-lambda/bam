@@ -28,7 +28,8 @@ const doesPolicyExist = async (roleName, policyName) => {
 };
 
 const doesLambdaExist = async (lambdaName) => {
-  const lambda = new AWS.Lambda({ apiVersion, region: getRegion() });
+  const region = await getRegion();
+  const lambda = new AWS.Lambda({ apiVersion, region });
   const asyncGetFunction = promisify(lambda.getFunction.bind(lambda));
 
   try {
@@ -40,7 +41,8 @@ const doesLambdaExist = async (lambdaName) => {
 };
 
 const doesApiExist = async (restApiId) => {
-  const api = new AWS.APIGateway({ apiVersion, region: getRegion() });
+  const region = await getRegion();
+  const api = new AWS.APIGateway({ apiVersion, region });
   const asyncGetRestApi = promisify(api.getRestApi.bind(api));
 
   try {

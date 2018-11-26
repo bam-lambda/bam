@@ -1,37 +1,39 @@
-const { promisify } = require('util');
-const fs = require('fs');
 const https = require('https');
 const AWS = require('aws-sdk');
-const rimraf = require('rimraf');
 
-const createDirectory = require('../src/util/createDirectory');
+const { promisify } = require('util');
+const { 
+  createDirectory, 
+  createJSONFile, 
+  promisifiedRimraf,
+  exists,
+  readFile,
+  writeFile,
+  writeLambda,
+  readFuncLibrary, 
+  unlink } = require('../src/util/fileUtils');
 const configTemplate = require('../templates/configTemplate');
 const createRole = require('../src/aws/createRole');
-const createJSONFile = require('../src/util/createJSONFile');
 
-const deployLambda = require('../src/aws/deployLambda.js');
-const deployApi = require('../src/aws/deployApi.js');
+const deployLambda = require('../src/aws/deployLambda');
+const deployApi = require('../src/aws/deployApi');
 
-const updateLambda = require('../src/aws/updateLambda.js');
-const redeploy = require('../src/commands/redeploy.js');
+const updateLambda = require('../src/aws/updateLambda');
+const redeploy = require('../src/commands/redeploy');
 
 const deleteLambda = require('../src/aws/deleteLambda');
 const { doesApiExist } = require('../src/aws/doesResourceExist');
 const deleteApi = require('../src/aws/deleteApi');
-const delay = require('../src/util/delay.js');
+const delay = require('../src/util/delay');
+const { bamError } = require('../src/util/logger');
 
 const iam = new AWS.IAM();
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
 const stageName = 'test';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
-const asyncRimRaf = dir => new Promise(res => rimraf(dir, res));
 const path = './test';
-const config = configTemplate(roleName);
-config.accountNumber = process.env.AWS_ID;
 
-const testLambdaFile = fs.readFileSync('./test/templates/testLambda.js');
-const testLambdaWithDependenciesFile = fs.readFileSync('./test/templates/testLambdaWithDependencies.js');
 const cwd = process.cwd();
 
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
@@ -41,31 +43,36 @@ const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 describe('bam redeploy lambda', () => {
   beforeEach(async () => {
     jest.setTimeout(60000);
-    createDirectory('.bam', path);
-    createDirectory('functions', `${path}/.bam/`);
-    createJSONFile('config', `${path}/.bam`, config);
-    createJSONFile('library', `${path}/.bam/functions`, {});
+    const config = await configTemplate(roleName);
+    config.accountNumber = process.env.AWS_ID;
+    const testLambdaFile = await readFile('./test/templates/testLambda.js');
+    await createDirectory('.bam', path);
+    await createDirectory('functions', `${path}/.bam/`);
+    await createJSONFile('config', `${path}/.bam`, config);
+    await createJSONFile('library', `${path}/.bam/functions`, {});
     await createRole(roleName, path);
-    fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaFile);
+    await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
   });
 
   afterEach(async () => {
-    const library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
+    const library = await readFuncLibrary(path);
     const { restApiId } = library[lambdaName].api;
     await deleteApi(restApiId, path);
     await deleteLambda(lambdaName, path);
-    await asyncRimRaf(`${path}/.bam`);
-    fs.unlinkSync(`${cwd}/${lambdaName}.js`);
+    await promisifiedRimraf(`${path}/.bam`);
+    await unlink(`${cwd}/${lambdaName}.js`);
+
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
     await delay(30000);
   });
 
   test('Response still 200 from same url after changing lambda', async () => {
-    await deployLambda(lambdaName, 'test description', path);
+    const data = await deployLambda(lambdaName, 'test description', path);
+    await writeLambda(data, path, 'test description');
     await deployApi(lambdaName, path, stageName);
 
-    const library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
+    const library = await readFuncLibrary(path);
     const url = library[lambdaName].api.endpoint;
     let responseStatus;
 
@@ -75,13 +82,15 @@ describe('bam redeploy lambda', () => {
       })
     );
 
+    const testLambdaWithDependenciesFile = await readFile('./test/templates/testLambdaWithDependencies.js');
+
     try {
-      fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
+      await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
       await updateLambda(lambdaName, path);      
       const response = await asyncHttpsGet(url);
       responseStatus = response.statusCode;
     } catch (err) {
-      console.log(err, err.stack);
+      bamError(err);
     }
 
     expect(responseStatus).toEqual(200);
@@ -89,10 +98,11 @@ describe('bam redeploy lambda', () => {
 
 
   test('Response contains different body before and after redeployment', async () => {
-    await deployLambda(lambdaName, 'test description', path);
+    const data = await deployLambda(lambdaName, 'test description', path);
+    await writeLambda(data, path, 'test description');
     await deployApi(lambdaName, path, stageName);
 
-    const library = JSON.parse(fs.readFileSync(`${path}/.bam/functions/library.json`));
+    const library = await readFuncLibrary(path);
     const url = library[lambdaName].api.endpoint;
     let responseBody;
 
@@ -110,7 +120,8 @@ describe('bam redeploy lambda', () => {
         expect(responseBody).toMatch('<h1>This is a test</h1>');
       });
 
-      fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
+      const testLambdaWithDependenciesFile = await readFile('./test/templates/testLambdaWithDependencies.js');
+      await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
       await updateLambda(lambdaName, path);
 
       const postResponse = await asyncHttpsGet(url);
@@ -122,21 +133,23 @@ describe('bam redeploy lambda', () => {
         expect(responseBody).toMatch('cool');
       });
     } catch (err) {
-      console.log(err, err.stack);
+      bamError(err);
     }
   });
 
   test('Local node modules exist for dependencies only post redeployment', async () => {
-    await deployLambda(lambdaName, 'test description', path);
+    const data = await deployLambda(lambdaName, 'test description', path);
+    await writeLambda(data, path, 'test description');
     await deployApi(lambdaName, path, stageName);
 
-    let nodeModules = fs.existsSync(`${path}/.bam/functions/${lambdaName}/node_modules`); 
+    let nodeModules = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`); 
     expect(nodeModules).toBe(false);
 
-    fs.writeFileSync(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
+    const testLambdaWithDependenciesFile = await readFile('./test/templates/testLambdaWithDependencies.js');
+    await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
     await redeploy(lambdaName, path);
 
-    nodeModules = fs.existsSync(`${path}/.bam/functions/${lambdaName}/node_modules`); 
+    nodeModules = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`); 
     expect(nodeModules).toBe(true);
   });  
 });

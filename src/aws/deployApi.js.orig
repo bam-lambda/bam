@@ -2,10 +2,10 @@ const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const uuid = require('uuid');
 const bamBam = require('../util/bamBam.js');
+const { writeApi } = require('../util/writeToLib');
 const {
   readFuncLibrary,
   writeFuncLibrary,
-  writeApi,
   readConfig,
   readFile,
 } = require('../util/fileUtils');
@@ -39,7 +39,7 @@ module.exports = async function deployApi(lambdaName, path, stageName = 'dev') {
   bamSpinner.start();
 
   // Sequence:
-  //try {
+  try {
     // create rest api
     const restApiId = (await asyncCreateApi({ name: lambdaName })).id;
 
@@ -97,14 +97,23 @@ module.exports = async function deployApi(lambdaName, path, stageName = 'dev') {
     const endpoint = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}/${lambdaName}`;
 
     // write to library
+<<<<<<< HEAD
     await writeApi(endpoint, lambdaName, restApiId, path);
+
+    clearInterval(spinnerInterval);
+    spinnerCleanup();
+=======
+    const functions = await readFuncLibrary(path);
+    functions[lambdaName].api = { endpoint, restApiId };
+    await writeFuncLibrary(path, functions);
     const bamAscii = await readFile(`${__dirname}/../../ascii/bam.txt`, 'utf8');
     bamSpinner.stop();
+>>>>>>> 8b12b3e687bb90a2069e9237683c06ec98b930d3
     bamLog(bamAscii);
     bamLog('API Gateway endpoint has been deployed:');
     bamLog(endpoint);
-//  } catch (err) {
-//    bamSpinner.stop();
-//    bamError(err);
-//  }
+  } catch (err) {
+    bamSpinner.stop();
+    bamError(err);
+  }
 };

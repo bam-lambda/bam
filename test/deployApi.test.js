@@ -14,7 +14,6 @@ const { bamErr } = require('../src/util/logger');
 
 const {
   writeFile,
-  exists,
   unlink,
   readFile,
   readFuncLibrary,

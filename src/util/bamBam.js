@@ -23,7 +23,6 @@ module.exports = async function bamBam(asyncCallback, {
         resetCursorPosition();
         bamLog('AWS is causing a delay. This will not take more than a minute.');
       }
-
       await delay(interval);
       const deployed = await bamBam(asyncCallback, {
         params,

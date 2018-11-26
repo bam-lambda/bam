@@ -45,6 +45,21 @@ const writeFuncLibrary = async (path, functions) => {
   await writeFile(`${path}/.bam/functions/library.json`, functionsJSON);
 };
 
+const writeLambda = async (data, path, description = '') => {
+  const name = data.FunctionName;
+  const arn = data.FunctionArn;
+
+  const functions = await readFuncLibrary(path);
+  functions[name] = { arn, description };
+  await writeFuncLibrary(path, functions);
+};
+
+const writeApi = async (endpoint, lambdaName, restApiId, path) => {
+  const functions = await readFuncLibrary(path);
+  functions[lambdaName].api = { endpoint, restApiId };
+  await writeFuncLibrary(path, functions);
+};
+
 const mkdir = promisify(fs.mkdir);
 
 const createDirectory = async (name, path) => {
@@ -80,5 +95,7 @@ module.exports = {
   isConfigured,
   readFuncLibrary,
   writeFuncLibrary,
+  writeLambda,
+  writeApi,
   promisifiedRimraf,
 };

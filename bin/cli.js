@@ -2,6 +2,7 @@
 const os = require('os');
 
 const deploy = require('../src/commands/deploy.js');
+const redeploy = require('../src/commands/redeploy.js');
 const create = require('../src/commands/create.js');
 const get = require('../src/commands/get.js');
 const list = require('../src/commands/list.js');
@@ -17,6 +18,7 @@ const [,, command, lambdaName = ''] = process.argv;
 const homedir = os.homedir();
 
 (async () => {
+  // TODO: add new commands to catchSetupAndConfig
   const shouldContinue = await catchSetupAndConfig(homedir, command);
   if (!shouldContinue) return;
 
@@ -24,6 +26,8 @@ const homedir = os.homedir();
     await create(lambdaName);
   } else if (command === 'deploy') {
     await deploy(lambdaName, homedir);
+  } else if (command === 'redeploy') {
+    await redeploy(lambdaName, homedir);
   } else if (command === 'get') {
     await get(lambdaName, homedir);
   } else if (command === 'delete') {

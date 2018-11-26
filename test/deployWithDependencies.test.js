@@ -9,9 +9,10 @@ const deployLambda = require('../src/aws/deployLambda.js');
 const deployApi = require('../src/aws/deployApi.js');
 
 const deleteLambda = require('../src/aws/deleteLambda');
-const { doesApiExist } = require('../src/aws/doesResourceExist');
 const deleteApi = require('../src/aws/deleteApi');
 const delay = require('../src/util/delay.js');
+
+const { bamError } = require('../src/util/logger');
 
 const {
   writeFile,
@@ -89,7 +90,7 @@ describe('bam deploy api', () => {
           expect(responseBody).toMatch('cool');
         });
       } catch (err) {
-        console.log(err, err.stack);
+        bamError(err);
       }
     });
 

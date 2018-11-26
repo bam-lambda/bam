@@ -15,8 +15,9 @@ const unzipper = async (lambdaName) => {
   }
 };
 
-const zipper = async (lambdaName, path) => {
-  const dir = `${path}/.bam/functions/${lambdaName}`;
+const zipper = async (lambdaName, path, dirName) => {
+  if (dirName === undefined) dirName = lambdaName; // may be lambdaName-temp
+  const dir = `${path}/.bam/functions/${dirName}`;
 
   try {
     await exec(`zip -r ${lambdaName} .`, { cwd: dir });

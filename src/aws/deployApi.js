@@ -1,18 +1,17 @@
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const uuid = require('uuid');
-const bamBam = require('../util/bamBam.js');
+const bamBam = require('../util/bamBam');
 const {
-  readFuncLibrary,
-  writeFuncLibrary,
+  writeApi,
   readConfig,
   readFile,
 } = require('../util/fileUtils');
 
 const {
   bamLog,
-  bamError,
   bamSpinner,
+  bamError,
 } = require('../util/logger');
 
 const apiVersion = 'latest';
@@ -96,9 +95,7 @@ module.exports = async function deployApi(lambdaName, path, stageName = 'dev') {
     const endpoint = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}/${lambdaName}`;
 
     // write to library
-    const functions = await readFuncLibrary(path);
-    functions[lambdaName].api = { endpoint, restApiId };
-    await writeFuncLibrary(path, functions);
+    await writeApi(endpoint, lambdaName, restApiId, path);
     const bamAscii = await readFile(`${__dirname}/../../ascii/bam.txt`, 'utf8');
     bamSpinner.stop();
     bamLog(bamAscii);

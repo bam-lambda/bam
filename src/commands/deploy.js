@@ -19,13 +19,17 @@ module.exports = async function deploy(lambdaName, path) {
     defaultAnswer: '',
   };
 
-  const input = await getUserInput([question]);
-  if (input === undefined) {
-    bamWarn('Lambda deployment aborted');
-    return;
-  } else {
+  try {
+    const input = await getUserInput([question]);
+    if (input === undefined) {
+      bamWarn('Lambda deployment aborted');
+      return;
+    }
+
     const [description] = input;
     await deployLambda(lambdaName, description, path);
     await deployApi(lambdaName, path);
+  } catch (err) {
+    bamWarn(err);
   }
 };

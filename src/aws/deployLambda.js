@@ -12,8 +12,7 @@ const {
 } = require('../util/logger');
 
 const {
-  readFuncLibrary,
-  writeFuncLibrary,
+  writeLambda,
   readConfig,
   copyFile,
   readFile,
@@ -55,23 +54,15 @@ module.exports = async function deployLambda(lambdaName, description, path) {
     return data;
   };
 
-  const writeToLib = async (data) => {
-    const name = data.FunctionName;
-    const arn = data.FunctionArn;
-
-    const functions = await readFuncLibrary(path);
-    functions[name] = { arn, description };
-    await writeFuncLibrary(path, functions);
-  };
-
   const data = await createAwsLambda();
 
   if (data) {
-    await writeToLib(data);
+    await writeLambda(data, path);
     bamSpinner.stop();
     bamLog(`Lambda "${lambdaName}" has been created`);
-  } else {
-    bamSpinner.stop();
-    bamWarn(`Lambda "${lambdaName}" already exists`);
+    return data;
   }
+
+  bamSpinner.stop();
+  bamWarn(`Lambda "${lambdaName}" already exists`);
 };

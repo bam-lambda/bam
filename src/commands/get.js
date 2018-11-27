@@ -14,6 +14,7 @@ const {
   createWriteStream,
   createDirectory,
   readdir,
+  unlink,
 } = require('../util/fileUtils');
 
 const { unzipper } = require('../util/zipper');
@@ -37,12 +38,13 @@ const lambdaNameExistsInCwd = async (lambdaName) => {
 const addLambdaFolderToCwd = async (lambdaName, location) => {
   const zipFileName = `${lambdaName}.zip`;
   await createDirectory(lambdaName, cwd);
-  const file = createWriteStream(`${lambdaName}/${zipFileName}`);
+  const file = createWriteStream(`${cwd}/${lambdaName}/${zipFileName}`);
   return new Promise((res) => {
     https.get(location, async (response) => {
       response.pipe(file);
       file.on('finish', async () => {
         await unzipper(lambdaName);
+        await unlink(`${cwd}/${lambdaName}/${zipFileName}`);
         res();
       });
     });

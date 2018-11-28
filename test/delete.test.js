@@ -23,10 +23,12 @@ const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
+const cwd = process.cwd();
+const stageName = 'bamTest';
+const httpMethod = 'GET';
 
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
-const cwd = process.cwd();
 
 describe('bam delete lambda', () => {
   beforeEach(async () => {
@@ -41,7 +43,7 @@ describe('bam delete lambda', () => {
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
     await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path);
+    await deployApi(lambdaName, path, httpMethod, stageName);
   });
 
   afterEach(async () => {

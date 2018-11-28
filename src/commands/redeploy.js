@@ -1,4 +1,16 @@
+const { promisify } = require('util');
+const AWS = require('aws-sdk');
+
 const updateLambda = require('../aws/updateLambda');
+const deployApi = require('../aws/deployApi.js');
+const { doesLambdaExist, doesApiExist } = require('../aws/doesResourceExist');
+const getLambda = require('../aws/getLambda');
+const { validateApiMethods } = require('../util/validations');
+const getRegion = require('../util/getRegion');
+const createApiGatewayIntegration = require('../aws/createApiGatewayIntegration');
+
+const apiVersion = 'latest';
+
 const {
   writeLambda,
   promisifiedRimraf,
@@ -6,17 +18,25 @@ const {
   rename,
   readFuncLibrary,
 } = require('../util/fileUtils');
-const deployApi = require('../aws/deployApi.js');
-const { doesLambdaExist, doesApiExist } = require('../aws/doesResourceExist');
-const getLambda = require('../aws/getLambda');
+
 const {
   bamLog,
   bamWarn,
   bamError,
 } = require('../util/logger');
 
+const stageName = 'bam';
+
 // redeploys lambda that already exists on AWS, whether or not local directory exists
-module.exports = async function redeploy(lambdaName, path) { // currently updates code only (not role)
+module.exports = async function redeploy(lambdaName, path, options) { // currently updates code only (not role)
+  const httpMethods = options.methods ? options.methods.map(method => method.toUpperCase()) : ['GET'];
+  const invalidApiMsg = validateApiMethods(httpMethods);
+
+  if (invalidApiMsg) {
+    bamWarn(invalidApiMsg);
+    return;
+  }
+
   if (!lambdaName) {
     bamError('bam redeploy [lambdaName]: lambdaName must be the name of a .js file in the current directory');
     return;
@@ -41,6 +61,10 @@ module.exports = async function redeploy(lambdaName, path) { // currently update
   const existsLocally = await exists(`${path}/.bam/functions/${lambdaName}`);
 
   // helper methods
+  const region = await getRegion();
+  const api = new AWS.APIGateway({ apiVersion, region });
+  const asyncCreateDeployment = promisify(api.createDeployment.bind(api));
+  const asyncGetResources = promisify(api.getResources.bind(api));
 
   // overwrite local deployment package if redeploy successful
   const overwriteLocalPkg = async () => {
@@ -63,11 +87,22 @@ module.exports = async function redeploy(lambdaName, path) { // currently update
     return library[lambdaName] && library[lambdaName].api && library[lambdaName].api.restApiId;
   };
 
-  const provideNewApiIfNeeded = async () => {
-    const apiId = await getApiId();
-    const apiExists = await doesApiExist(apiId);
-    if (!existsLocally || !apiId || !apiExists) {
-      await deployApi(lambdaName, path);
+  const provideNewApiOrIntegrations = async () => {
+    const restApiId = await getApiId();
+    const apiExists = await doesApiExist(restApiId);
+
+    if (!existsLocally || !restApiId || !apiExists) {
+      await deployApi(lambdaName, path, httpMethods, stageName);
+    } else {
+      const resources = (await asyncGetResources({ restApiId })).items;
+      const resourceId = resources.find(resource => resource.pathPart === lambdaName).id;
+
+      for (let i = 0; i < httpMethods.length; i += 1) {
+        const httpMethod = httpMethods[i];
+        await createApiGatewayIntegration(httpMethod, resourceId, restApiId, lambdaName, path);
+      }
+
+      await asyncCreateDeployment({ restApiId, stageName });
     }
   };
 
@@ -82,7 +117,7 @@ module.exports = async function redeploy(lambdaName, path) { // currently update
   if (data) {
     await overwriteLocalPkg();
     await syncLocalToCloudLambda(); // lambda should be written to lib by now
-    await provideNewApiIfNeeded();
+    await provideNewApiOrIntegrations();
     bamLog(`Lambda "${lambdaName}" has been updated`);
   } else {
     await revertToPriorState();

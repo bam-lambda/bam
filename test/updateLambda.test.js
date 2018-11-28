@@ -30,11 +30,11 @@ const { bamError } = require('../src/util/logger');
 const iam = new AWS.IAM();
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
-const stageName = 'test';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
-
 const cwd = process.cwd();
+const stageName = 'bamTest';
+const httpMethod = 'GET';
 
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
@@ -67,10 +67,10 @@ describe('bam redeploy lambda', () => {
     await delay(30000);
   });
 
-  test('Response still 200 from same url after changing lambda', async () => {
+  test.only('Response still 200 from same url after changing lambda', async () => {
     const data = await deployLambda(lambdaName, 'test description', path);
     await writeLambda(data, path, 'test description');
-    await deployApi(lambdaName, path, stageName);
+    await deployApi(lambdaName, path, httpMethod, stageName);
 
     const library = await readFuncLibrary(path);
     const url = library[lambdaName].api.endpoint;
@@ -100,7 +100,7 @@ describe('bam redeploy lambda', () => {
   test('Response contains different body before and after redeployment', async () => {
     const data = await deployLambda(lambdaName, 'test description', path);
     await writeLambda(data, path, 'test description');
-    await deployApi(lambdaName, path, stageName);
+    await deployApi(lambdaName, path, httpMethod, stageName);
 
     const library = await readFuncLibrary(path);
     const url = library[lambdaName].api.endpoint;
@@ -140,7 +140,7 @@ describe('bam redeploy lambda', () => {
   test('Local node modules exist for dependencies only post redeployment', async () => {
     const data = await deployLambda(lambdaName, 'test description', path);
     await writeLambda(data, path, 'test description');
-    await deployApi(lambdaName, path, stageName);
+    await deployApi(lambdaName, path, httpMethod, stageName);
 
     let nodeModules = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`);
     expect(nodeModules).toBe(false);

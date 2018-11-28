@@ -2,13 +2,23 @@ const deployLambda = require('../aws/deployLambda');
 const deployApi = require('../aws/deployApi');
 const getUserInput = require('../util/getUserInput');
 const { bamWarn } = require('../util/logger');
-const { validateLambdaDeployment } = require('../util/validateLambda');
+const { validateLambdaDeployment, validateApiMethods } = require('../util/validations');
 
-module.exports = async function deploy(lambdaName, path) {
+const stage = 'bam';
+
+module.exports = async function deploy(lambdaName, path, options) {
   const invalidLambdaMsg = await validateLambdaDeployment(lambdaName);
 
   if (invalidLambdaMsg) {
     bamWarn(invalidLambdaMsg);
+    return;
+  }
+
+  const httpMethods = options.methods ? options.methods.map(method => method.toUpperCase()) : ['GET'];
+  const invalidApiMsg = validateApiMethods(httpMethods);
+
+  if (invalidApiMsg) {
+    bamWarn(invalidApiMsg);
     return;
   }
 
@@ -28,7 +38,7 @@ module.exports = async function deploy(lambdaName, path) {
 
     const [description] = input;
     await deployLambda(lambdaName, description, path);
-    await deployApi(lambdaName, path);
+    await deployApi(lambdaName, path, httpMethods, stage);
   } catch (err) {
     bamWarn(err);
   }

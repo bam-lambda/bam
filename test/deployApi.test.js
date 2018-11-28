@@ -10,7 +10,7 @@ const deleteLambda = require('../src/aws/deleteLambda');
 const { doesApiExist } = require('../src/aws/doesResourceExist');
 const deleteApi = require('../src/aws/deleteApi');
 const delay = require('../src/util/delay');
-const { bamErr } = require('../src/util/logger');
+const { bamError } = require('../src/util/logger');
 
 const {
   writeFile,
@@ -26,14 +26,29 @@ const {
 const iam = new AWS.IAM();
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
-const stageName = 'test';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
 const cwd = process.cwd();
+const stageName = 'bamTest';
+const httpMethod = 'GET';
 
 const asyncHttpsGet = endpoint => (
   new Promise((resolve) => {
     https.get(endpoint, resolve);
+  })
+);
+
+const asyncHttpsPost = opts => (
+  new Promise((resolve, reject) => {
+    const request = https.request(opts, (response) => {
+      resolve(response);
+    });
+
+    request.on('error,', (err) => {
+      reject(err);
+    });
+
+    request.end();
   })
 );
 
@@ -42,6 +57,7 @@ const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 
 describe('bam deploy api', () => {
   beforeEach(async () => {
+console.log('before...')
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     const config = await configTemplate(roleName);
     config.accountNumber = process.env.AWS_ID;
@@ -52,6 +68,7 @@ describe('bam deploy api', () => {
     await createJSONFile('library', `${path}/.bam/functions`, {});
     await createRole(roleName, path);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
+console.log('before done...')
   });
 
   afterEach(async () => {
@@ -68,7 +85,7 @@ describe('bam deploy api', () => {
 
   test('Response is 200 when hitting endpoint from library.json', async () => {
     await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, stageName);
+    await deployApi(lambdaName, path, httpMethod, stageName);
 
     const library = await readFuncLibrary(path);
     const url = library[lambdaName].api.endpoint;
@@ -86,7 +103,7 @@ describe('bam deploy api', () => {
 
   test('Api metadata exists within ./test/.bam/functions/library.json', async () => {
     await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, stageName);
+    await deployApi(lambdaName, path, httpMethod, stageName);
 
     const library = await readFuncLibrary(path);
     const { api } = library[lambdaName];
@@ -95,7 +112,7 @@ describe('bam deploy api', () => {
 
   test('Api endpoint exists on AWS', async () => {
     await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, stageName);
+    await deployApi(lambdaName, path, httpMethod, stageName);
 
     const library = await readFuncLibrary(path);
     const { restApiId } = library[lambdaName].api;
@@ -107,7 +124,7 @@ describe('bam deploy api', () => {
     const testLambdaWithQueryParams = await readFile(`${path}/templates/testLambdaWithQueryParams.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithQueryParams);
     await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, stageName);
+    await deployApi(lambdaName, path, httpMethod, stageName);
 
     const library = await readFuncLibrary(path);
     const url = `${library[lambdaName].api.endpoint}?name=John`;
@@ -123,5 +140,30 @@ describe('bam deploy api', () => {
     } catch (err) {
       bamErr(err);
     }
+  });
+
+  test('POST request returns 201 status code', async () => {
+    const testLambdaForPostMethod = await readFile(`${path}/templates/testLambdaForPostMethod.js`);
+    await writeFile(`${cwd}/${lambdaName}.js`, testLambdaForPostMethod);
+    await deployLambda(lambdaName, 'test description', path);
+    await deployApi(lambdaName, path, 'POST', stageName);
+
+    const library = await readFuncLibrary(path);
+    const url = library[lambdaName].api.endpoint;
+    const urlParts = url.split('//')[1].split('/');
+    const options = {
+      hostname: urlParts[0],
+      path: `/${urlParts.slice(1).join('/')}`,
+      method: 'POST',
+    };
+
+    let response;
+    try {
+      response = await asyncHttpsPost(options);
+    } catch (err) {
+      bamError(err);
+    }
+
+    expect(response.statusCode).toBe(201);
   });
 });

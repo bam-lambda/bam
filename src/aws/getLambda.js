@@ -5,7 +5,8 @@ const getRegion = require('../util/getRegion');
 const apiVersion = 'latest';
 
 module.exports = async function getLambda(lambdaName) {
-  const lambda = new AWS.Lambda({ apiVersion, region: await getRegion() });
+  const region = await getRegion();
+  const lambda = new AWS.Lambda({ apiVersion, region });
   const asyncGetFunction = promisify(lambda.getFunction.bind(lambda));
 
   try {

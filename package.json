@@ -37,7 +37,6 @@
   },
   "dependencies": {
     "aws-sdk": "^2.348.0",
-    "node-stream-zip": "^1.7.0",
     "rimraf": "^2.6.2",
     "uuid": "^3.3.2"
   },

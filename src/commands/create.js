@@ -1,6 +1,6 @@
 const { writeFile, readFile } = require('../util/fileUtils');
 const { bamWarn, bamLog } = require('../util/logger');
-const { validateLambdaCreation } = require('../util/validateLambda');
+const { validateLambdaCreation } = require('../util/validations');
 
 module.exports = async function create(lambdaName) {
   const invalidLambdaMsg = await validateLambdaCreation(lambdaName);

@@ -3,6 +3,8 @@ const { promisify } = require('util');
 
 const getRegion = require('../util/getRegion');
 
+const bamBam = require('../util/bamBam');
+
 module.exports = async function deleteLambda(lambdaName) {
   const region = await getRegion();
   const apiVersion = 'latest';
@@ -13,4 +15,5 @@ module.exports = async function deleteLambda(lambdaName) {
   }));
 
   await asyncLambdaDeleteFunction();
+  //await bamBam(asyncLambdaDeleteFunction, { retryError: 'TooManyRequestsException' });
 };

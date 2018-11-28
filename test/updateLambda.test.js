@@ -153,13 +153,13 @@ describe('bam redeploy lambda', () => {
 
     const testLambdaWithDependenciesFile = await readFile('./test/templates/testLambdaWithDependencies.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
-    await redeploy(lambdaName, path);
+    await redeploy(lambdaName, path, {});
 
     nodeModules = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`);
     expect(nodeModules).toBe(true);
   });
 
-  test.skip('POST and PUT requests return 201 status code', async () => {
+  test.only('POST and PUT requests return 201 status code', async () => {
     const testLambdaForPostMethod = await readFile(`${path}/templates/testLambdaForPostMethod.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaForPostMethod);
     await deployLambda(lambdaName, 'test description', path);

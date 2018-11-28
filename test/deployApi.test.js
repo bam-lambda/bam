@@ -30,7 +30,7 @@ const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecut
 const path = './test';
 const cwd = process.cwd();
 const stageName = 'bamTest';
-const httpMethod = 'GET';
+const httpMethods = ['GET'];
 
 const asyncHttpsGet = endpoint => (
   new Promise((resolve) => {
@@ -57,7 +57,6 @@ const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 
 describe('bam deploy api', () => {
   beforeEach(async () => {
-console.log('before...')
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     const config = await configTemplate(roleName);
     config.accountNumber = process.env.AWS_ID;
@@ -68,7 +67,6 @@ console.log('before...')
     await createJSONFile('library', `${path}/.bam/functions`, {});
     await createRole(roleName, path);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
-console.log('before done...')
   });
 
   afterEach(async () => {
@@ -85,7 +83,7 @@ console.log('before done...')
 
   test('Response is 200 when hitting endpoint from library.json', async () => {
     await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, httpMethod, stageName);
+    await deployApi(lambdaName, path, httpMethods, stageName);
 
     const library = await readFuncLibrary(path);
     const url = library[lambdaName].api.endpoint;
@@ -95,7 +93,7 @@ console.log('before done...')
       const response = await asyncHttpsGet(url);
       responseStatus = response.statusCode;
     } catch (err) {
-      bamErr(err);
+      bamError(err);
     }
 
     expect(responseStatus).toEqual(200);
@@ -103,7 +101,7 @@ console.log('before done...')
 
   test('Api metadata exists within ./test/.bam/functions/library.json', async () => {
     await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, httpMethod, stageName);
+    await deployApi(lambdaName, path, httpMethods, stageName);
 
     const library = await readFuncLibrary(path);
     const { api } = library[lambdaName];
@@ -112,7 +110,7 @@ console.log('before done...')
 
   test('Api endpoint exists on AWS', async () => {
     await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, httpMethod, stageName);
+    await deployApi(lambdaName, path, httpMethods, stageName);
 
     const library = await readFuncLibrary(path);
     const { restApiId } = library[lambdaName].api;
@@ -124,7 +122,7 @@ console.log('before done...')
     const testLambdaWithQueryParams = await readFile(`${path}/templates/testLambdaWithQueryParams.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithQueryParams);
     await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, httpMethod, stageName);
+    await deployApi(lambdaName, path, httpMethods, stageName);
 
     const library = await readFuncLibrary(path);
     const url = `${library[lambdaName].api.endpoint}?name=John`;
@@ -138,7 +136,7 @@ console.log('before done...')
         expect(responseBody).toMatch('John');
       });
     } catch (err) {
-      bamErr(err);
+      bamError(err);
     }
   });
 
@@ -146,7 +144,7 @@ console.log('before done...')
     const testLambdaForPostMethod = await readFile(`${path}/templates/testLambdaForPostMethod.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaForPostMethod);
     await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, 'POST', stageName);
+    await deployApi(lambdaName, path, ['POST'], stageName);
 
     const library = await readFuncLibrary(path);
     const url = library[lambdaName].api.endpoint;

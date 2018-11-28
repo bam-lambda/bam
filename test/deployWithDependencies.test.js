@@ -33,7 +33,7 @@ const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecut
 const path = './test';
 const cwd = process.cwd();
 const stageName = 'bamTest';
-const httpMethod = 'GET';
+const httpMethods = ['GET'];
 
 const asyncHttpsGet = endpoint => (
   new Promise((resolve) => {
@@ -73,7 +73,7 @@ describe('bam deploy api', () => {
       const testLambdaWithDependencies = await readFile(`${path}/templates/testLambdaWithDependencies.js`);
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependencies);
       await deployLambda(lambdaName, 'test description', path);
-      await deployApi(lambdaName, path, httpMethod, stageName);
+      await deployApi(lambdaName, path, httpMethods, stageName);
     });
 
     test('Response contains output from dependencies in body', async () => {
@@ -125,7 +125,7 @@ describe('bam deploy api', () => {
       const testLambdaWithIncorrectDependencies = await readFile('./test/templates/testLambdaWithIncorrectDependencies.js');
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithIncorrectDependencies);
       await deployLambda(lambdaName, 'test description', path);
-      await deployApi(lambdaName, path, httpMethod, stageName);
+      await deployApi(lambdaName, path, httpMethods, stageName);
     });
 
     test('node modules directory does not contain modules listed after exports.handler', async () => {

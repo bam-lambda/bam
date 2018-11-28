@@ -1,4 +1,4 @@
-exports.handler = async () => (
+exports.handler = async (event, context) => (
   {
     statusCode: 201,
   }

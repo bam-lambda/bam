@@ -34,11 +34,30 @@ const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecut
 const path = './test';
 const cwd = process.cwd();
 const stageName = 'bamTest';
-const httpMethod = 'GET';
+const httpMethods = ['GET'];
 
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 
+const asyncHttpsGet = endpoint => (
+  new Promise((resolve) => {
+    https.get(endpoint, resolve);
+  })
+);
+
+const asyncHttpsRequest = opts => (
+  new Promise((resolve, reject) => {
+    const request = https.request(opts, (response) => {
+      resolve(response);
+    });
+
+    request.on('error,', (err) => {
+      reject(err);
+    });
+
+    request.end();
+  })
+);
 
 describe('bam redeploy lambda', () => {
   beforeEach(async () => {
@@ -64,23 +83,17 @@ describe('bam redeploy lambda', () => {
 
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
-    await delay(30000);
+    delay(30000);
   });
 
-  test.only('Response still 200 from same url after changing lambda', async () => {
+  test('Response still 200 from same url after changing lambda', async () => {
     const data = await deployLambda(lambdaName, 'test description', path);
     await writeLambda(data, path, 'test description');
-    await deployApi(lambdaName, path, httpMethod, stageName);
+    await deployApi(lambdaName, path, httpMethods, stageName);
 
     const library = await readFuncLibrary(path);
     const url = library[lambdaName].api.endpoint;
     let responseStatus;
-
-    const asyncHttpsGet = endpoint => (
-      new Promise((resolve) => {
-        https.get(endpoint, resolve);
-      })
-    );
 
     const testLambdaWithDependenciesFile = await readFile('./test/templates/testLambdaWithDependencies.js');
 
@@ -96,21 +109,14 @@ describe('bam redeploy lambda', () => {
     expect(responseStatus).toEqual(200);
   });
 
-
   test('Response contains different body before and after redeployment', async () => {
     const data = await deployLambda(lambdaName, 'test description', path);
     await writeLambda(data, path, 'test description');
-    await deployApi(lambdaName, path, httpMethod, stageName);
+    await deployApi(lambdaName, path, httpMethods, stageName);
 
     const library = await readFuncLibrary(path);
     const url = library[lambdaName].api.endpoint;
     let responseBody;
-
-    const asyncHttpsGet = endpoint => (
-      new Promise((resolve) => {
-        https.get(endpoint, resolve);
-      })
-    );
 
     try {
       const preResponse = await asyncHttpsGet(url);
@@ -140,7 +146,7 @@ describe('bam redeploy lambda', () => {
   test('Local node modules exist for dependencies only post redeployment', async () => {
     const data = await deployLambda(lambdaName, 'test description', path);
     await writeLambda(data, path, 'test description');
-    await deployApi(lambdaName, path, httpMethod, stageName);
+    await deployApi(lambdaName, path, httpMethods, stageName);
 
     let nodeModules = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`);
     expect(nodeModules).toBe(false);
@@ -151,5 +157,40 @@ describe('bam redeploy lambda', () => {
 
     nodeModules = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`);
     expect(nodeModules).toBe(true);
+  });
+
+  test.skip('POST and PUT requests return 201 status code', async () => {
+    const testLambdaForPostMethod = await readFile(`${path}/templates/testLambdaForPostMethod.js`);
+    await writeFile(`${cwd}/${lambdaName}.js`, testLambdaForPostMethod);
+    await deployLambda(lambdaName, 'test description', path);
+    await deployApi(lambdaName, path, httpMethods, stageName);
+    await redeploy(lambdaName, path, { methods: ['POST', 'PUT'] });
+
+    const library = await readFuncLibrary(path);
+    const url = library[lambdaName].api.endpoint;
+    const urlParts = url.split('//')[1].split('/');
+    const postOptions = {
+      hostname: urlParts[0],
+      path: `/${urlParts.slice(1).join('/')}`,
+      method: 'POST',
+    };
+
+    const putOptions = {
+      hostname: urlParts[0],
+      path: `/${urlParts.slice(1).join('/')}`,
+      method: 'PUT',
+    };
+
+    let responsePost;
+    let responsePut;
+    try {
+      responsePost = await asyncHttpsRequest(postOptions);
+      responsePut = await asyncHttpsRequest(putOptions);
+    } catch (err) {
+      bamError(err);
+    }
+
+    expect(responsePost.statusCode).toBe(201);
+    expect(responsePut.statusCode).toBe(201);
   });
 });

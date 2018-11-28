@@ -3,6 +3,8 @@ const { promisify } = require('util');
 
 const createApiGatewayIntegration = require('./createApiGatewayIntegration');
 
+const bamBam = require('../util/bamBam');
+
 const {
   writeApi,
   readConfig,
@@ -44,11 +46,12 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
 
     for (let i = 0; i < httpMethods.length; i += 1) {
       const httpMethod = httpMethods[i];
-      await createApiGatewayIntegration(httpMethod, resourceId, restApiId, lambdaName, path);
+      const params = [httpMethod, resourceId, restApiId, lambdaName, path];
+      await bamBam(createApiGatewayIntegration, { params, retryError: 'TooManyRequestsException' });
     }
 
     // create deployment
-    await asyncCreateDeployment({ restApiId, stageName });
+    await bamBam(asyncCreateDeployment, { params: [{ restApiId, stageName }], retryError: 'TooManyRequestsException' });
 
     // api endpoint
     const endpoint = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}/${lambdaName}`;

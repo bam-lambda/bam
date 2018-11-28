@@ -29,7 +29,7 @@ const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
 const cwd = process.cwd();
-const stageName = 'bamTest';
+const stageName = 'bam';
 const httpMethods = ['GET'];
 
 const asyncHttpsGet = endpoint => (

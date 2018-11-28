@@ -21,6 +21,7 @@ const deployApi = require('../src/aws/deployApi');
 
 const updateLambda = require('../src/aws/updateLambda');
 const redeploy = require('../src/commands/redeploy');
+const destroy = require('../src/commands/destroy');
 
 const deleteLambda = require('../src/aws/deleteLambda');
 const deleteApi = require('../src/aws/deleteApi');
@@ -33,7 +34,7 @@ const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
 const cwd = process.cwd();
-const stageName = 'bamTest';
+const stageName = 'bam';
 const httpMethods = ['GET'];
 
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
@@ -60,7 +61,7 @@ const asyncHttpsRequest = opts => (
 );
 
 describe('bam redeploy lambda', () => {
-  beforeEach(async () => {
+  beforeEach(async () => {    
     jest.setTimeout(60000);
     const config = await configTemplate(roleName);
     config.accountNumber = process.env.AWS_ID;
@@ -73,17 +74,11 @@ describe('bam redeploy lambda', () => {
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
   });
 
-  afterEach(async () => {
-    const library = await readFuncLibrary(path);
-    const { restApiId } = library[lambdaName].api;
-    await deleteApi(restApiId, path);
-    await deleteLambda(lambdaName, path);
+  afterEach(async () => {  
+    await destroy(lambdaName, path);
     await promisifiedRimraf(`${path}/.bam`);
-    await unlink(`${cwd}/${lambdaName}.js`);
-
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
-    delay(30000);
   });
 
   test('Response still 200 from same url after changing lambda', async () => {
@@ -99,7 +94,7 @@ describe('bam redeploy lambda', () => {
 
     try {
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
-      await updateLambda(lambdaName, path);
+      await redeploy(lambdaName, path, {});
       const response = await asyncHttpsGet(url);
       responseStatus = response.statusCode;
     } catch (err) {
@@ -128,7 +123,7 @@ describe('bam redeploy lambda', () => {
 
       const testLambdaWithDependenciesFile = await readFile('./test/templates/testLambdaWithDependencies.js');
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
-      await updateLambda(lambdaName, path);
+      await redeploy(lambdaName, path, {});
 
       const postResponse = await asyncHttpsGet(url);
       postResponse.setEncoding('utf8');
@@ -159,7 +154,7 @@ describe('bam redeploy lambda', () => {
     expect(nodeModules).toBe(true);
   });
 
-  test.only('POST and PUT requests return 201 status code', async () => {
+  test('POST and PUT requests return 201 status code', async () => {
     const testLambdaForPostMethod = await readFile(`${path}/templates/testLambdaForPostMethod.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaForPostMethod);
     await deployLambda(lambdaName, 'test description', path);

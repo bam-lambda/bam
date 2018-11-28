@@ -9,6 +9,8 @@ const { validateApiMethods } = require('../util/validations');
 const getRegion = require('../util/getRegion');
 const createApiGatewayIntegration = require('../aws/createApiGatewayIntegration');
 
+const bamBam = require('../util/bamBam');
+
 const apiVersion = 'latest';
 
 const {
@@ -95,14 +97,17 @@ module.exports = async function redeploy(lambdaName, path, options) { // current
       await deployApi(lambdaName, path, httpMethods, stageName);
     } else {
       const resources = (await asyncGetResources({ restApiId })).items;
-      const resourceId = resources.find(resource => resource.pathPart === lambdaName).id;
-
+      const resource = resources.find(resource => resource.pathPart === lambdaName);
+      const resourceId = resource.id;
+      const resourceMethods = Object.keys(resource.resourceMethods);
       for (let i = 0; i < httpMethods.length; i += 1) {
         const httpMethod = httpMethods[i];
-        await createApiGatewayIntegration(httpMethod, resourceId, restApiId, lambdaName, path);
+        if (!resourceMethods.includes(httpMethod)) {
+          const params = [httpMethod, resourceId, restApiId, lambdaName, path];
+          await bamBam(createApiGatewayIntegration, { params, retryError: 'TooManyRequestsException' });
+        }
       }
-
-      await asyncCreateDeployment({ restApiId, stageName });
+      await bamBam(asyncCreateDeployment, { params: [{ restApiId, stageName }], retryError: 'TooManyRequestsException' });
     }
   };
 

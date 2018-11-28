@@ -24,7 +24,7 @@ const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
 const cwd = process.cwd();
-const stageName = 'bamTest';
+const stageName = 'bam';
 const httpMethods = ['GET'];
 
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
@@ -32,7 +32,7 @@ const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 
 describe('bam delete lambda', () => {
   beforeEach(async () => {
-    jest.setTimeout(60000);
+    jest.setTimeout(100000);
     await createDirectory('.bam', path);
     await createDirectory('functions', `${path}/.bam/`);
     const config = await configTemplate(roleName);

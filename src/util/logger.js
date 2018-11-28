@@ -1,4 +1,5 @@
 const { log } = console;
+const { stdout } = process;
 
 const {
   getStyledText,
@@ -6,9 +7,11 @@ const {
   warningColor,
   errorColor,
   bamTextStyles,
+  hideCursor,
+  resetCursor,
 } = require('./fancyText');
 
-const resetCursorPosition = () => process.stdout.cursorTo(0);
+const resetCursorPosition = () => stdout.cursorTo(0);
 
 const padding = (level, char = ' ') => char.repeat(level);
 const indent = padding(2);
@@ -21,29 +24,37 @@ const bamWarnText = text => getStyledText(text, warningColor);
 const bamErrorText = text => getStyledText(text, errorColor);
 
 const logInColor = (text, color) => log(getStyledText(text, color));
-const bamWrite = text => process.stdout.write(bamText(text));
+const bamWrite = text => stdout.write(bamText(text));
 const bamLog = text => log(bamText(text));
 const bamWarn = text => log(bamWarnText(text));
 const bamError = text => log(bamErrorText(text));
 
+const hideCursorAndWriteBamText = (text) => {
+  const bamifiedText = bamText(text);
+  stdout.write(`${resetCursor}${bamifiedText}${hideCursor}`);
+};
+
 const bamSpinner = (() => {
   let intervalId = null;
+
   const spinner = () => {
     const spinnerChars = ['|', '/', '-', '\\'];
     let i = 0;
 
-    return setInterval(() => {
+    intervalId = setInterval(() => {
+      const spinnerChar = spinnerChars[i % 4];
       resetCursorPosition();
-      const spinnerChar = getStyledText(spinnerChars[i % 4], 'showCursor', 'hideCursor');
-      bamWrite(spinnerChar);
+      hideCursorAndWriteBamText(spinnerChar);
       i += 1;
     }, 200);
+
+    resetStyledText();
   };
 
   return {
     start() {
       this.stop();
-      intervalId = spinner();
+      spinner();
     },
     stop() {
       clearInterval(intervalId);
@@ -92,3 +103,13 @@ module.exports = {
   indentFurthest,
   vertPadding,
 };
+
+
+
+(async () => {
+  const delay  = require('./delay');
+  bamSpinner.start();
+  await delay(3000);
+  bamSpinner.stop();
+  console.log('hi');
+})();

@@ -9,16 +9,17 @@ const textStyles = {
   red: `${escapeChar}[31m`,
 };
 
+const { reset, showCursor, hideCursor } = textStyles;
+
 const warningColor = 'yellow';
 const errorColor = 'red';
 const bamTextStyles = ['green', 'bright'];
 
-const showCursor = () => process.stdout.write(textStyles.showCursor);
-const resetColor = () => process.stdout.write(textStyles.reset);
+const resetCursor = `${showCursor}${reset}`;
+const writeResetCursor = () => process.stdout.write(resetCursor);
 
 const resetStyledText = () => {
-  showCursor();
-  resetColor();
+  writeResetCursor();
 };
 
 const getStyledText = (text, ...styles) => {
@@ -32,4 +33,6 @@ module.exports = {
   warningColor,
   errorColor,
   bamTextStyles,
+  hideCursor,
+  resetCursor,
 };

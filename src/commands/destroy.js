@@ -2,10 +2,10 @@ const deleteApi = require('../aws/deleteApi.js');
 const bamBam = require('../util/bamBam');
 const deleteAwsLambda = require('../aws/deleteLambda');
 
+const bamSpinner = require('../util/spinner');
 const {
   bamLog,
   bamError,
-  bamSpinner,
 } = require('../util/logger');
 
 const {

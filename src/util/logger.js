@@ -3,7 +3,6 @@ const { stdout } = process;
 
 const {
   getStyledText,
-  resetStyledText,
   warningColor,
   errorColor,
   bamTextStyles,
@@ -34,60 +33,6 @@ const hideCursorAndWriteBamText = (text) => {
   stdout.write(`${resetCursor}${bamifiedText}${hideCursor}`);
 };
 
-const bamSpinner = (() => {
-  let intervalId = null;
-
-  const spinner = () => {
-    const spinnerChars = ['|', '/', '-', '\\'];
-    let i = 0;
-
-    intervalId = setInterval(() => {
-      const spinnerChar = spinnerChars[i % 4];
-      resetCursorPosition();
-      hideCursorAndWriteBamText(spinnerChar);
-      i += 1;
-    }, 200);
-
-    resetStyledText();
-  };
-
-  return {
-    start() {
-      this.stop();
-      spinner();
-    },
-    stop() {
-      clearInterval(intervalId);
-      resetCursorPosition();
-      resetStyledText();
-    },
-  };
-})();
-
-// attach user callback to the process event emitter
-// if no callback, it will still exit gracefully on Ctrl-C
-process.on('cleanup', () => {
-  bamSpinner.stop();
-});
-
-// do app specific cleaning before exiting
-process.on('exit', () => {
-  process.emit('cleanup');
-});
-
-// catch ctrl+c event and exit normally
-process.on('SIGINT', () => {
-  log('Ctrl-C...');
-  process.exit(2);
-});
-
-// catch uncaught exceptions, trace, then exit normally
-process.on('uncaughtException', (e) => {
-  bamError('Uncaught Exception...');
-  log(e.stack);
-  process.exit(1);
-});
-
 module.exports = {
   log,
   logInColor,
@@ -96,20 +41,10 @@ module.exports = {
   bamWarn,
   bamText,
   bamError,
-  bamSpinner,
+  hideCursorAndWriteBamText,
   resetCursorPosition,
   indent,
   indentFurther,
   indentFurthest,
   vertPadding,
 };
-
-
-
-(async () => {
-  const delay  = require('./delay');
-  bamSpinner.start();
-  await delay(3000);
-  bamSpinner.stop();
-  console.log('hi');
-})();

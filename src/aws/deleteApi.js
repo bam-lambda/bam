@@ -1,7 +1,8 @@
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const getRegion = require('../util/getRegion');
-const { bamLog, bamSpinner } = require('../util/logger');
+const bamSpinner = require('../util/spinner');
+const { bamLog } = require('../util/logger');
 const { readFuncLibrary, writeFuncLibrary } = require('../util/fileUtils');
 
 module.exports = async function deleteApi(restApiId, path) {

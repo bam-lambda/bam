@@ -9,9 +9,7 @@ const {
 const { zipper } = require('../util/zipper');
 const installLambdaDependencies = require('../util/installLambdaDependencies');
 const bamBam = require('../util/bamBam');
-const {
-  bamSpinner,
-} = require('../util/logger');
+const bamSpinner = require('../util/spinner');
 
 const apiVersion = 'latest';
 

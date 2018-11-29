@@ -4,11 +4,11 @@ const { createDirectory } = require('../util/fileUtils');
 const { zipper } = require('../util/zipper.js');
 const installLambdaDependencies = require('../util/installLambdaDependencies.js');
 const bamBam = require('../util/bamBam.js');
+const bamSpinner = require('../util/spinner');
 
 const {
   bamLog,
   bamWarn,
-  bamSpinner,
 } = require('../util/logger');
 
 const {

@@ -2,9 +2,9 @@ const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const { readConfig, readFile } = require('../util/fileUtils');
 const { doesRoleExist, doesPolicyExist, isPolicyAttached } = require('./doesResourceExist');
+const bamSpinner = require('../util/spinner');
 
 const {
-  bamSpinner,
   bamLog,
   bamError,
 } = require('../util/logger');

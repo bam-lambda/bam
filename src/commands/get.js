@@ -2,11 +2,11 @@ const { promisify } = require('util');
 const https = require('https');
 const AWS = require('aws-sdk');
 
+const bamSpinner = require('../util/spinner');
 const {
   bamLog,
   bamWarn,
   bamError,
-  bamSpinner,
 } = require('../util/logger');
 
 const {

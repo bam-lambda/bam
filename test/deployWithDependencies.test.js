@@ -3,7 +3,7 @@ const https = require('https');
 const AWS = require('aws-sdk');
 
 const configTemplate = require('../templates/configTemplate');
-const createRole = require('../src/aws/createRole');
+const createRoles = require('../src/aws/createRoles');
 
 const deployLambda = require('../src/aws/deployLambda.js');
 const deployApi = require('../src/aws/deployApi.js');
@@ -53,7 +53,7 @@ describe('bam deploy api', () => {
     await createDirectory('functions', `${path}/.bam/`);
     await createJSONFile('config', `${path}/.bam`, config);
     await createJSONFile('library', `${path}/.bam/functions`, {});
-    await createRole(roleName, path);
+    await createRoles(roleName, path);
   });
 
   afterEach(async () => {

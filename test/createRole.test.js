@@ -10,7 +10,7 @@ const {
 } = require('../src/util/fileUtils');
 
 const { doesRoleExist, doesPolicyExist } = require('../src/aws/doesResourceExist.js');
-const createRole = require('../src/aws/createRole.js');
+const createRoles = require('../src/aws/createRoles.js');
 const configTemplate = require('../templates/configTemplate.js');
 
 const iam = new AWS.IAM();
@@ -21,7 +21,7 @@ const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 const path = './test';
 
-describe('createRole', async () => {
+describe('createRoles', async () => {
   beforeEach(async () => {
     jest.setTimeout(10000);
     await createDirectory('.bam', path);
@@ -38,7 +38,7 @@ describe('createRole', async () => {
     config.accountNumber = process.env.AWS_ID;
     config.role = 'otherTestRole';
     await writeConfig(path, config);
-    await createRole(roleName, path);
+    await createRoles(roleName, path);
     const role = await doesRoleExist(roleName);
     expect(role).toBe(false);
   });
@@ -58,19 +58,19 @@ describe('createRole', async () => {
     test('testBamRole is created', async () => {
       let role = await doesRoleExist(roleName);
       expect(role).toBe(false);
-      await createRole(roleName, path);
+      await createRoles(roleName, path);
       role = await doesRoleExist(roleName);
       expect(role).toBe(true);
     });
 
     test('testBamRole is not created if already exists', async () => {
-      await createRole(roleName, path);
-      const result = await createRole(roleName, path);
+      await createRoles(roleName, path);
+      const result = await createRoles(roleName, path);
       expect(result).toBeUndefined();
     });
 
     test('defaultRole has a policy', async () => {
-      await createRole(roleName, path);
+      await createRoles(roleName, path);
       const policy = await doesPolicyExist(roleName, policyName);
       expect(policy).toBe(true);
     });

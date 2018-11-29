@@ -5,7 +5,7 @@ const deployLambda = require('../src/aws/deployLambda.js');
 const deployApi = require('../src/aws/deployApi.js');
 const destroy = require('../src/commands/destroy');
 const configTemplate = require('../templates/configTemplate');
-const createRole = require('../src/aws/createRole');
+const createRoles = require('../src/aws/createRoles');
 const { doesLambdaExist, doesApiExist } = require('../src/aws/doesResourceExist');
 
 const {
@@ -39,7 +39,7 @@ describe('bam delete lambda', () => {
     config.accountNumber = process.env.AWS_ID;
     await createJSONFile('config', `${path}/.bam/`, config);
     await createJSONFile('library', `${path}/.bam/functions`, {});
-    await createRole(roleName, path);
+    await createRoles(roleName, path);
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
     await deployLambda(lambdaName, 'test description', path);

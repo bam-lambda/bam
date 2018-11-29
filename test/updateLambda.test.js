@@ -11,22 +11,14 @@ const {
   writeFile,
   writeLambda,
   readFuncLibrary,
-  unlink,
 } = require('../src/util/fileUtils');
+const { bamError } = require('../src/util/logger');
 const configTemplate = require('../templates/configTemplate');
-const createRole = require('../src/aws/createRole');
-
+const createRoles = require('../src/aws/createRoles');
 const deployLambda = require('../src/aws/deployLambda');
 const deployApi = require('../src/aws/deployApi');
-
-const updateLambda = require('../src/aws/updateLambda');
 const redeploy = require('../src/commands/redeploy');
 const destroy = require('../src/commands/destroy');
-
-const deleteLambda = require('../src/aws/deleteLambda');
-const deleteApi = require('../src/aws/deleteApi');
-const delay = require('../src/util/delay');
-const { bamError } = require('../src/util/logger');
 
 const iam = new AWS.IAM();
 const roleName = 'testBamRole';
@@ -61,7 +53,7 @@ const asyncHttpsRequest = opts => (
 );
 
 describe('bam redeploy lambda', () => {
-  beforeEach(async () => {    
+  beforeEach(async () => {
     jest.setTimeout(60000);
     const config = await configTemplate(roleName);
     config.accountNumber = process.env.AWS_ID;
@@ -70,11 +62,11 @@ describe('bam redeploy lambda', () => {
     await createDirectory('functions', `${path}/.bam/`);
     await createJSONFile('config', `${path}/.bam`, config);
     await createJSONFile('library', `${path}/.bam/functions`, {});
-    await createRole(roleName, path);
+    await createRoles(roleName, path);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
   });
 
-  afterEach(async () => {  
+  afterEach(async () => {
     await destroy(lambdaName, path);
     await promisifiedRimraf(`${path}/.bam`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
@@ -95,7 +87,7 @@ describe('bam redeploy lambda', () => {
     try {
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
       await redeploy(lambdaName, path, {});
-      const response = await asyncHttpsGet(url);     
+      const response = await asyncHttpsGet(url);
       responseStatus = response.statusCode;
     } catch (err) {
       bamError(err);
@@ -179,7 +171,7 @@ describe('bam redeploy lambda', () => {
     const deleteOptions = {
       hostname: urlParts[0],
       path: `/${urlParts.slice(1).join('/')}`,
-      method: 'DELETE',      
+      method: 'DELETE',
     };
 
     let responsePost;
@@ -226,7 +218,7 @@ describe('bam redeploy lambda', () => {
     const deleteOptions = {
       hostname: urlParts[0],
       path: `/${urlParts.slice(1).join('/')}`,
-      method: 'DELETE',      
+      method: 'DELETE',
     };
 
     let responsePost;

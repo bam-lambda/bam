@@ -71,7 +71,7 @@ const createDatabaseBamRole = async () => {
     const policyDocumentJSON = await readFile(`${__dirname}/../../templates/databaseBamRolePolicy.json`, 'utf8');
     const policyDocument = JSON.stringify(JSON.parse(policyDocumentJSON));
 
-    // bamBam
+    // TODO: bamBam, createRole test (delete roles afterEach & add test for databaseBamRole)
     const policyParams = {
       PolicyName: 'databaseBamPolicy',
       PolicyDocument: policyDocument,
@@ -100,5 +100,4 @@ module.exports = async function createRoles(bamRole, path) {
   if (!databaseBamRoleExists) {
     await createDatabaseBamRole();
   }
-  // TODO: update tests
 };

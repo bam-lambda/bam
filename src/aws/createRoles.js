@@ -1,7 +1,8 @@
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const { readConfig, readFile } = require('../util/fileUtils');
-const { doesRoleExist } = require('./doesResourceExist');
+const { doesRoleExist, doesPolicyExist, isPolicyAttached } = require('./doesResourceExist');
+
 const {
   bamSpinner,
   bamLog,
@@ -10,8 +11,6 @@ const {
 
 const iam = new AWS.IAM();
 const AWSLambdaBasicExecutionRolePolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
-
-const databaseBamRole = 'databaseBamRole';
 
 const rolePolicy = {
   Version: '2012-10-17',
@@ -33,7 +32,6 @@ const getAttachParams = (roleName, policyArn) => (
   }
 );
 
-
 const getRoleParams = roleName => (
   {
     RoleName: roleName,
@@ -45,63 +43,72 @@ const asyncCreateRole = promisify(iam.createRole.bind(iam));
 const asyncCreatePolicy = promisify(iam.createPolicy.bind(iam));
 const asyncAttachPolicy = promisify(iam.attachRolePolicy.bind(iam));
 
-const createBamRole = async (roleName) => {
-  bamSpinner.start();
-
-  try {
-    const roleParams = getRoleParams(roleName);
-    const roleData = await asyncCreateRole(roleParams);
-    const attachedParams = getAttachParams(roleData.Role.RoleName,
-      AWSLambdaBasicExecutionRolePolicyARN);
-    await asyncAttachPolicy(attachedParams);
+const createRole = async (roleName) => {
+  const roleParams = getRoleParams(roleName);
+  const doesRoleNameExist = await doesRoleExist(roleName);
+  if (!doesRoleNameExist) {
+    await asyncCreateRole(roleParams);
     bamSpinner.stop();
     bamLog(`Role "${roleName}" has been created`);
-  } catch (err) {
-    bamSpinner.stop();
-    bamError(err);
   }
 };
 
-const createDatabaseBamRole = async () => {
-  bamSpinner.start();
+const createDatabaseBamRolePolicy = async (databaseBamRole, databasePolicyName) => {
+  const doesDatabasePolicyExist = await doesPolicyExist(databaseBamRole, databasePolicyName);
 
-  try {
-    const databaseRoleParams = getRoleParams(databaseBamRole);
-    await asyncCreateRole(databaseRoleParams);
+  if (!doesDatabasePolicyExist) {
     const policyDocumentJSON = await readFile(`${__dirname}/../../templates/databaseBamRolePolicy.json`, 'utf8');
     const policyDocument = JSON.stringify(JSON.parse(policyDocumentJSON));
 
-    // TODO: bamBam
-    // TODO: createRole test (delete roles afterEach & add test for databaseBamRole)
-    // TODO: export createBamRole & createDatabaseBamRole separately & handle in
-    // init & tests
-    // TODO: update files that requires createRoles
     const policyParams = {
-      PolicyName: 'databaseBamPolicy',
+      PolicyName: databasePolicyName,
       PolicyDocument: policyDocument,
     };
-    const databasePolicyData = await asyncCreatePolicy(policyParams);
-    const databasePolicyArn = databasePolicyData.Policy.Arn;
-    const databaseAttachedParams = await getAttachParams(databaseBamRole, databasePolicyArn);
 
-    await asyncAttachPolicy(databaseAttachedParams);
+    await asyncCreatePolicy(policyParams);
+  }
+};
+
+const attachPolicy = async (roleName, policyArn) => {
+  const isAwsPolicyAttached = await isPolicyAttached(roleName, policyArn);
+  if (!isAwsPolicyAttached) {
+    const attachedParams = getAttachParams(roleName, policyArn);
+    await asyncAttachPolicy(attachedParams);
+  }
+};
+
+const createBamRole = async (roleName) => {
+  bamSpinner.start();
+  try {
+    await createRole(roleName);
+    await attachPolicy(roleName, AWSLambdaBasicExecutionRolePolicyARN);
     bamSpinner.stop();
-    bamLog(`Role "${databaseBamRole}" has been created`);
   } catch (err) {
     bamSpinner.stop();
     bamError(err);
   }
 };
 
-module.exports = async function createRoles(bamRole, path) {
-  const config = await readConfig(path);
-  const roleExists = await doesRoleExist(bamRole);
-  if (config.role === bamRole && !roleExists) {
-    await createBamRole(bamRole, path);
-  }
+const createDatabaseBamRole = async (databaseBamRole, path) => {
+  bamSpinner.start();
 
-  const databaseBamRoleExists = await doesRoleExist(databaseBamRole);
-  if (!databaseBamRoleExists) {
-    await createDatabaseBamRole();
+  const config = await readConfig(path);
+  const { accountNumber } = config;
+  const databasePolicyName = `${databaseBamRole}Policy`;
+  const databasePolicyArn = `arn:aws:iam::${accountNumber}:policy/${databasePolicyName}`;
+
+  try {
+    await createRole(databaseBamRole);
+    await createDatabaseBamRolePolicy(databaseBamRole, databasePolicyName);
+    await attachPolicy(databaseBamRole, databasePolicyArn);
+    bamSpinner.stop();
+  } catch (err) {
+    bamSpinner.stop();
+    bamError(err);
   }
+};
+
+module.exports = {
+  createBamRole,
+  createDatabaseBamRole,
 };

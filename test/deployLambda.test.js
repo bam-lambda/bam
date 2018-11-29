@@ -4,7 +4,7 @@ const AWS = require('aws-sdk');
 const deployLambda = require('../src/aws/deployLambda.js');
 const deleteLambda = require('../src/aws/deleteLambda');
 const configTemplate = require('../templates/configTemplate');
-const createRoles = require('../src/aws/createRoles');
+const { createBamRole } = require('../src/aws/createRoles');
 const { doesLambdaExist } = require('../src/aws/doesResourceExist');
 
 const {
@@ -38,7 +38,7 @@ describe('bam deploy lambda', () => {
     await createDirectory('functions', `${path}/.bam/`);
     await createJSONFile('config', `${path}/.bam/`, config);
     await createJSONFile('library', `${path}/.bam/functions`, {});
-    await createRoles(roleName, path);
+    await createBamRole(roleName);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
   });
 

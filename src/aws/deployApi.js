@@ -2,9 +2,8 @@ const AWS = require('aws-sdk');
 const { promisify } = require('util');
 
 const createApiGatewayIntegration = require('./createApiGatewayIntegration');
-
 const bamBam = require('../util/bamBam');
-
+const bamSpinner = require('../util/spinner');
 const {
   writeApi,
   readConfig,
@@ -13,7 +12,6 @@ const {
 
 const {
   bamLog,
-  bamSpinner,
   bamError,
 } = require('../util/logger');
 

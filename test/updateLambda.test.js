@@ -21,9 +21,12 @@ const redeploy = require('../src/commands/redeploy');
 const destroy = require('../src/commands/destroy');
 
 const iam = new AWS.IAM();
+const accountNumber = process.env.AWS_ID;
 const roleName = 'testBamRole';
+const databaseBamRole = 'databaseBamRole';
 const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
+const databasePolicyARN = `arn:aws:iam::${accountNumber}:policy/databaseBamPolicy`;
 const path = './test';
 const cwd = process.cwd();
 const stageName = 'bam';
@@ -56,7 +59,7 @@ describe('bam redeploy lambda', () => {
   beforeEach(async () => {
     jest.setTimeout(60000);
     const config = await configTemplate(roleName);
-    config.accountNumber = process.env.AWS_ID;
+    config.accountNumber = accountNumber;
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await createDirectory('.bam', path);
     await createDirectory('functions', `${path}/.bam/`);
@@ -71,6 +74,8 @@ describe('bam redeploy lambda', () => {
     await promisifiedRimraf(`${path}/.bam`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
+    await asyncDetachPolicy({ PolicyArn: databasePolicyARN, RoleName: databaseBamRole });
+    await asyncDeleteRole({ RoleName: databaseBamRole });
   });
 
   test('Response still 200 from same url after changing lambda', async () => {

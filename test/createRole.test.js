@@ -13,9 +13,12 @@ const { doesRoleExist, doesPolicyExist } = require('../src/aws/doesResourceExist
 const createRoles = require('../src/aws/createRoles.js');
 const configTemplate = require('../templates/configTemplate.js');
 
+const accountNumber = process.env.AWS_ID;
 const iam = new AWS.IAM();
 const roleName = 'testBamRole';
+const databaseBamRole = 'databaseBamRole';
 const policyName = 'AWSLambdaBasicExecutionRole';
+const databasePolicyARN = `arn:aws:iam::${accountNumber}:policy/databaseBamPolicy`;
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
@@ -31,6 +34,8 @@ describe('createRoles', async () => {
 
   afterEach(async () => {
     await promisifiedRimraf(`${path}/.bam`);
+    await asyncDetachPolicy({ PolicyArn: databasePolicyARN, RoleName: databaseBamRole });
+    await asyncDeleteRole({ RoleName: databaseBamRole });
   });
 
   test('defaultRole is not created if user uses own role', async () => {
@@ -65,8 +70,9 @@ describe('createRoles', async () => {
 
     test('testBamRole is not created if already exists', async () => {
       await createRoles(roleName, path);
-      const result = await createRoles(roleName, path);
-      expect(result).toBeUndefined();
+      const role = await doesRoleExist(roleName);
+      await createRoles(roleName, path);
+      expect(role).toBeTruthy();
     });
 
     test('defaultRole has a policy', async () => {
@@ -74,5 +80,8 @@ describe('createRoles', async () => {
       const policy = await doesPolicyExist(roleName, policyName);
       expect(policy).toBe(true);
     });
+
+    // test('databaseBamRole is created', async () => {
+    // })
   });
 });

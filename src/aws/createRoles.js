@@ -71,7 +71,11 @@ const createDatabaseBamRole = async () => {
     const policyDocumentJSON = await readFile(`${__dirname}/../../templates/databaseBamRolePolicy.json`, 'utf8');
     const policyDocument = JSON.stringify(JSON.parse(policyDocumentJSON));
 
-    // TODO: bamBam, createRole test (delete roles afterEach & add test for databaseBamRole)
+    // TODO: bamBam
+    // TODO: createRole test (delete roles afterEach & add test for databaseBamRole)
+    // TODO: export createBamRole & createDatabaseBamRole separately & handle in
+    // init & tests
+    // TODO: update files that requires createRoles
     const policyParams = {
       PolicyName: 'databaseBamPolicy',
       PolicyDocument: policyDocument,

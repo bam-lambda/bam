@@ -21,10 +21,10 @@ const homedir = os.homedir();
 (async () => {
   // TODO: add new commands to catchSetupAndConfig
   let lambdaName;
-  let options;
-  const shouldContinue = await catchSetupAndConfig(homedir, command);
-  if (!shouldContinue) return;
+  let options = {};
   if (args) ({ lambdaName, options } = handleArgs(args));
+  const shouldContinue = await catchSetupAndConfig(homedir, command, options);
+  if (!shouldContinue) return;
 
   if (command === 'create') {
     await create(lambdaName);

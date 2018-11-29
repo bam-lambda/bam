@@ -3,18 +3,16 @@ const https = require('https');
 const AWS = require('aws-sdk');
 
 const configTemplate = require('../templates/configTemplate');
-const createRole = require('../src/aws/createRole');
+const { createBamRole } = require('../src/aws/createRoles');
 const deployLambda = require('../src/aws/deployLambda.js');
 const deployApi = require('../src/aws/deployApi.js');
-const deleteLambda = require('../src/aws/deleteLambda');
 const { doesApiExist } = require('../src/aws/doesResourceExist');
-const deleteApi = require('../src/aws/deleteApi');
+const destroy = require('../src/commands/destroy');
 const delay = require('../src/util/delay');
 const { bamError } = require('../src/util/logger');
 
 const {
   writeFile,
-  unlink,
   readFile,
   readFuncLibrary,
   createDirectory,
@@ -65,17 +63,13 @@ describe('bam deploy api', () => {
     await createDirectory('functions', `${path}/.bam/`);
     await createJSONFile('config', `${path}/.bam`, config);
     await createJSONFile('library', `${path}/.bam/functions`, {});
-    await createRole(roleName, path);
+    await createBamRole(roleName);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
   });
 
   afterEach(async () => {
-    const library = await readFuncLibrary(path);
-    const { restApiId } = library[lambdaName].api;
-    await deleteApi(restApiId, path);
-    await deleteLambda(lambdaName, path);
+    await destroy(lambdaName, path);
     await promisifiedRimraf(`${path}/.bam`);
-    await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
     await delay(30000);

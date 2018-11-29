@@ -53,9 +53,22 @@ const doesApiExist = async (restApiId) => {
   }
 };
 
+const isPolicyAttached = async (roleName, policyArn) => {
+  const asyncListAttachedRolePolicies = promisify(iam.listAttachedRolePolicies.bind(iam));
+
+  try {
+    const data = await asyncListAttachedRolePolicies({ RoleName: roleName });
+    const attachedPolicies = data.AttachedPolicies;
+    return attachedPolicies.any(obj => obj.PolicyArn === policyArn);
+  } catch (err) {
+    return false;
+  }
+};
+
 module.exports = {
   doesRoleExist,
   doesPolicyExist,
   doesLambdaExist,
   doesApiExist,
+  isPolicyAttached,
 };

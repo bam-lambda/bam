@@ -1,24 +1,6 @@
 const { doesLambdaExist } = require('../aws/doesResourceExist.js');
 const { readdir } = require('../util/fileUtils.js');
-
-// messages
-const customizeLambdaWarnings = (name) => {
-  const warningMessages = {
-    nameIsTaken: `The name "${name}" is already being used in this directory. Please select another.`,
-    invalidSyntax: `"${name}" is invalid. Lambda names must contain 1 to 64 letters, numbers, hyphens, and/or underscores only.`,
-    doesNotExistInCwd: `There is no file called "${name}.js" in this directory.`,
-    alreadyExistsOnAws: `"${name}" lambda already exists. If you are trying to overwrite this lambda, please use the "redeploy" command.`,
-    doesNotExistOnAws: `Lambda "${name}" does not exist on AWS.`,
-  };
-  return warningMessages;
-};
-
-const customizeApiWarnings = (methods) => {
-  const warningMessages = {
-    invalidMethods: `One or more of the HTTP methods are invalid: ${methods.join(' ')}`,
-  };
-  return warningMessages;
-};
+const { customizeLambdaWarnings, customizeApiWarnings } = require('./validationMessages.js');
 
 // helper methods
 const lambdaExistsInCwd = async (name) => {
@@ -47,12 +29,12 @@ const validateLambda = async (name, validations) => {
   for (let i = 0; i < validations.length; i += 1) {
     const { validation, feedbackType, affirmative } = validations[i];
     const check = affirmative ? await validation(name) : !(await validation(name));
+
     if (check) {
       msg = warnings[feedbackType];
       break;
     }
   }
-
   return msg;
 };
 
@@ -71,6 +53,26 @@ const validateLambdaDeployment = async (name) => {
       validation: lambdaExistsOnAws,
       feedbackType: 'alreadyExistsOnAws',
       affirmative: true,
+    },
+  ];
+  const status = await validateLambda(name, validations);
+  return status;
+};
+
+const validateLambdaReDeployment = async (name) => {
+  const validations = [
+    {
+      validation: lambdaHasValidName,
+      feedbackType: 'invalidSyntax',
+      affirmative: false,
+    }, {
+      validation: lambdaExistsInCwd,
+      feedbackType: 'doesNotExistInCwd',
+      affirmative: false,
+    }, {
+      validation: lambdaExistsOnAws,
+      feedbackType: 'useDeployInstead',
+      affirmative: false,
     },
   ];
   const status = await validateLambda(name, validations);
@@ -129,6 +131,7 @@ const validateApiMethods = (methods) => {
 module.exports = {
   validateLambdaRetrieval,
   validateLambdaDeployment,
+  validateLambdaReDeployment,
   validateLambdaCreation,
   validateApiMethods,
 };

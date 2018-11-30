@@ -30,7 +30,7 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
 
   bamSpinner.start();
 
-  // Sequence:
+  // deploy sequence:
   try {
     // create rest api
     const restApiId = (await asyncCreateApi({ name: lambdaName })).id;

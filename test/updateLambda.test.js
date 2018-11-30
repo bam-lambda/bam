@@ -147,7 +147,7 @@ describe('bam redeploy lambda', () => {
     expect(nodeModules).toBe(true);
   });
 
-  test.only('Different requests return corresponding status codes', async () => {
+  test('Different requests return corresponding status codes', async () => {
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
     await deployLambda(lambdaName, 'test description', path);

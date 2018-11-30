@@ -18,7 +18,7 @@ module.exports = async function createApiGatewayIntegration(httpMethod, resource
   const asyncPutMethodResponse = promisify(api.putMethodResponse.bind(api));
 
   // add permission to lambda
-  const sourceArn = `arn:aws:execute-api:${region}:${accountNumber}:${restApiId}/*/${httpMethod}/${lambdaName}`;
+  const sourceArn = `arn:aws:execute-api:${region}:${accountNumber}:${restApiId}/*/${httpMethod}/`;
   const addPermissionParams = {
     FunctionName: lambdaName,
     StatementId: uuid.v4(),

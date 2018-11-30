@@ -1,5 +1,5 @@
 module.exports = function handleArgs(args) {
-  const lambdaName = args[0];
+  const resourceName = args[0];
   const options = {};
   const formattedOptions = args.slice(1)
     .join(' ')
@@ -13,7 +13,7 @@ module.exports = function handleArgs(args) {
   });
 
   return {
-    lambdaName,
+    resourceName,
     options,
   };
 };

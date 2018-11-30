@@ -8,6 +8,7 @@ const get = require('../src/commands/get.js');
 const list = require('../src/commands/list.js');
 const version = require('../src/commands/version.js');
 const destroy = require('../src/commands/destroy.js');
+const dbtable = require('../src/commands/dbtable.js');
 const help = require('../src/commands/help.js');
 const config = require('../src/commands/config.js');
 const handleArgs = require('../src/util/handleArgs.js');
@@ -20,22 +21,24 @@ const homedir = os.homedir();
 
 (async () => {
   // TODO: add new commands to catchSetupAndConfig
-  let lambdaName;
+  let resourceName;
   let options = {};
-  if (args) ({ lambdaName, options } = handleArgs(args));
+  if (args) ({ resourceName, options } = handleArgs(args));
   const shouldContinue = await catchSetupAndConfig(homedir, command, options);
   if (!shouldContinue) return;
 
   if (command === 'create') {
-    await create(lambdaName);
+    await create(resourceName);
   } else if (command === 'deploy') {
-    await deploy(lambdaName, homedir, options);
+    await deploy(resourceName, homedir, options);
   } else if (command === 'redeploy') {
-    await redeploy(lambdaName, homedir, options);
+    await redeploy(resourceName, homedir, options);
   } else if (command === 'get') {
-    await get(lambdaName, homedir);
+    await get(resourceName, homedir);
   } else if (command === 'delete') {
-    await destroy(lambdaName, homedir);
+    await destroy(resourceName, homedir);
+  } else if (command === 'dbtable') {
+    await dbtable(resourceName, homedir);
   } else if (command === 'list') {
     await list(homedir);
   } else if (command === 'version' || command === '-v') {

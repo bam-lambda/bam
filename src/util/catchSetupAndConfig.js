@@ -9,7 +9,8 @@ const bamRole = 'bamRole';
 const databaseBamRole = 'databaseBamRole';
 
 module.exports = async function catchSetupAndConfig(path, command, options) {
-  if (!['create', 'deploy', 'redeploy', 'list', 'get', 'delete', 'config'].includes(command)) return true;
+  if (!['create', 'deploy', 'redeploy', 'list', 'get', 'delete', 'config', 'dbtable']
+    .includes(command)) return true;
 
   const bamDirExists = await exists(`${path}/.bam`);
   if (!bamDirExists) {

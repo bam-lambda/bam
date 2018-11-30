@@ -7,7 +7,7 @@ const getRegion = require('../util/getRegion');
 
 const apiVersion = 'latest';
 
-const createDbTable = async (tableName, partitionKey, sortKey) => {
+module.exports = async function createDbTable(tableName, partitionKey, sortKey) {
   bamSpinner.start();
   const region = await getRegion();
   const dynamo = new AWS.DynamoDB({ apiVersion, region });
@@ -56,16 +56,7 @@ const createDbTable = async (tableName, partitionKey, sortKey) => {
 
   try {
     await asyncCreateTable(tableParams);
-    bamSpinner.stop();
-    bamLog(`DynamoDB table "${tableName}" is being created. This may take a few minutes to complete on AWS.`);
   } catch (err) {
-    bamSpinner.stop();
     bamError(err);
   }
 };
-
-createDbTable('bamDogs',
-  {
-    name: 'dogs',
-    dataType: 'S',
-  });

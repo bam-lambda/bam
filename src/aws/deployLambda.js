@@ -6,6 +6,8 @@ const installLambdaDependencies = require('../util/installLambdaDependencies.js'
 const bamBam = require('../util/bamBam.js');
 const bamSpinner = require('../util/spinner');
 
+const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
+
 const {
   bamLog,
   bamWarn,
@@ -20,9 +22,10 @@ const {
 
 const apiVersion = 'latest';
 
-module.exports = async function deployLambda(lambdaName, description, path) {
+module.exports = async function deployLambda(lambdaName, description, path, dbFlag) {
   const config = await readConfig(path);
-  const { accountNumber, region, role } = config;
+  const { accountNumber, region } = config;
+  const role = dbFlag ? dbRole : config.role;
   const lambda = new AWS.Lambda({ apiVersion, region });
   const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
 

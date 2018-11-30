@@ -1,11 +1,13 @@
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
+const getLambda = require('./getLambda');
 const {
   createDirectory,
   readFile,
   copyFile,
   readConfig,
 } = require('../util/fileUtils');
+const { bamError } = require('../util/logger');
 const { zipper } = require('../util/zipper');
 const installLambdaDependencies = require('../util/installLambdaDependencies');
 const bamBam = require('../util/bamBam');
@@ -13,11 +15,24 @@ const bamSpinner = require('../util/spinner');
 
 const apiVersion = 'latest';
 
-module.exports = async function updateLambda(lambdaName, path) {
+const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
+
+module.exports = async function updateLambda(lambdaName, path, dbFlag) {
   const config = await readConfig(path);
-  const { region } = config;
+  const { region, accountNumber } = config;
   const lambda = new AWS.Lambda({ apiVersion, region });
   const asyncLambdaUpdateFunctionCode = promisify(lambda.updateFunctionCode.bind(lambda));
+  const asyncLambdaUpdateFunctionConfiguration = promisify(lambda.updateFunctionConfiguration.bind(lambda));
+  const databaseRoleArn = `arn:aws:iam::${accountNumber}:role/${dbRole}`;
+
+  const getRole = async (lambdaName) => { 
+    try {
+      const data = await getLambda(lambdaName);
+      return data.Configuration.Role;
+    } catch (err) {
+      bamError(err);
+    }
+  };
 
   const createTempDeployPkg = async () => {
     const cwd = process.cwd();
@@ -32,11 +47,20 @@ module.exports = async function updateLambda(lambdaName, path) {
   const zipContents = await readFile(zippedFileName);
 
   const updateAwsLambda = async () => {
-    const sdkParams = {
+    const currentRoleArn = await getRole(lambdaName);
+    if (dbFlag && currentRoleArn !== databaseRoleArn) {
+      const configParams = {
+        FunctionName: lambdaName,
+        Role: databaseRoleArn,
+      };
+      await asyncLambdaUpdateFunctionConfiguration(configParams);
+    }
+
+    const codeParams = {
       FunctionName: lambdaName,
       ZipFile: zipContents,
     };
-    const data = await bamBam(asyncLambdaUpdateFunctionCode, { params: [sdkParams] });
+    const data = await bamBam(asyncLambdaUpdateFunctionCode, { params: [codeParams] });
     return data;
   };
 

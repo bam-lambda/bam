@@ -94,7 +94,7 @@ module.exports = async function redeploy(lambdaName, path, options) {
   };
 
   // redeploy sequence
-  const data = await updateLambda(lambdaName, path);
+  const data = await updateLambda(lambdaName, path, options.db);
 
   if (data) {
     await overwriteLocalPkg();

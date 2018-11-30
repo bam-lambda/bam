@@ -97,7 +97,7 @@ module.exports = async function redeploy(lambdaName, path, options) { // current
       await deployApi(lambdaName, path, httpMethods, stageName);
     } else {
       const resources = (await asyncGetResources({ restApiId })).items;
-      const resource = resources.find(resource => resource.pathPart === lambdaName);
+      const resource = resources.find(res => res.path === '/');
       const resourceId = resource.id;
       const resourceMethods = Object.keys(resource.resourceMethods);
       for (let i = 0; i < httpMethods.length; i += 1) {

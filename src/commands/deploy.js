@@ -37,7 +37,7 @@ module.exports = async function deploy(lambdaName, path, options) {
     }
 
     const [description] = input;
-    await deployLambda(lambdaName, description, path);
+    await deployLambda(lambdaName, description, path, options.db);
     await deployApi(lambdaName, path, httpMethods, stage);
   } catch (err) {
     bamWarn(err);

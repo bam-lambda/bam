@@ -13,6 +13,8 @@ const bamBam = require('../util/bamBam');
 
 const apiVersion = 'latest';
 
+
+
 const {
   writeLambda,
   promisifiedRimraf,
@@ -117,7 +119,7 @@ module.exports = async function redeploy(lambdaName, path, options) { // current
   };
 
   // update lambda code
-  const data = await updateLambda(lambdaName, path);
+  const data = await updateLambda(lambdaName, path, options.db);
 
   if (data) {
     await overwriteLocalPkg();

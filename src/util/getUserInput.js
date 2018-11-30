@@ -2,8 +2,6 @@ const readline = require('readline');
 
 const { bamText, bamWarn } = require('./logger');
 
-const answers = [];
-
 const asyncValidate = async (asyncCallback, validator, feedback, question, defaultAnswer, quitStr = 'q') => {
   while (true) {
     const result = await asyncCallback(question, defaultAnswer);
@@ -17,6 +15,7 @@ const asyncValidate = async (asyncCallback, validator, feedback, question, defau
 };
 
 module.exports = async function getUserInput(prompts) {
+  const answers = [];
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,

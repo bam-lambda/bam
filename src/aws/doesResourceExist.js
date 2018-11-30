@@ -40,6 +40,19 @@ const doesLambdaExist = async (lambdaName) => {
   }
 };
 
+const doesTableExist = async (tableName) => {
+  const region = await getRegion();
+  const dynamo = new AWS.DynamoDB({ apiVersion, region });
+  const asyncDescribeTable = promisify(dynamo.describeTable.bind(dynamo));
+
+  try {
+    await asyncDescribeTable({ TableName: tableName });
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
+
 const doesApiExist = async (restApiId) => {
   const region = await getRegion();
   const api = new AWS.APIGateway({ apiVersion, region });
@@ -69,6 +82,7 @@ module.exports = {
   doesRoleExist,
   doesPolicyExist,
   doesLambdaExist,
+  doesTableExist,
   doesApiExist,
   isPolicyAttached,
 };

@@ -17,7 +17,15 @@ const customizeApiWarnings = (methods) => {
   return warningMessages;
 };
 
+const customizeTableWarnings = name => (
+  {
+    invalidTableNameSyntax: `"${name}" is invalid. Table names must contain 3 to 255 letters, numbers, hyphens, periods, and/or underscores only.`,
+    tableDoesExistOnAws: `"${name}" table already exists on AWS`,
+  }
+);
+
 module.exports = {
   customizeLambdaWarnings,
   customizeApiWarnings,
+  customizeTableWarnings,
 };

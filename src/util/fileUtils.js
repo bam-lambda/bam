@@ -26,7 +26,7 @@ const readConfig = async (path) => {
 };
 
 const writeConfig = async (path, config) => {
-  const configJSON = JSON.stringify(config);
+  const configJSON = JSON.stringify(config, null, 2);
   await writeFile(`${path}/.bam/config.json`, configJSON);
 };
 
@@ -41,7 +41,7 @@ const readFuncLibrary = async (path) => {
 };
 
 const writeFuncLibrary = async (path, functions) => {
-  const functionsJSON = JSON.stringify(functions);
+  const functionsJSON = JSON.stringify(functions, null, 2);
   await writeFile(`${path}/.bam/functions/library.json`, functionsJSON);
 };
 
@@ -72,7 +72,7 @@ const createDirectory = async (name, path) => {
 };
 
 const createJSONFile = async (fileName, path, json) => {
-  const configStr = JSON.stringify(json);
+  const configStr = JSON.stringify(json, null, 2);
   await writeFile(`${path}/${fileName}.json`, configStr);
 };
 

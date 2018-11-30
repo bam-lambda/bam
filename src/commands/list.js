@@ -57,7 +57,7 @@ module.exports = async function list(path) {
   const awsFunctionsList = getAwsFunctionsList(functionsOnAws, functionsLocalAndOnAws);
   const bamFunctionsList = getBamFunctionsList(functionsLocalAndOnAws, library);
 
-  logInColor(`\n${indent}Lambdas deployed from this machine using BAM:`, 'green');
+  logInColor(`${indent}Lambdas deployed from this machine using BAM:`, 'green');
   log(`${bamFunctionsList}\n`);
 
   if (awsFunctionsList.length > 0) {

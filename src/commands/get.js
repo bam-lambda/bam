@@ -13,6 +13,7 @@ const {
   createWriteStream,
   createDirectory,
   unlink,
+  rename,
 } = require('../util/fileUtils');
 
 const bamSpinner = require('../util/spinner');
@@ -31,6 +32,7 @@ const addLambdaFolderToCwd = async (lambdaName, location) => {
       response.pipe(file);
       file.on('finish', async () => {
         await unzipper(lambdaName);
+        await rename(`${cwd}/${lambdaName}/index.js`, `${cwd}/${lambdaName}/${lambdaName}.js`);
         await unlink(`${cwd}/${lambdaName}/${zipFileName}`);
         res();
       });

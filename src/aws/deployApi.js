@@ -25,7 +25,6 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
   // sdk promises
   const asyncCreateApi = promisify(api.createRestApi.bind(api));
   const asyncGetResources = promisify(api.getResources.bind(api));
-  const asyncCreateResource = promisify(api.createResource.bind(api));
   const asyncCreateDeployment = promisify(api.createDeployment.bind(api));
 
   bamSpinner.start();
@@ -35,24 +34,26 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
     // create rest api
     const restApiId = (await asyncCreateApi({ name: lambdaName })).id;
 
-    // get resources
-    const parentId = (await asyncGetResources({ restApiId })).items[0].id;
-
-    // create resource
-    const createResourceParams = { restApiId, parentId, pathPart: lambdaName };
-    const resourceId = (await asyncCreateResource(createResourceParams)).id;
+    // get resource
+    const resourceId = (await asyncGetResources({ restApiId })).items[0].id;
 
     for (let i = 0; i < httpMethods.length; i += 1) {
       const httpMethod = httpMethods[i];
       const params = [httpMethod, resourceId, restApiId, lambdaName, path];
-      await bamBam(createApiGatewayIntegration, { params, retryError: 'TooManyRequestsException' });
+      await bamBam(createApiGatewayIntegration, {
+        params,
+        retryError: 'TooManyRequestsException',
+      });
     }
 
     // create deployment
-    await bamBam(asyncCreateDeployment, { params: [{ restApiId, stageName }], retryError: 'TooManyRequestsException' });
+    await bamBam(asyncCreateDeployment, {
+      params: [{ restApiId, stageName }],
+      retryError: 'TooManyRequestsException',
+    });
 
     // api endpoint
-    const endpoint = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}/${lambdaName}`;
+    const endpoint = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}`;
 
     // write to library
     await writeApi(endpoint, lambdaName, restApiId, path);

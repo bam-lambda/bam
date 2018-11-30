@@ -8,7 +8,6 @@ const stage = 'bam';
 
 module.exports = async function deploy(lambdaName, path, options) {
   const invalidLambdaMsg = await validateLambdaDeployment(lambdaName);
-
   if (invalidLambdaMsg) {
     bamWarn(invalidLambdaMsg);
     return;
@@ -16,7 +15,6 @@ module.exports = async function deploy(lambdaName, path, options) {
 
   const httpMethods = options.methods ? options.methods.map(method => method.toUpperCase()) : ['GET'];
   const invalidApiMsg = validateApiMethods(httpMethods);
-
   if (invalidApiMsg) {
     bamWarn(invalidApiMsg);
     return;

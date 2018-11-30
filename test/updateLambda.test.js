@@ -147,7 +147,7 @@ describe('bam redeploy lambda', () => {
     expect(nodeModules).toBe(true);
   });
 
-  test.only('Different requests return corresponding status codes', async () => {
+  test('Different requests return corresponding status codes', async () => {
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
     await deployLambda(lambdaName, 'test description', path);
@@ -190,8 +190,8 @@ describe('bam redeploy lambda', () => {
 
     expect(responseGet.statusCode).toBe(200);
     expect(responsePut.statusCode).toBe(200);
-    // expect(responsePost.statusCode).toBe(201);
-    // expect(responseDelete.statusCode).toBe(204);
+    expect(responsePost.statusCode).toBe(201);
+    expect(responseDelete.statusCode).toBe(204);
   });
 
   test('httpMethod ANY supports all method types', async () => {

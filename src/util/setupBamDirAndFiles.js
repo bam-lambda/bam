@@ -7,4 +7,5 @@ module.exports = async function setupBamDirAndFiles(roleName, path) {
   await createDirectory('functions', `${path}/.bam`);
   await createJSONFile('config', `${path}/.bam`, configJSON);
   await createJSONFile('library', `${path}/.bam/functions`, {});
+  await createJSONFile('dbTables', `${path}/.bam`, {});
 };

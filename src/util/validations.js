@@ -1,6 +1,10 @@
-const { doesLambdaExist } = require('../aws/doesResourceExist.js');
+const { doesLambdaExist, doesTableExist } = require('../aws/doesResourceExist.js');
 const { readdir } = require('../util/fileUtils.js');
-const { customizeLambdaWarnings, customizeApiWarnings } = require('./validationMessages.js');
+const {
+  customizeLambdaWarnings,
+  customizeApiWarnings,
+  customizeTableWarnings,
+} = require('./validationMessages.js');
 
 // helper methods
 const lambdaExistsInCwd = async (name) => {
@@ -14,7 +18,7 @@ const lambdaExistsInCwd = async (name) => {
 
 const lambdaHasValidName = (name) => {
   if (!name) return false;
-  return (/^[a-zA-Z0-9-_]+$/).test(name) && name.length < 64;
+  return (/^[a-zA-Z0-9\-_]+$/).test(name) && name.length < 64;
 };
 
 const lambdaExistsOnAws = async (name) => {
@@ -22,8 +26,18 @@ const lambdaExistsOnAws = async (name) => {
   return status;
 };
 
-const validateLambda = async (name, validations) => {
-  const warnings = customizeLambdaWarnings(name);
+const tableHasValidName = (name) => {
+  if (!name) return false;
+  return (/^[a-zA-Z0-9\-_.]{3,255}$/).test(name);
+};
+
+const tableExistsOnAws = async (name) => {
+  const status = await doesTableExist(name);
+  return status;
+};
+
+const validateResource = async (name, validations, customWarnings) => {
+  const warnings = customWarnings(name);
   let msg;
 
   for (let i = 0; i < validations.length; i += 1) {
@@ -55,7 +69,7 @@ const validateLambdaDeployment = async (name) => {
       affirmative: true,
     },
   ];
-  const status = await validateLambda(name, validations);
+  const status = await validateResource(name, validations, customizeLambdaWarnings);
   return status;
 };
 
@@ -75,7 +89,7 @@ const validateLambdaReDeployment = async (name) => {
       affirmative: false,
     },
   ];
-  const status = await validateLambda(name, validations);
+  const status = await validateResource(name, validations, customizeLambdaWarnings);
   return status;
 };
 
@@ -91,7 +105,7 @@ const validateLambdaCreation = async (name) => {
       affirmative: false,
     },
   ];
-  const status = await validateLambda(name, validations);
+  const status = await validateResource(name, validations, customizeLambdaWarnings);
   return status;
 };
 
@@ -111,7 +125,23 @@ const validateLambdaRetrieval = async (name) => {
       affirmative: false,
     },
   ];
-  const status = await validateLambda(name, validations);
+  const status = await validateResource(name, validations, customizeLambdaWarnings);
+  return status;
+};
+
+const validateTableCreation = async (name) => {
+  const validations = [
+    {
+      validation: tableHasValidName,
+      feedbackType: 'invalidTableNameSyntax',
+      affirmative: false,
+    }, {
+      validation: tableExistsOnAws,
+      feedbackType: 'tableDoesExistOnAws',
+      affirmative: true,
+    },
+  ];
+  const status = await validateResource(name, validations, customizeTableWarnings);
   return status;
 };
 
@@ -134,4 +164,5 @@ module.exports = {
   validateLambdaReDeployment,
   validateLambdaCreation,
   validateApiMethods,
+  validateTableCreation,
 };

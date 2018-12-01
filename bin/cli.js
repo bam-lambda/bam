@@ -38,7 +38,7 @@ const homedir = os.homedir();
   } else if (command === 'delete') {
     await destroy(resourceName, homedir);
   } else if (command === 'dbtable') {
-    await dbtable(resourceName, homedir);
+    await dbtable(resourceName, homedir, options);
   } else if (command === 'list') {
     await list(homedir);
   } else if (command === 'version' || command === '-v') {

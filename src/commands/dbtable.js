@@ -13,6 +13,7 @@ module.exports = async function dbtable(tableName, path, options) {
       await deleteDbTable(tableName);
       const tableConfigJSON = await readFile(`${path}/.bam/dbTables.json`, 'utf8');
       const tableConfig = JSON.parse(tableConfigJSON);
+      delete tableConfig[tableName];
       await writeFile(`${path}/.bam/dbTables.json`, JSON.stringify(tableConfig, null, 2));
       bamLog(`"${tableName}" table has been deleted`);
     } else {

@@ -39,7 +39,7 @@ module.exports = async function catchSetupAndConfig(path, command, options) {
     }
   }
 
-  if ((command === 'deploy' || command === 'redeploy') && options.db) {
+  if ((command === 'deploy' || command === 'redeploy') && options.permitDb) {
     await createDatabaseBamRole(databaseBamRole, path);
   }
 

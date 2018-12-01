@@ -27,7 +27,6 @@ const {
 const apiVersion = 'latest';
 const stageName = 'bam';
 
-// INFO: currently updates code only (not role)
 module.exports = async function redeploy(lambdaName, path, options) {
   // validations
   const invalidLambdaMsg = await validateLambdaReDeployment(lambdaName);

@@ -6,6 +6,9 @@ const {
   readFile,
   copyFile,
   readConfig,
+  rename,
+  copyDir,
+  exists,
 } = require('../util/fileUtils');
 const { bamError } = require('../util/logger');
 const { zipper } = require('../util/zipper');
@@ -16,6 +19,16 @@ const bamSpinner = require('../util/spinner');
 const apiVersion = 'latest';
 
 const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
+const getRole = async (lambdaName) => {
+  try {
+    const data = await getLambda(lambdaName);
+    return data.Configuration.Role;
+  } catch (err) {
+    bamError(err);
+    return err;
+  }
+};
+
 
 module.exports = async function updateLambda(lambdaName, path, dbFlag) {
   const config = await readConfig(path);
@@ -25,19 +38,20 @@ module.exports = async function updateLambda(lambdaName, path, dbFlag) {
   const asyncLambdaUpdateFunctionConfiguration = promisify(lambda.updateFunctionConfiguration.bind(lambda));
   const databaseRoleArn = `arn:aws:iam::${accountNumber}:role/${dbRole}`;
 
-  const getRole = async (lambdaName) => { 
-    try {
-      const data = await getLambda(lambdaName);
-      return data.Configuration.Role;
-    } catch (err) {
-      bamError(err);
-    }
-  };
-
   const createTempDeployPkg = async () => {
     const cwd = process.cwd();
-    await createDirectory(`${lambdaName}-temp`, `${path}/.bam/functions`);
-    await copyFile(`${cwd}/${lambdaName}.js`, `${path}/.bam/functions/${lambdaName}-temp/index.js`);
+    const lambdaNameDirExists = await exists(`${cwd}/${lambdaName}`);
+    if (lambdaNameDirExists) {
+      await copyDir(`${cwd}/${lambdaName}`, `${path}/.bam/functions/${lambdaName}-temp`);
+      const lambdaNameJSExists = await exists(`${path}/.bam/functions/${lambdaName}-temp/${lambdaName}.js`);
+      if (lambdaNameJSExists) {
+        await rename(`${path}/.bam/functions/${lambdaName}-temp/${lambdaName}.js`,
+          `${path}/.bam/functions/${lambdaName}-temp/index.js`);
+      }
+    } else {
+      await createDirectory(`${lambdaName}-temp`, `${path}/.bam/functions`);
+      await copyFile(`${cwd}/${lambdaName}.js`, `${path}/.bam/functions/${lambdaName}-temp/index.js`);
+    }
   };
 
   bamSpinner.start();

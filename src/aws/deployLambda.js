@@ -16,8 +16,11 @@ const {
 const {
   writeLambda,
   readConfig,
+  copyDir,
   copyFile,
   readFile,
+  rename,
+  exists,
 } = require('../util/fileUtils');
 
 const apiVersion = 'latest';
@@ -31,8 +34,18 @@ module.exports = async function deployLambda(lambdaName, description, path, dbFl
 
   const createDeploymentPackage = async () => {
     const cwd = process.cwd();
-    await createDirectory(lambdaName, `${path}/.bam/functions`);
-    await copyFile(`${cwd}/${lambdaName}.js`, `${path}/.bam/functions/${lambdaName}/index.js`);
+    const lambdaNameDirExists = await exists(`${cwd}/${lambdaName}`);
+    if (lambdaNameDirExists) {
+      await copyDir(`${cwd}/${lambdaName}`, `${path}/.bam/functions/${lambdaName}`);
+      const lambdaNameJSExists = await exists(`${path}/.bam/functions/${lambdaName}/${lambdaName}.js`);
+      if (lambdaNameJSExists) {
+        await rename(`${path}/.bam/functions/${lambdaName}/${lambdaName}.js`,
+          `${path}/.bam/functions/${lambdaName}/index.js`);
+      }
+    } else {
+      await createDirectory(lambdaName, `${path}/.bam/functions`);
+      await copyFile(`${cwd}/${lambdaName}.js`, `${path}/.bam/functions/${lambdaName}/index.js`);
+    }
   };
 
   bamSpinner.start();

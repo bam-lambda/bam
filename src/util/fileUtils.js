@@ -78,9 +78,27 @@ const createJSONFile = async (fileName, path, json) => {
 
 const promisifiedRimraf = dir => new Promise(res => rimraf(dir, res));
 
+const copyDir = async (src, dest) => {
+  const entries = await readdir(src, { withFileTypes: true });
+  await mkdir(dest);
+
+  for (let i = 0; i < entries.length; i += 1) {
+    const entry = entries[i];
+    const srcPath = `${src}/${entry.name}`;
+    const destPath = `${dest}/${entry.name}`;
+
+    if (entry.isDirectory()) {
+      await copyDir(srcPath, destPath);
+    } else {
+      await copyFile(srcPath, destPath);
+    }
+  }
+};
+
 module.exports = {
   readFile,
   writeFile,
+  copyDir,
   copyFile,
   unlink,
   rename,

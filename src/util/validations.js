@@ -1,5 +1,5 @@
-const { doesLambdaExist, doesTableExist } = require('../aws/doesResourceExist.js');
-const { readdir } = require('../util/fileUtils.js');
+const { doesLambdaExist, doesTableExist } = require('../aws/doesResourceExist');
+const { readdir, exists } = require('../util/fileUtils');
 const {
   customizeLambdaWarnings,
   customizeApiWarnings,
@@ -7,13 +7,27 @@ const {
 } = require('./validationMessages.js');
 
 // helper methods
+const lambdaFileExistsWithinDir = async (name) => {
+  const cwd = process.cwd();
+  const lambdaFileExists = await exists(`${cwd}/${name}/${name}.js`);
+  return lambdaFileExists;
+};
+
 const lambdaExistsInCwd = async (name) => {
   const cwd = process.cwd();
   const files = await readdir(cwd);
-  return files.some((file) => {
+
+  const dirOrFileExists = files.some((file) => {
     const fileWithoutExtension = file.split('.')[0];
     return fileWithoutExtension === name;
   });
+
+  if (dirOrFileExists) {
+    const dirExists = files.includes(name);
+    return (dirExists ? lambdaFileExistsWithinDir(name) : true);
+  }
+
+  return false;
 };
 
 const lambdaHasValidName = (name) => {

@@ -78,6 +78,17 @@ const createJSONFile = async (fileName, path, json) => {
 
 const promisifiedRimraf = dir => new Promise(res => rimraf(dir, res));
 
+const unique = (arr) => {
+  const present = {};
+  return arr.reduce((acc, e) => {
+    if (!present[e]) {
+      present[e] = true;
+      acc.push(e);
+    }
+    return acc;
+  }, []);
+};
+
 module.exports = {
   readFile,
   writeFile,
@@ -98,4 +109,5 @@ module.exports = {
   writeLambda,
   writeApi,
   promisifiedRimraf,
+  unique,
 };

@@ -5,9 +5,15 @@ const updateLambda = require('../aws/updateLambda');
 const deployApi = require('../aws/deployApi.js');
 const { doesApiExist } = require('../aws/doesResourceExist');
 const getLambda = require('../aws/getLambda');
-const { validateApiMethods, validateLambdaReDeployment } = require('../util/validations');
+
+const { 
+  validateApiMethods,
+  validateLambdaReDeployment,
+} = require('../util/validations');
+
 const getRegion = require('../util/getRegion');
-const createApiGatewayIntegration = require('../aws/createApiGatewayIntegration');
+
+const updateHttpMethods = require('../aws/updateHttpMethods');
 const bamBam = require('../util/bamBam');
 
 const {
@@ -16,6 +22,7 @@ const {
   exists,
   rename,
   readFuncLibrary,
+  unique,
 } = require('../util/fileUtils');
 
 const {
@@ -36,10 +43,11 @@ module.exports = async function redeploy(lambdaName, path, options) {
     return;
   }
 
-  const httpMethods = options.methods ? options.methods.map(method => method.toUpperCase()) : ['GET'];
-  const invalidApiMsg = validateApiMethods(httpMethods);
-  if (invalidApiMsg) {
-    bamWarn(invalidApiMsg);
+  const addMethods = options.methods ? unique(options.methods.map(method => method.toUpperCase())) : [];
+  const removeMethods = options.rmMethods ? unique(options.rmMethods.map(method => method.toUpperCase())) : [];
+  const invalidHttp = validateApiMethods(addMethods) || validateApiMethods(removeMethods);
+  if (invalidHttp) {
+    bamWarn(invalidHttp);
     return;
   }
 
@@ -72,19 +80,11 @@ module.exports = async function redeploy(lambdaName, path, options) {
     const apiExists = await doesApiExist(restApiId);
 
     if (!existsLocally || !restApiId || !apiExists) {
-      await deployApi(lambdaName, path, httpMethods, stageName);
+      await deployApi(lambdaName, path, addMethods, stageName);
     } else {
       const resources = (await asyncGetResources({ restApiId })).items;
       const resource = resources.find(res => res.path === '/');
-      const resourceId = resource.id;
-      const resourceMethods = Object.keys(resource.resourceMethods);
-      for (let i = 0; i < httpMethods.length; i += 1) {
-        const httpMethod = httpMethods[i];
-        if (!resourceMethods.includes(httpMethod)) {
-          const params = [httpMethod, resourceId, restApiId, lambdaName, path];
-          await bamBam(createApiGatewayIntegration, { params, retryError: 'TooManyRequestsException' });
-        }
-      }
+      await updateHttpMethods(resource, lambdaName, restApiId, addMethods, removeMethods, path);
       await bamBam(asyncCreateDeployment, { params: [{ restApiId, stageName }], retryError: 'TooManyRequestsException' });
     }
   };
@@ -94,7 +94,7 @@ module.exports = async function redeploy(lambdaName, path, options) {
   };
 
   // redeploy sequence
-  const data = await updateLambda(lambdaName, path, options.permitDb);
+  const data = await updateLambda(lambdaName, path, options);
 
   if (data) {
     await overwriteLocalPkg();

@@ -78,16 +78,23 @@ const createJSONFile = async (fileName, path, json) => {
 
 const promisifiedRimraf = dir => new Promise(res => rimraf(dir, res));
 
+const isDirectory = async (path) => {
+  const stat = promisify(fs.stat);
+  const statOfPath = await stat(path);
+  return statOfPath.isDirectory();
+};
+
 const copyDir = async (src, dest) => {
-  const entries = await readdir(src, { withFileTypes: true });
+  const entries = await readdir(src);
   await mkdir(dest);
 
   for (let i = 0; i < entries.length; i += 1) {
     const entry = entries[i];
-    const srcPath = `${src}/${entry.name}`;
-    const destPath = `${dest}/${entry.name}`;
+    const srcPath = `${src}/${entry}`;
+    const destPath = `${dest}/${entry}`;
+    const srcIsDir = await isDirectory(srcPath);
 
-    if (entry.isDirectory()) {
+    if (srcIsDir) {
       await copyDir(srcPath, destPath);
     } else {
       await copyFile(srcPath, destPath);

@@ -6,6 +6,9 @@ const {
   readFile,
   copyFile,
   readConfig,
+  rename,
+  copyDir,
+  exists,
 } = require('../util/fileUtils');
 const { bamError } = require('../util/logger');
 const { zipper } = require('../util/zipper');
@@ -14,8 +17,18 @@ const bamBam = require('../util/bamBam');
 const bamSpinner = require('../util/spinner');
 
 const apiVersion = 'latest';
+const cwd = process.cwd();
 
 const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
+const getRole = async (lambdaName) => {
+  try {
+    const data = await getLambda(lambdaName);
+    return data.Configuration.Role;
+  } catch (err) {
+    bamError(err);
+    return err;
+  }
+};
 
 module.exports = async function updateLambda(lambdaName, path, dbFlag) {
   const config = await readConfig(path);
@@ -24,20 +37,25 @@ module.exports = async function updateLambda(lambdaName, path, dbFlag) {
   const asyncLambdaUpdateFunctionCode = promisify(lambda.updateFunctionCode.bind(lambda));
   const asyncLambdaUpdateFunctionConfiguration = promisify(lambda.updateFunctionConfiguration.bind(lambda));
   const databaseRoleArn = `arn:aws:iam::${accountNumber}:role/${dbRole}`;
+  const lambdaNameDirExists = await exists(`${cwd}/${lambdaName}`);
+  const renameLambdaFileToIndexJs = async () => {
+    await rename(`${path}/.bam/functions/${lambdaName}-temp/${lambdaName}.js`,
+      `${path}/.bam/functions/${lambdaName}-temp/index.js`);
+  };
 
-  const getRole = async (lambdaName) => { 
-    try {
-      const data = await getLambda(lambdaName);
-      return data.Configuration.Role;
-    } catch (err) {
-      bamError(err);
-    }
+  const createDeploymentPackageFromDir = async () => {
+    await copyDir(`${cwd}/${lambdaName}`, `${path}/.bam/functions/${lambdaName}-temp`);
+    const lambdaNameJSExists = await exists(`${path}/.bam/functions/${lambdaName}-temp/${lambdaName}.js`);
+    if (lambdaNameJSExists) await renameLambdaFileToIndexJs();
   };
 
   const createTempDeployPkg = async () => {
-    const cwd = process.cwd();
-    await createDirectory(`${lambdaName}-temp`, `${path}/.bam/functions`);
-    await copyFile(`${cwd}/${lambdaName}.js`, `${path}/.bam/functions/${lambdaName}-temp/index.js`);
+    if (lambdaNameDirExists) {
+      await createDeploymentPackageFromDir();
+    } else {
+      await createDirectory(`${lambdaName}-temp`, `${path}/.bam/functions`);
+      await copyFile(`${cwd}/${lambdaName}.js`, `${path}/.bam/functions/${lambdaName}-temp/index.js`);
+    }
   };
 
   bamSpinner.start();

@@ -2,10 +2,11 @@ const customizeLambdaWarnings = (name) => {
   const warningMessages = {
     nameIsTaken: `The name "${name}" is already being used in this directory. Please select another.`,
     invalidSyntax: `"${name}" is invalid. Lambda names must contain 1 to 64 letters, numbers, hyphens, and/or underscores only.`,
-    doesNotExistInCwd: `There is no file called "${name}.js" in this directory.`,
+    doesNotExistInCwd: `There is no file called "${name}.js".`,
     alreadyExistsOnAws: `"${name}" lambda already exists. If you are trying to overwrite this lambda, please use "bam redeploy ${name}" instead.`,
     doesNotExistOnAws: `Lambda "${name}" does not exist on AWS.`,
     useDeployInstead: `Lambda "${name}" does not exist on AWS. If you are trying to create a new lambda, please use "bam deploy ${name}" instead.`,
+    invalidLambda: `Lambda "${name}" does not contain "exports.handler".  Consider using "bam create" to create a local file that is in the correct format.`,
   };
   return warningMessages;
 };

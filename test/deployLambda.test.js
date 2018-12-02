@@ -30,7 +30,6 @@ const cwd = process.cwd();
 
 describe('bam deploy lambda', () => {
   beforeEach(async () => {
-    const testLambdaFile = await readFile('./test/templates/testLambda.js');
     const config = await configTemplate(roleName);
     config.accountNumber = process.env.AWS_ID;
     jest.setTimeout(30000);
@@ -39,33 +38,50 @@ describe('bam deploy lambda', () => {
     await createJSONFile('config', `${path}/.bam/`, config);
     await createJSONFile('library', `${path}/.bam/functions`, {});
     await createBamRole(roleName);
-    await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
   });
 
   afterEach(async () => {
     await deleteLambda(lambdaName, path);
     await promisifiedRimraf(`${path}/.bam`);
-    await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
   });
 
   test(`Zip file exists within ./test/.bam/functions/${lambdaName}`, async () => {
+    const testLambdaFile = await readFile('./test/templates/testLambda.js');
+    await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
     await deployLambda(lambdaName, 'test description', path);
     const zipFile = await exists(`${path}/.bam/functions/${lambdaName}/${lambdaName}.zip`);
+    await unlink(`${cwd}/${lambdaName}.js`);
     expect(zipFile).toBe(true);
   });
 
   test('Lambda exists on AWS', async () => {
+    const testLambdaFile = await readFile('./test/templates/testLambda.js');
+    await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
     await deployLambda(lambdaName, 'test description', path);
     const lambda = await doesLambdaExist(lambdaName);
+    await unlink(`${cwd}/${lambdaName}.js`);
     expect(lambda).toBe(true);
   });
 
   test('Lambda metadata exists within ./test/.bam/functions/library.json', async () => {
+    const testLambdaFile = await readFile('./test/templates/testLambda.js');
+    await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
     await deployLambda(lambdaName, 'test description', path);
     const library = await readFuncLibrary(path);
     const lambda = library[lambdaName];
+    await unlink(`${cwd}/${lambdaName}.js`);
     expect(lambda).toBeTruthy();
+  });
+
+  test('Lambda deployed with folder exists on AWS', async () => {
+    const testLambdaFile = await readFile('./test/templates/testLambda.js');
+    await createDirectory(lambdaName, cwd);
+    await writeFile(`${cwd}/${lambdaName}/${lambdaName}.js`, testLambdaFile);
+    await deployLambda(lambdaName, 'test description', path);
+    const lambda = await doesLambdaExist(lambdaName);
+    await promisifiedRimraf(`${cwd}/${lambdaName}`);
+    expect(lambda).toBe(true);
   });
 });

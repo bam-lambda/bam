@@ -16,11 +16,15 @@ const {
 const {
   writeLambda,
   readConfig,
+  copyDir,
   copyFile,
   readFile,
+  rename,
+  exists,
 } = require('../util/fileUtils');
 
 const apiVersion = 'latest';
+const cwd = process.cwd();
 
 module.exports = async function deployLambda(lambdaName, description, path, dbFlag) {
   const config = await readConfig(path);
@@ -28,11 +32,25 @@ module.exports = async function deployLambda(lambdaName, description, path, dbFl
   const role = dbFlag ? dbRole : config.role;
   const lambda = new AWS.Lambda({ apiVersion, region });
   const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
+  const lambdaNameDirExists = await exists(`${cwd}/${lambdaName}`);
+  const renameLambdaFileToIndexJs = async () => {
+    await rename(`${path}/.bam/functions/${lambdaName}/${lambdaName}.js`,
+      `${path}/.bam/functions/${lambdaName}/index.js`);
+  };
+
+  const createDeploymentPackageFromDir = async () => {
+    await copyDir(`${cwd}/${lambdaName}`, `${path}/.bam/functions/${lambdaName}`);
+    const lambdaNameJSExists = await exists(`${path}/.bam/functions/${lambdaName}/${lambdaName}.js`);
+    if (lambdaNameJSExists) await renameLambdaFileToIndexJs();
+  };
 
   const createDeploymentPackage = async () => {
-    const cwd = process.cwd();
-    await createDirectory(lambdaName, `${path}/.bam/functions`);
-    await copyFile(`${cwd}/${lambdaName}.js`, `${path}/.bam/functions/${lambdaName}/index.js`);
+    if (lambdaNameDirExists) {
+      await createDeploymentPackageFromDir();
+    } else {
+      await createDirectory(lambdaName, `${path}/.bam/functions`);
+      await copyFile(`${cwd}/${lambdaName}.js`, `${path}/.bam/functions/${lambdaName}/index.js`);
+    }
   };
 
   bamSpinner.start();

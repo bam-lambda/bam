@@ -29,7 +29,7 @@ module.exports = function handleArgs(args, command) {
   let resourceName = '';
 
   if (commandWithResource(command)) {
-    [resourceName, options] = args;
+    [resourceName, ...options] = args;
     options = getOptions(options);
   } else {
     options = getOptions([args[0]]);

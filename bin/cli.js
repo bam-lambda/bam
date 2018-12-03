@@ -23,7 +23,8 @@ const homedir = os.homedir();
   // TODO: add new commands to catchSetupAndConfig
   let resourceName;
   let options = {};
-  if (args) ({ resourceName, options } = handleArgs(args));
+
+  if (args) ({ resourceName, options } = handleArgs(args, command));
   const shouldContinue = await catchSetupAndConfig(homedir, command, options);
   if (!shouldContinue) return;
 
@@ -40,7 +41,7 @@ const homedir = os.homedir();
   } else if (command === 'dbtable') {
     await dbtable(resourceName, homedir, options);
   } else if (command === 'list') {
-    await list(homedir);
+    await list(homedir, options);
   } else if (command === 'version' || command === '-v') {
     await version();
   } else if (command === 'help' || command === '-h' || command === 'man') {

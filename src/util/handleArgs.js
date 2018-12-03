@@ -1,7 +1,6 @@
-module.exports = function handleArgs(args) {
-  const resourceName = args[0];
+const getOptions = (flags) => {
   const options = {};
-  const formattedOptions = args.slice(1)
+  const formattedOptions = flags
     .join(' ')
     .split('--')
     .slice(1)
@@ -11,6 +10,30 @@ module.exports = function handleArgs(args) {
     const [key, ...values] = optionStr.split(' ');
     options[key] = values;
   });
+
+  return options;
+};
+
+const commandsWithResource = [
+  'create',
+  'deploy',
+  'redeploy',
+  'get',
+  'delete',
+  'dbtable',
+];
+const commandWithResource = command => commandsWithResource.includes(command);
+
+module.exports = function handleArgs(args, command) {
+  let options;
+  let resourceName = '';
+
+  if (commandWithResource(command)) {
+    [resourceName, options] = args;
+    options = getOptions(options);
+  } else {
+    options = getOptions([args[0]]);
+  }
 
   return {
     resourceName,

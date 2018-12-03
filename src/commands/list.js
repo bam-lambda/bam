@@ -53,17 +53,8 @@ const getAwsFunctionsList = (functionsOnAws, functionsLocalAndOnAws) => {
     `${indentFurther}${funcName}`)).join('\n');
 };
 
-const getBamTablesList = async (path) => {
-  const region = await getRegion();
-  const dynamo = new AWS.DynamoDB({ apiVersion, region });
-  const asyncListTables = promisify(dynamo.listTables.bind(dynamo));
-  const tablesNamesOnAws = await asyncListTables();
-  const tablesOnAws = tablesNamesOnAws.TableNames;
-
-  const tablesConfigJSON = await readFile(`${path}/.bam/dbTables.json`, 'utf8');
-  const tablesConfig = JSON.parse(tablesConfigJSON);
-  const tableNames = Object.keys(tablesConfig).filter(table => tablesOnAws.includes(table));
-  const tablesList = tableNames.map((tableName) => {
+const getFormattedTablesList = (tableNames, tablesConfig) => (
+  tableNames.map((tableName) => {
     const { partitionKey, sortKey } = tablesConfig[tableName];
     const tableNameStr = bamText(`${tableName}:`);
     const partitionKeyDataType = friendlyDataTypes[partitionKey.dataType];
@@ -77,12 +68,30 @@ const getBamTablesList = async (path) => {
     }
 
     return fields.join('\n');
-  }).join(`${vertPadding}${indentFurther}`);
+  }).join(`${vertPadding}${indentFurther}`)
+);
 
-  return `${indentFurther}${tablesList}`;
+const getBamTablesList = async (path) => {
+  const region = await getRegion();
+  const dynamo = new AWS.DynamoDB({ apiVersion, region });
+  const asyncListTables = promisify(dynamo.listTables.bind(dynamo));
+  const tablesNamesOnAws = await asyncListTables();
+  const tablesOnAws = tablesNamesOnAws.TableNames;
+
+  const tablesConfigJSON = await readFile(`${path}/.bam/dbTables.json`, 'utf8');
+  const tablesConfig = JSON.parse(tablesConfigJSON);
+  const tableNames = Object.keys(tablesConfig).filter(table => tablesOnAws.includes(table));
+  const formattedTablesList = getFormattedTablesList(tableNames, tablesConfig);
+
+  return `${indentFurther}${formattedTablesList}`;
 };
 
-module.exports = async function list(path) {
+const checkForDbTablesOption = (options) => {
+  const optionsKeys = Object.keys(options);
+  return optionsKeys.some(optionKey => /db/.test(optionKey));
+};
+
+module.exports = async function list(path, options) {
   const functionsOnAws = await getLambdaNamesFromAws(path);
   const library = await readFuncLibrary(path);
 
@@ -92,17 +101,20 @@ module.exports = async function list(path) {
   const awsFunctionsList = getAwsFunctionsList(functionsOnAws, functionsLocalAndOnAws);
   const bamFunctionsList = getBamFunctionsList(functionsLocalAndOnAws, library);
   const tablesList = await getBamTablesList(path);
+  const listDbTables = checkForDbTablesOption(options);
 
-  logInColor(`${indent}Lambdas deployed from this machine using BAM:`, 'green');
-  log(`${bamFunctionsList}\n`);
-
-  if (awsFunctionsList.length > 0) {
-    bamWarn(`${indent}Other lambdas on AWS:`);
-    log(`${awsFunctionsList}\n`);
-  }
-
-  if (tablesList.length > 0) {
+  if (listDbTables && tablesList.length > 0) {
     logInColor(`${indent}DynamoDB tables deployed from this machine using BAM:`, 'green');
     log(`${tablesList}\n`);
+  } else if (listDbTables) {
+    bamWarn('No tables on AWS have been deployed from this machine');
+  } else {
+    logInColor(`${indent}Lambdas deployed from this machine using BAM:`, 'green');
+    log(`${bamFunctionsList}\n`);
+
+    if (awsFunctionsList.length > 0) {
+      bamWarn(`${indent}Other lambdas on AWS:`);
+      log(`${awsFunctionsList}\n`);
+    }
   }
 };

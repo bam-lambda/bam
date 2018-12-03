@@ -1,16 +1,28 @@
-const getUserDefaults = require('./getUserDefaults.js');
-const init = require('./init.js');
-const { bamLog, bamWarn } = require('./fancyText.js');
-const { readConfig, exists, isConfigured } = require('./fileUtils.js');
+const getUserDefaults = require('./getUserDefaults');
+const init = require('./init');
+const { bamLog, bamWarn } = require('./logger');
+const { readConfig, exists, isConfigured } = require('./fileUtils');
 const { createBamRole, createDatabaseBamRole } = require('../aws/createRoles');
 const { doesRoleExist } = require('../aws/doesResourceExist');
 
 const bamRole = 'bamRole';
 const databaseBamRole = 'databaseBamRole';
+const commands = [
+  'create',
+  'deploy',
+  'redeploy',
+  'list',
+  'get',
+  'delete',
+  'config',
+  'dbtable',
+  'help',
+  'version',
+];
+const commandIsNotValid = command => !commands.includes(command);
 
 module.exports = async function catchSetupAndConfig(path, command, options) {
-  if (!['create', 'deploy', 'redeploy', 'list', 'get', 'delete', 'config', 'dbtable']
-    .includes(command)) return true;
+  if (commandIsNotValid(command) || ['help', 'version'].includes(command)) return true;
 
   const bamDirExists = await exists(`${path}/.bam`);
   if (!bamDirExists) {

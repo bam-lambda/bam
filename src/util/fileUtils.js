@@ -48,9 +48,13 @@ const writeFuncLibrary = async (path, functions) => {
 const writeLambda = async (data, path, description = '') => {
   const name = data.FunctionName;
   const arn = data.FunctionArn;
+  const api = {
+    endpoint: '',
+    restApiId: '',
+  };
 
   const functions = await readFuncLibrary(path);
-  functions[name] = { arn, description };
+  functions[name] = { arn, description, api };
   await writeFuncLibrary(path, functions);
 };
 

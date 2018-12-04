@@ -9,7 +9,11 @@ const {
   getBamTablesList,
 } = require('../util/listHelpers');
 const checkForOptionType = require('../util/checkForOptionType');
-const { readFuncLibrary } = require('../util/fileUtils');
+const {
+  readFuncLibrary,
+  readFile,
+  exists,
+} = require('../util/fileUtils');
 
 const logBamFunctions = (bamFunctionsList) => {
   if (bamFunctionsList.length > 0) {
@@ -37,10 +41,23 @@ const logBamTables = (bamTablesList) => {
 };
 
 module.exports = async function list(path, options) {
-  const library = await readFuncLibrary(path);
+  let library = {};
+  const libraryFileExists = await exists(`${path}/.bam/functions/library.json`);
+  if (libraryFileExists) {
+    library = await readFuncLibrary(path) || {};
+  }
+
+  let dbtables = {};
+  const dbtablesFilePath = `${path}/.bam/dbtables.json`;
+  const dbtablesFileExists = await exists(dbtablesFilePath);
+  if (dbtablesFileExists) {
+    const dbtablesJSON = await readFile(dbtablesFilePath, 'utf8');
+    dbtables = JSON.parse(dbtablesJSON);
+  }
+
   const awsFunctionsList = await getAwsFunctionsList(path, library);
   const bamFunctionsList = await getBamFunctionsList(path, library);
-  const bamTablesList = await getBamTablesList(path);
+  const bamTablesList = await getBamTablesList(path, dbtables);
 
   const dbFlag = checkForOptionType(options, 'db');
   const lambdaFlag = checkForOptionType(options, 'lambda');

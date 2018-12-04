@@ -69,8 +69,8 @@ const getAwsFunctionsList = async (path, library) => {
   return numOfFunctionsOnlyOnAws === 0 ? '' : formatAwsFunctionsList(functionsOnlyOnAws);
 };
 
-const formatTablesList = (tableName, tablesConfig) => {
-  const { partitionKey, sortKey } = tablesConfig[tableName];
+const formatTablesList = (tableName, dbtables) => {
+  const { partitionKey, sortKey } = dbtables[tableName];
   const tableNameStr = bamText(`${tableName}:`);
   const partitionKeyDataType = friendlyDataTypes[partitionKey.dataType];
   const partitionKeyStr = `${indentFurthest}${bamText('Partition Key:')} ${partitionKey.name} (${partitionKeyDataType})`;
@@ -85,24 +85,22 @@ const formatTablesList = (tableName, tablesConfig) => {
   return fields.join('\n');
 };
 
-const getFormattedTablesList = (tableNames, tablesConfig) => (
+const getFormattedTablesList = (tableNames, dbtables) => (
   tableNames.map(tableName => (
-    formatTablesList(tableName, tablesConfig)
+    formatTablesList(tableName, dbtables)
   )).join(`${vertPadding}${indentFurther}`)
 );
 
-const getBamTablesList = async (path) => {
+const getBamTablesList = async (path, dbtables) => {
   const region = await getRegion();
   const dynamo = new AWS.DynamoDB({ apiVersion, region });
   const asyncListTables = promisify(dynamo.listTables.bind(dynamo));
   const tablesNamesOnAws = await asyncListTables();
   const tablesOnAws = tablesNamesOnAws.TableNames;
 
-  const tablesConfigJSON = await readFile(`${path}/.bam/dbTables.json`, 'utf8');
-  const tablesConfig = JSON.parse(tablesConfigJSON);
-  const tableNames = Object.keys(tablesConfig).filter(table => tablesOnAws.includes(table));
+  const tableNames = Object.keys(dbtables).filter(table => tablesOnAws.includes(table));
   const numOfTables = tableNames.length;
-  const formattedTablesList = getFormattedTablesList(tableNames, tablesConfig);
+  const formattedTablesList = getFormattedTablesList(tableNames, dbtables);
 
   return numOfTables === 0 ? '' : `${indentFurther}${formattedTablesList}`;
 };

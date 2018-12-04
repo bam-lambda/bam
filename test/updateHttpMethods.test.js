@@ -6,10 +6,8 @@ const {
   createDirectory,
   createJSONFile,
   promisifiedRimraf,
-  exists,
   readFile,
   writeFile,
-  writeLambda,
   readFuncLibrary,
 } = require('../src/util/fileUtils');
 const { bamError } = require('../src/util/logger');
@@ -128,9 +126,9 @@ describe('bam redeploy lambda', () => {
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
     await deployLambda(lambdaName, 'test description', path);
     await deployApi(lambdaName, path, httpMethods, stageName);
-    const options = { 
+    const options = {
       methods: ['POST', 'POST', 'PUT', 'DELETE'],
-      rmMethods: ['PUT', 'DELETE'], 
+      rmMethods: ['PUT', 'DELETE'],
     };
     await redeploy(lambdaName, path, options);
 

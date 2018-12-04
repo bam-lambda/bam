@@ -7,7 +7,6 @@ const {
   indentFurthest,
   vertPadding,
 } = require('../util/logger');
-const { readFile } = require('../util/fileUtils');
 const getRegion = require('../util/getRegion');
 
 const apiVersion = 'latest';

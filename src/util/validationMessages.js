@@ -1,6 +1,6 @@
 const customizeLambdaWarnings = (name) => {
   const warningMessages = {
-    nameIsTaken: `The name "${name}" is already being used in this directory. Please select another.`,
+    nameIsTaken: `The name "${name}" is already being used in this directory.`,
     invalidSyntax: `"${name}" is invalid. Lambda names must contain 1 to 64 letters, numbers, hyphens, and/or underscores only.`,
     doesNotExistInCwd: `There is no file called "${name}.js".`,
     alreadyExistsOnAws: `"${name}" lambda already exists. If you are trying to overwrite this lambda, please use "bam redeploy ${name}" instead.`,

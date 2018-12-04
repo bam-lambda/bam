@@ -40,7 +40,6 @@ const addLambdaFolderToCwd = async (lambdaName, location) => {
   });
 };
 
-// path only needed for aws func -> remove when that is extracted
 module.exports = async function get(lambdaName, path) {
   bamSpinner.start();
   const invalidLambdaMsg = await validateLambdaRetrieval(lambdaName);

@@ -3,16 +3,13 @@ const deployApi = require('../aws/deployApi');
 const getUserInput = require('../util/getUserInput');
 const { bamWarn } = require('../util/logger');
 const { validateLambdaDeployment, validateApiMethods } = require('../util/validations');
+const checkForOptionType = require('../util/checkForOptionType');
 
 const stage = 'bam';
 
-const checkForLambdaOnlyOption = (options) => {
-  const optionsKeys = Object.keys(options);
-  return optionsKeys.some(opt => (/lambda/).test(opt));
-};
-
 module.exports = async function deploy(lambdaName, path, options) {
-  const deployLambdaOnly = checkForLambdaOnlyOption(options);
+  const deployLambdaOnly = checkForOptionType(options, 'lambda');
+  const permitDb = checkForOptionType(options, 'db');
 
   const invalidLambdaMsg = await validateLambdaDeployment(lambdaName);
   if (invalidLambdaMsg) {
@@ -20,7 +17,8 @@ module.exports = async function deploy(lambdaName, path, options) {
     return;
   }
 
-  const httpMethods = options.methods ? options.methods.map(method => method.toUpperCase()) : ['GET'];
+  const httpMethods = options.methods
+    ? options.methods.map(method => method.toUpperCase()) : ['GET'];
   const invalidApiMsg = validateApiMethods(httpMethods);
   if (invalidApiMsg) {
     bamWarn(invalidApiMsg);
@@ -42,7 +40,7 @@ module.exports = async function deploy(lambdaName, path, options) {
     }
 
     const [description] = input;
-    await deployLambda(lambdaName, description, path, options.permitDb);
+    await deployLambda(lambdaName, description, path, permitDb);
     if (deployLambdaOnly) return;
     await deployApi(lambdaName, path, httpMethods, stage);
   } catch (err) {

@@ -6,7 +6,7 @@ const deployApi = require('../aws/deployApi.js');
 const { doesApiExist } = require('../aws/doesResourceExist');
 const getLambda = require('../aws/getLambda');
 
-const { 
+const {
   validateApiMethods,
   validateLambdaReDeployment,
 } = require('../util/validations');
@@ -41,9 +41,12 @@ module.exports = async function redeploy(lambdaName, path, options) {
     bamWarn(invalidLambdaMsg);
     return;
   }
-  const addMethods = options.methods ? unique(options.methods.map(method => method.toUpperCase())) : [];
-  const removeMethods = options.rmMethods ? unique(options.rmMethods.map(method => method.toUpperCase())) : []; 
+  const addMethods = options.methods
+    ? unique(options.methods.map(method => method.toUpperCase())) : [];
+  const removeMethods = options.rmMethods
+    ? unique(options.rmMethods.map(method => method.toUpperCase())) : [];
   const invalidHttp = validateApiMethods(addMethods) || validateApiMethods(removeMethods);
+
   if (invalidHttp) {
     bamWarn(invalidHttp);
     return;

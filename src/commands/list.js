@@ -42,22 +42,23 @@ const logBamTables = (bamTablesList) => {
 
 module.exports = async function list(path, options) {
   let library = {};
+  let bamFunctionsList = [];
   const libraryFileExists = await exists(`${path}/.bam/functions/library.json`);
   if (libraryFileExists) {
     library = await readFuncLibrary(path) || {};
+    bamFunctionsList = await getBamFunctionsList(path, library);
   }
+  const awsFunctionsList = await getAwsFunctionsList(path, library);
 
   let dbtables = {};
+  let bamTablesList = [];
   const dbtablesFilePath = `${path}/.bam/dbtables.json`;
   const dbtablesFileExists = await exists(dbtablesFilePath);
   if (dbtablesFileExists) {
     const dbtablesJSON = await readFile(dbtablesFilePath, 'utf8');
     dbtables = JSON.parse(dbtablesJSON);
+    bamTablesList = await getBamTablesList(path, dbtables);
   }
-
-  const awsFunctionsList = await getAwsFunctionsList(path, library);
-  const bamFunctionsList = await getBamFunctionsList(path, library);
-  const bamTablesList = await getBamTablesList(path, dbtables);
 
   const dbFlag = checkForOptionType(options, 'db');
   const lambdaFlag = checkForOptionType(options, 'lambda');

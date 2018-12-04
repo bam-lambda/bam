@@ -15,9 +15,9 @@ module.exports = async function bamBam(asyncCallback, {
   calls = 0,
 } = defaultObj) {
   try {
-    const data = await asyncCallback(...params);
+    const data = await asyncCallback(...params);    
     return data;
-  } catch (err) {
+  } catch (err) {  
     if (err.code === retryError) {
       if (err.code === 'TooManyRequestsException' && calls === 0) {
         resetCursorPosition();

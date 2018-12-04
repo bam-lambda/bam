@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const { promisify } = require('util');
 
 const { readConfig } = require('../util/fileUtils');
-const { bamError } = require('../util/logger');
+const { bamWarn, bamError } = require('../util/logger');
 const bamBam = require('../util/bamBam');
 const { doesRoleExist } = require('./doesResourceExist');
 const getLambda = require('./getLambda');
@@ -25,7 +25,7 @@ module.exports = async function updateLambdaConfig(lambdaName, path, options) {
     const userRole = options.role[0];
     const roleExists = await doesRoleExist(userRole);
     if (!roleExists) {
-      bamError(`Role ${userRole} does not exist`);
+      bamWarn(`Role ${userRole} does not exist`);
       return;
     }
     updatedRoleArn = `arn:aws:iam::${accountNumber}:role/${userRole}`;

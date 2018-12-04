@@ -78,6 +78,7 @@ const createJSONFile = async (fileName, path, json) => {
 
 const promisifiedRimraf = dir => new Promise(res => rimraf(dir, res));
 
+<<<<<<< HEAD
 const unique = (arr) => {
   const present = {};
   return arr.reduce((acc, e) => {
@@ -87,8 +88,7 @@ const unique = (arr) => {
     }
     return acc;
   }, []);
-};
-
+=======
 const isDirectory = async (path) => {
   const stat = promisify(fs.stat);
   const statOfPath = await stat(path);
@@ -111,6 +111,7 @@ const copyDir = async (src, dest) => {
       await copyFile(srcPath, destPath);
     }
   }
+>>>>>>> origin/develop
 };
 
 module.exports = {

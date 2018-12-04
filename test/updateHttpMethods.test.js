@@ -19,6 +19,7 @@ const deployLambda = require('../src/aws/deployLambda');
 const deployApi = require('../src/aws/deployApi');
 const redeploy = require('../src/commands/redeploy');
 const destroy = require('../src/commands/destroy');
+const delay = require('../src/util/delay');
 
 const iam = new AWS.IAM();
 const accountNumber = process.env.AWS_ID;
@@ -55,7 +56,7 @@ const asyncHttpsRequest = opts => (
 
 describe('bam redeploy lambda', () => {
   beforeEach(async () => {
-    jest.setTimeout(60000);
+    jest.setTimeout(200000);
     const config = await configTemplate(roleName);
     config.accountNumber = accountNumber;
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
@@ -74,6 +75,54 @@ describe('bam redeploy lambda', () => {
     await asyncDeleteRole({ RoleName: roleName });
   });
 
+  test('specified httpMethods are created when api is deployed', async () => {
+    const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
+    await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
+    await deployLambda(lambdaName, 'test description', path);
+    const specifiedMethods = ['PUT', 'DELETE'];
+    await deployApi(lambdaName, path, specifiedMethods, stageName);
+
+    const library = await readFuncLibrary(path);
+    const url = library[lambdaName].api.endpoint;
+    const urlParts = url.split('//')[1].split('/');
+    const postOptions = {
+      hostname: urlParts[0],
+      path: `/${urlParts.slice(1).join('/')}`,
+      method: 'POST',
+    };
+
+    const putOptions = {
+      hostname: urlParts[0],
+      path: `/${urlParts.slice(1).join('/')}`,
+      method: 'PUT',
+    };
+
+    const deleteOptions = {
+      hostname: urlParts[0],
+      path: `/${urlParts.slice(1).join('/')}`,
+      method: 'DELETE',
+    };
+
+    let responsePost;
+    let responsePut;
+    let responseGet;
+    let responseDelete;
+    try {
+      await delay(60000);
+      responseGet = await asyncHttpsGet(url);
+      responsePost = await asyncHttpsRequest(postOptions);
+      responsePut = await asyncHttpsRequest(putOptions);
+      responseDelete = await asyncHttpsRequest(deleteOptions);
+    } catch (err) {
+      bamError(err);
+    }
+
+    expect(responseGet.statusCode).toBe(403);
+    expect(responsePut.statusCode).toBe(200);
+    expect(responsePost.statusCode).toBe(403);
+    expect(responseDelete.statusCode).toBe(204);
+  });
+
   test('httpMethods update upon redeploy', async () => {
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
@@ -81,7 +130,8 @@ describe('bam redeploy lambda', () => {
     await deployApi(lambdaName, path, httpMethods, stageName);
     const options = { 
       methods: ['POST', 'POST', 'PUT', 'DELETE'],
-      rmMethods: ['PUT', 'DELETE'], }
+      rmMethods: ['PUT', 'DELETE'], 
+    };
     await redeploy(lambdaName, path, options);
 
     const library = await readFuncLibrary(path);
@@ -110,6 +160,7 @@ describe('bam redeploy lambda', () => {
     let responseGet;
     let responseDelete;
     try {
+      await delay(60000);
       responseGet = await asyncHttpsGet(url);
       responsePost = await asyncHttpsRequest(postOptions);
       responsePut = await asyncHttpsRequest(putOptions);
@@ -119,8 +170,81 @@ describe('bam redeploy lambda', () => {
     }
 
     expect(responseGet.statusCode).toBe(200);
-    expect(responsePut.statusCode).toBe(200);
+    expect(responsePut.statusCode).toBe(403);
     expect(responsePost.statusCode).toBe(201);
-    expect(responseDelete.statusCode).toBe(204);
+    expect(responseDelete.statusCode).toBe(403);
+  });
+
+  test('method "ANY" accepts all methods', async () => {
+    const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
+    await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
+    await deployLambda(lambdaName, 'test description', path);
+    await deployApi(lambdaName, path, httpMethods, stageName);
+    const addAny = { methods: ['ANY'] };
+    const rmAny = { rmMethods: ['ANY'] };
+
+    const library = await readFuncLibrary(path);
+    const url = library[lambdaName].api.endpoint;
+    const urlParts = url.split('//')[1].split('/');
+    const postOptions = {
+      hostname: urlParts[0],
+      path: `/${urlParts.slice(1).join('/')}`,
+      method: 'POST',
+    };
+
+    const putOptions = {
+      hostname: urlParts[0],
+      path: `/${urlParts.slice(1).join('/')}`,
+      method: 'PUT',
+    };
+
+    const deleteOptions = {
+      hostname: urlParts[0],
+      path: `/${urlParts.slice(1).join('/')}`,
+      method: 'DELETE',
+    };
+
+    let responsePost;
+    let responsePut;
+    let responseGet;
+    let responseDelete;
+    try {
+      await delay(60000);
+      responseGet = await asyncHttpsGet(url);
+      responsePost = await asyncHttpsRequest(postOptions);
+      responsePut = await asyncHttpsRequest(putOptions);
+      responseDelete = await asyncHttpsRequest(deleteOptions);
+
+      expect(responseGet.statusCode).toBe(200);
+      expect(responsePut.statusCode).toBe(403);
+      expect(responsePost.statusCode).toBe(403);
+      expect(responseDelete.statusCode).toBe(403);
+
+      await redeploy(lambdaName, path, addAny);
+      await delay(60000);
+      responseGet = await asyncHttpsGet(url);
+      responsePost = await asyncHttpsRequest(postOptions);
+      responsePut = await asyncHttpsRequest(putOptions);
+      responseDelete = await asyncHttpsRequest(deleteOptions);
+
+      expect(responseGet.statusCode).toBe(200);
+      expect(responsePut.statusCode).toBe(200);
+      expect(responsePost.statusCode).toBe(201);
+      expect(responseDelete.statusCode).toBe(204);
+
+      await redeploy(lambdaName, path, rmAny);
+      await delay(60000);
+      responseGet = await asyncHttpsGet(url);
+      responsePost = await asyncHttpsRequest(postOptions);
+      responsePut = await asyncHttpsRequest(putOptions);
+      responseDelete = await asyncHttpsRequest(deleteOptions);
+
+      expect(responseGet.statusCode).toBe(200);
+      expect(responsePut.statusCode).toBe(403);
+      expect(responsePost.statusCode).toBe(403);
+      expect(responseDelete.statusCode).toBe(403);
+    } catch (err) {
+      bamError(err);
+    }
   });
 });

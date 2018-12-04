@@ -34,7 +34,6 @@ const {
 const apiVersion = 'latest';
 const stageName = 'bam';
 
-// INFO: currently updates code only (not role)
 module.exports = async function redeploy(lambdaName, path, options) {
   // validations
   const invalidLambdaMsg = await validateLambdaReDeployment(lambdaName);
@@ -42,9 +41,8 @@ module.exports = async function redeploy(lambdaName, path, options) {
     bamWarn(invalidLambdaMsg);
     return;
   }
-
   const addMethods = options.methods ? unique(options.methods.map(method => method.toUpperCase())) : [];
-  const removeMethods = options.rmMethods ? unique(options.rmMethods.map(method => method.toUpperCase())) : [];
+  const removeMethods = options.rmMethods ? unique(options.rmMethods.map(method => method.toUpperCase())) : []; 
   const invalidHttp = validateApiMethods(addMethods) || validateApiMethods(removeMethods);
   if (invalidHttp) {
     bamWarn(invalidHttp);

@@ -1,7 +1,9 @@
 const https = require('https');
-const AWS = require('aws-sdk');
 
-const { promisify } = require('util');
+const {
+  asyncDeleteRole,
+  asyncDetachPolicy,
+} = require('../src/aws/awsFunctions');
 const {
   createDirectory,
   createJSONFile,
@@ -21,7 +23,6 @@ const redeploy = require('../src/commands/redeploy');
 const destroy = require('../src/commands/destroy');
 const delay = require('../src/util/delay');
 
-const iam = new AWS.IAM();
 const accountNumber = process.env.AWS_ID;
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
@@ -30,9 +31,6 @@ const path = './test';
 const cwd = process.cwd();
 const stageName = 'bam';
 const httpMethods = ['GET'];
-
-const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
-const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 
 const asyncHttpsGet = endpoint => (
   new Promise((resolve) => {

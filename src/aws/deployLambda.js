@@ -1,19 +1,14 @@
-const AWS = require('aws-sdk');
-const { promisify } = require('util');
-const { createDirectory } = require('../util/fileUtils');
-const { zipper } = require('../util/zipper.js');
-const installLambdaDependencies = require('../util/installLambdaDependencies.js');
-const bamBam = require('../util/bamBam.js');
+const { asyncLambdaCreateFunction } = require('./awsFunctions');
+const { zipper } = require('../util/zipper');
+const installLambdaDependencies = require('../util/installLambdaDependencies');
+const bamBam = require('../util/bamBam');
 const bamSpinner = require('../util/spinner');
-
-const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
-
 const {
   bamLog,
   bamWarn,
 } = require('../util/logger');
-
 const {
+  createDirectory,
   writeLambda,
   readConfig,
   copyDir,
@@ -23,15 +18,13 @@ const {
   exists,
 } = require('../util/fileUtils');
 
-const apiVersion = 'latest';
 const cwd = process.cwd();
+const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
 
 module.exports = async function deployLambda(lambdaName, description, path, dbFlag) {
   const config = await readConfig(path);
-  const { accountNumber, region } = config;
+  const { accountNumber } = config;
   const role = dbFlag ? dbRole : config.role;
-  const lambda = new AWS.Lambda({ apiVersion, region });
-  const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
   const lambdaNameDirExists = await exists(`${cwd}/${lambdaName}`);
   const renameLambdaFileToIndexJs = async () => {
     await rename(`${path}/.bam/functions/${lambdaName}/${lambdaName}.js`,

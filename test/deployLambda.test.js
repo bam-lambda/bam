@@ -1,6 +1,7 @@
-const { promisify } = require('util');
-const AWS = require('aws-sdk');
-
+const {
+  asyncDeleteRole,
+  asyncDetachPolicy,
+} = require('../src/aws/awsFunctions');
 const deployLambda = require('../src/aws/deployLambda.js');
 const deleteLambda = require('../src/aws/deleteLambda');
 const configTemplate = require('../templates/configTemplate');
@@ -18,14 +19,10 @@ const {
   promisifiedRimraf,
 } = require('../src/util/fileUtils');
 
-const iam = new AWS.IAM();
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
-
-const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
-const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 const cwd = process.cwd();
 
 describe('bam deploy lambda', () => {

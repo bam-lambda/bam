@@ -28,7 +28,7 @@ module.exports = async function getUserDefaults(path) {
       defaultAnswer: process.env.AWS_ID,
     };
 
-    const getRegion = {
+    const getUserRegion = {
       question: 'Please provide your default region: ',
       validator: validRegion,
       feedback: badRegion,
@@ -42,7 +42,7 @@ module.exports = async function getUserDefaults(path) {
       defaultAnswer: defaultRole,
     };
 
-    const configPrompts = [getAccountNumber, getRegion, getRole];
+    const configPrompts = [getAccountNumber, getUserRegion, getRole];
 
     const userDefaults = await getUserInput(configPrompts); // undefined if user quits prompts
     if (userDefaults) [config.accountNumber, config.region, config.role] = userDefaults;

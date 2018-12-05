@@ -1,21 +1,19 @@
-const AWS = require('aws-sdk');
-const { promisify } = require('util');
 const uuid = require('uuid');
 const bamBam = require('../util/bamBam');
 const { readConfig } = require('../util/fileUtils');
 
-const apiVersion = 'latest';
+const { asyncGetRegion } = require('../util/getRegion');
+const {
+  asyncAddPermission,
+  asyncPutMethod,
+  asyncPutIntegration,
+  asyncPutMethodResponse,
+} = require('./awsFunctions');
 
 module.exports = async function createApiGatewayIntegration(httpMethod, resourceId, restApiId, lambdaName, path) {
   const config = await readConfig(path);
-  const { region, accountNumber } = config;
-  const lambda = new AWS.Lambda({ apiVersion, region });
-  const api = new AWS.APIGateway({ apiVersion, region });
-
-  const asyncAddPermission = promisify(lambda.addPermission.bind(lambda));
-  const asyncPutMethod = promisify(api.putMethod.bind(api));
-  const asyncPutIntegration = promisify(api.putIntegration.bind(api));
-  const asyncPutMethodResponse = promisify(api.putMethodResponse.bind(api));
+  const region = await asyncGetRegion();
+  const { accountNumber } = config;
 
   // add permission to lambda
   const sourceArn = `arn:aws:execute-api:${region}:${accountNumber}:${restApiId}/*/${httpMethod}/`;

@@ -1,31 +1,24 @@
-const AWS = require('aws-sdk');
-const { promisify } = require('util');
+const {
+  asyncCreateApi,
+  asyncGetResources,
+  asyncCreateDeployment,
+} = require('./awsFunctions');
 
 const createApiGatewayIntegration = require('./createApiGatewayIntegration');
 const bamBam = require('../util/bamBam');
 const bamSpinner = require('../util/spinner');
 const {
   writeApi,
-  readConfig,
   readFile,
 } = require('../util/fileUtils');
-
+const { asyncGetRegion } = require('../util/getRegion');
 const {
   bamLog,
   bamError,
 } = require('../util/logger');
 
-const apiVersion = 'latest';
-
 module.exports = async function deployApi(lambdaName, path, httpMethods, stageName) {
-  const config = await readConfig(path);
-  const { region } = config;
-  const api = new AWS.APIGateway({ apiVersion, region });
-
-  // sdk promises
-  const asyncCreateApi = promisify(api.createRestApi.bind(api));
-  const asyncGetResources = promisify(api.getResources.bind(api));
-  const asyncCreateDeployment = promisify(api.createDeployment.bind(api));
+  const region = await asyncGetRegion();
 
   bamSpinner.start();
 

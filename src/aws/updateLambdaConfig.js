@@ -1,5 +1,4 @@
-const AWS = require('aws-sdk');
-const { promisify } = require('util');
+const { asyncLambdaUpdateFunctionConfiguration } = require('./awsFunctions');
 
 const { readConfig } = require('../util/fileUtils');
 const { bamWarn, bamError } = require('../util/logger');
@@ -8,8 +7,6 @@ const checkForOptionType = require('../util/checkForOptionType');
 const bamBam = require('../util/bamBam');
 const { doesRoleExist } = require('./doesResourceExist');
 const getLambda = require('./getLambda');
-
-const apiVersion = 'latest';
 
 const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
 
@@ -24,9 +21,7 @@ const getRole = async (lambdaName) => {
 
 module.exports = async function updateLambdaConfig(lambdaName, path, options) {
   const config = await readConfig(path);
-  const { region, accountNumber, role } = config;
-  const lambda = new AWS.Lambda({ apiVersion, region });
-  const asyncLambdaUpdateFunctionConfiguration = promisify(lambda.updateFunctionConfiguration.bind(lambda));
+  const { accountNumber, role } = config;
   const permitDb = checkForOptionType(options, 'permitDb');
   const revokeDb = checkForOptionType(options, 'revokeDb');
 

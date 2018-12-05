@@ -1,13 +1,13 @@
-const AWS = require('aws-sdk');
-const { promisify } = require('util');
-const getRegion = require('../util/getRegion');
-
-const iam = new AWS.IAM();
-const apiVersion = 'latest';
+const {
+  asyncListRolePolicies,
+  asyncGetRole,
+  asyncGetFunction,
+  asyncDescribeTable,
+  asyncGetRestApi,
+  asyncListAttachedRolePolicies,
+} = require('./awsFunctions');
 
 const doesRoleExist = async (role) => {
-  const asyncGetRole = promisify(iam.getRole.bind(iam));
-
   try {
     await asyncGetRole({ RoleName: role });
     return true;
@@ -17,8 +17,6 @@ const doesRoleExist = async (role) => {
 };
 
 const doesPolicyExist = async (roleName, policyName) => {
-  const asyncListRolePolicies = promisify(iam.listAttachedRolePolicies.bind(iam));
-
   try {
     const result = await asyncListRolePolicies({ RoleName: roleName });
     return result.AttachedPolicies[0].PolicyName === policyName;
@@ -28,10 +26,6 @@ const doesPolicyExist = async (roleName, policyName) => {
 };
 
 const doesLambdaExist = async (lambdaName) => {
-  const region = await getRegion();
-  const lambda = new AWS.Lambda({ apiVersion, region });
-  const asyncGetFunction = promisify(lambda.getFunction.bind(lambda));
-
   try {
     await asyncGetFunction({ FunctionName: lambdaName });
     return true;
@@ -41,10 +35,6 @@ const doesLambdaExist = async (lambdaName) => {
 };
 
 const doesTableExist = async (tableName) => {
-  const region = await getRegion();
-  const dynamo = new AWS.DynamoDB({ apiVersion, region });
-  const asyncDescribeTable = promisify(dynamo.describeTable.bind(dynamo));
-
   try {
     await asyncDescribeTable({ TableName: tableName });
     return true;
@@ -54,10 +44,6 @@ const doesTableExist = async (tableName) => {
 };
 
 const doesApiExist = async (restApiId) => {
-  const region = await getRegion();
-  const api = new AWS.APIGateway({ apiVersion, region });
-  const asyncGetRestApi = promisify(api.getRestApi.bind(api));
-
   try {
     await asyncGetRestApi({ restApiId });
     return true;
@@ -67,8 +53,6 @@ const doesApiExist = async (restApiId) => {
 };
 
 const isPolicyAttached = async (roleName, policyArn) => {
-  const asyncListAttachedRolePolicies = promisify(iam.listAttachedRolePolicies.bind(iam));
-
   try {
     const data = await asyncListAttachedRolePolicies({ RoleName: roleName });
     const attachedPolicies = data.AttachedPolicies;

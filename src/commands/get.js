@@ -1,6 +1,6 @@
-const { promisify } = require('util');
 const https = require('https');
-const AWS = require('aws-sdk');
+
+const { asyncGetFunction } = require('../aws/awsFunctions');
 
 const {
   bamLog,
@@ -9,7 +9,6 @@ const {
 } = require('../util/logger');
 
 const {
-  readConfig,
   createWriteStream,
   createDirectory,
   unlink,
@@ -20,7 +19,6 @@ const bamSpinner = require('../util/spinner');
 const { unzipper } = require('../util/zipper');
 const { validateLambdaRetrieval } = require('../util/validations');
 
-const apiVersion = 'latest';
 const cwd = process.cwd();
 
 const addLambdaFolderToCwd = async (lambdaName, location) => {
@@ -40,7 +38,7 @@ const addLambdaFolderToCwd = async (lambdaName, location) => {
   });
 };
 
-module.exports = async function get(lambdaName, path) {
+module.exports = async function get(lambdaName) {
   bamSpinner.start();
   const invalidLambdaMsg = await validateLambdaRetrieval(lambdaName);
 
@@ -50,15 +48,10 @@ module.exports = async function get(lambdaName, path) {
     return;
   }
 
-  const config = await readConfig(path);
-  const { region } = config;
-
-  const lambda = new AWS.Lambda({ apiVersion, region });
   const getFunctionParams = { FunctionName: lambdaName };
-  const getLambdaFunction = promisify(lambda.getFunction.bind(lambda));
 
   try {
-    const func = await getLambdaFunction(getFunctionParams);
+    const func = await asyncGetFunction(getFunctionParams);
     const { Location } = func.Code;
     await addLambdaFolderToCwd(lambdaName, Location);
     bamSpinner.stop();

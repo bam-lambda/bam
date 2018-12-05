@@ -1,21 +1,24 @@
+const deployLambda = require('../src/aws/deployLambda.js');
+const deleteLambda = require('../src/aws/deleteLambda');
+const { createBamRole } = require('../src/aws/createRoles');
+const { doesLambdaExist } = require('../src/aws/doesResourceExist');
+const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
+const { asyncGetRegion } = require('../src/util/getRegion');
+
 const {
   asyncDeleteRole,
   asyncDetachPolicy,
 } = require('../src/aws/awsFunctions');
-const deployLambda = require('../src/aws/deployLambda.js');
-const deleteLambda = require('../src/aws/deleteLambda');
-const configTemplate = require('../templates/configTemplate');
-const { createBamRole } = require('../src/aws/createRoles');
-const { doesLambdaExist } = require('../src/aws/doesResourceExist');
 
 const {
   writeFile,
+  readConfig,
+  writeConfig,
   unlink,
   exists,
-  readFuncLibrary,
+  readLambdasLibrary,
   readFile,
   createDirectory,
-  createJSONFile,
   promisifiedRimraf,
 } = require('../src/util/fileUtils');
 
@@ -27,19 +30,18 @@ const cwd = process.cwd();
 
 describe('bam deploy lambda', () => {
   beforeEach(async () => {
-    const config = await configTemplate(roleName);
-    config.accountNumber = process.env.AWS_ID;
     jest.setTimeout(30000);
-    await createDirectory('.bam', path);
-    await createDirectory('functions', `${path}/.bam/`);
-    await createJSONFile('config', `${path}/.bam/`, config);
-    await createJSONFile('library', `${path}/.bam/functions`, {});
+    await setupBamDirAndFiles(roleName, path);
+    const config = await readConfig(path);
+    config.accountNumber = process.env.AWS_ID;
+    await writeConfig(path, config);
     await createBamRole(roleName);
   });
 
   afterEach(async () => {
     await deleteLambda(lambdaName, path);
     await promisifiedRimraf(`${path}/.bam`);
+    await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
   });
@@ -62,12 +64,13 @@ describe('bam deploy lambda', () => {
     expect(lambda).toBe(true);
   });
 
-  test('Lambda metadata exists within ./test/.bam/functions/library.json', async () => {
+  test('Lambda metadata exists within ./test/.bam/lambdas.json', async () => {
+    const region = await asyncGetRegion();
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
     await deployLambda(lambdaName, 'test description', path);
-    const library = await readFuncLibrary(path);
-    const lambda = library[lambdaName];
+    const lambdas = await readLambdasLibrary(path);
+    const lambda = lambdas[region][lambdaName];
     await unlink(`${cwd}/${lambdaName}.js`);
     expect(lambda).toBeTruthy();
   });

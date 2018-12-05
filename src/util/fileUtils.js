@@ -3,6 +3,8 @@ const { promisify } = require('util');
 const rimraf = require('rimraf');
 const exec = promisify(require('child_process').exec);
 
+const { asyncGetRegion } = require('./getRegion');
+
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 const copyFile = promisify(fs.copyFile);
@@ -35,33 +37,84 @@ const isConfigured = async (path) => {
   return config.accountNumber && config.region && config.role;
 };
 
-const readFuncLibrary = async (path) => {
-  const libraryJSON = await readFile(`${path}/.bam/functions/library.json`);
-  return JSON.parse(libraryJSON);
+// lambdas
+const readLambdasLibrary = async (path) => {
+  const json = await readFile(`${path}/.bam/lambdas.json`);
+  return JSON.parse(json);
 };
 
-const writeFuncLibrary = async (path, functions) => {
-  const functionsJSON = JSON.stringify(functions, null, 2);
-  await writeFile(`${path}/.bam/functions/library.json`, functionsJSON);
+const writeLambdasLibrary = async (path, lambdas) => {
+  const json = JSON.stringify(lambdas, null, 2);
+  await writeFile(`${path}/.bam/lambdas.json`, json);
+};
+
+// apis
+const readApisLibrary = async (path) => {
+  const json = await readFile(`${path}/.bam/apis.json`);
+  return JSON.parse(json);
+};
+
+const writeApisLibrary = async (path, apis) => {
+  const json = JSON.stringify(apis, null, 2);
+  await writeFile(`${path}/.bam/apis.json`, json);
+};
+
+// dbtables
+const readDbtablesLibrary = async (path) => {
+  const json = await readFile(`${path}/.bam/dbtables.json`);
+  return JSON.parse(json);
+};
+
+const writeDbtablesLibrary = async (path, dbtables) => {
+  const json = JSON.stringify(dbtables, null, 2);
+  await writeFile(`${path}/.bam/dbtables.json`, json);
 };
 
 const writeLambda = async (data, path, description = '') => {
+  const region = await asyncGetRegion();
   const name = data.FunctionName;
   const arn = data.FunctionArn;
-  const api = {
-    endpoint: '',
-    restApiId: '',
-  };
+  const api = '';
 
-  const functions = await readFuncLibrary(path);
-  functions[name] = { arn, description, api };
-  await writeFuncLibrary(path, functions);
+  const lambdas = await readLambdasLibrary(path);
+  lambdas[region][name] = { arn, description, api };
+  await writeLambdasLibrary(path, lambdas);
 };
 
-const writeApi = async (endpoint, lambdaName, restApiId, path) => {
-  const functions = await readFuncLibrary(path);
-  functions[lambdaName].api = { endpoint, restApiId };
-  await writeFuncLibrary(path, functions);
+const writeApi = async (endpoint, methods, resourceName, restApiId, path) => {
+  const region = await asyncGetRegion();
+  const lambdas = await readLambdasLibrary(path);
+  const apis = await readApisLibrary(path);
+  lambdas[region][resourceName].api = restApiId;
+
+  apis[region][resourceName] = {
+    restApiId,
+    endpoint,
+    methods,
+  };
+
+  await writeLambdasLibrary(path, lambdas);
+  await writeApisLibrary(path, apis);
+};
+
+const deleteLambdaFromLibrary = async (resourceName, path) => {
+  const region = await asyncGetRegion();
+  const lambdas = await readLambdasLibrary(path);
+  delete lambdas[region][resourceName];
+  await writeLambdasLibrary(path, lambdas);
+};
+
+const deleteApiFromLibraries = async (resourceName, path) => {
+  const region = await asyncGetRegion();
+  const lambdas = await readLambdasLibrary(path);
+  const apis = await readApisLibrary(path);
+
+  // only if lambda exists
+  lambdas[region][resourceName].api = '';
+  await writeLambdasLibrary(path, lambdas);
+
+  delete apis[region][resourceName];
+  await writeApisLibrary(path, apis);
 };
 
 const mkdir = promisify(fs.mkdir);
@@ -133,10 +186,16 @@ module.exports = {
   readConfig,
   writeConfig,
   isConfigured,
-  readFuncLibrary,
-  writeFuncLibrary,
+  readLambdasLibrary,
+  writeLambdasLibrary,
+  readApisLibrary,
+  writeApisLibrary,
+  readDbtablesLibrary,
+  writeDbtablesLibrary,
   writeLambda,
   writeApi,
+  deleteLambdaFromLibrary,
+  deleteApiFromLibraries,
   promisifiedRimraf,
   unique,
 };

@@ -1,18 +1,20 @@
-const {
-  asyncDeleteRole,
-  asyncDetachPolicy,
-} = require('../src/aws/awsFunctions');
 const destroy = require('../src/commands/destroy');
 const get = require('../src/commands/get');
 const deployLambda = require('../src/aws/deployLambda');
 const deployApi = require('../src/aws/deployApi');
 const { createBamRole } = require('../src/aws/createRoles');
-const configTemplate = require('../templates/configTemplate');
+const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
+
+const {
+  asyncDeleteRole,
+  asyncDetachPolicy,
+} = require('../src/aws/awsFunctions');
+
 const {
   readFile,
+  writeConfig,
+  readConfig,
   promisifiedRimraf,
-  createDirectory,
-  createJSONFile,
   writeFile,
   exists,
   unlink,
@@ -28,13 +30,11 @@ const httpMethods = ['GET'];
 
 describe('bam get', async () => {
   beforeEach(async () => {
-    const config = await configTemplate(roleName);
-    config.accountNumber = process.env.AWS_ID;
     jest.setTimeout(60000);
-    await createDirectory('.bam', path);
-    await createDirectory('functions', `${path}/.bam/`);
-    await createJSONFile('config', `${path}/.bam`, config);
-    await createJSONFile('library', `${path}/.bam/functions`, {});
+    await setupBamDirAndFiles(roleName, path);
+    const config = await readConfig(path);
+    config.accountNumber = process.env.AWS_ID;
+    await writeConfig(path, config);
     await createBamRole(roleName);
   });
 

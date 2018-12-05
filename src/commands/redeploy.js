@@ -1,26 +1,30 @@
+const updateLambda = require('../aws/updateLambda');
+const deployApi = require('../aws/deployApi.js');
+const { doesApiExist } = require('../aws/doesResourceExist');
+const getLambda = require('../aws/getLambda');
+const updateHttpMethods = require('../aws/updateHttpMethods');
+const bamBam = require('../util/bamBam');
+const { asyncGetRegion } = require('../util/getRegion');
+
 const {
   asyncCreateDeployment,
   asyncGetResources,
 } = require('../aws/awsFunctions');
 
-const updateLambda = require('../aws/updateLambda');
-const deployApi = require('../aws/deployApi.js');
-const { doesApiExist } = require('../aws/doesResourceExist');
-const getLambda = require('../aws/getLambda');
 const {
   validateApiMethods,
   validateLambdaReDeployment,
 } = require('../util/validations');
-const updateHttpMethods = require('../aws/updateHttpMethods');
-const bamBam = require('../util/bamBam');
+
 const {
   writeLambda,
   promisifiedRimraf,
   exists,
   rename,
-  readFuncLibrary,
+  readApisLibrary,
   unique,
 } = require('../util/fileUtils');
+
 const {
   bamLog,
   bamWarn,
@@ -63,8 +67,9 @@ module.exports = async function redeploy(lambdaName, path, options) {
   };
 
   const getApiId = async () => {
-    const library = await readFuncLibrary(path);
-    return library[lambdaName] && library[lambdaName].api && library[lambdaName].api.restApiId;
+    const region = await asyncGetRegion();
+    const apis = await readApisLibrary(path);
+    return apis[region] && apis[region][lambdaName] && apis[region][lambdaName].restApiId;
   };
 
   const provideNewApiOrIntegrations = async () => {

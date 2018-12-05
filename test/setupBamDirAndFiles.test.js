@@ -34,8 +34,8 @@ describe('bam init', async () => {
     expect(functionsDirExists).toBe(true);
   });
 
-  test('functions directory contains library.json', async () => {
-    const libraryExists = await exists('./test/.bam/functions/library.json');
-    expect(libraryExists).toBe(true);
+  test('bam directory contains lambdas.json', async () => {
+    const lambdasExists = await exists('./test/.bam/lambdas.json');
+    expect(lambdasExists).toBe(true);
   });
 });

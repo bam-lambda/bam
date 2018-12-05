@@ -19,7 +19,6 @@ const {
 
 module.exports = async function deployApi(lambdaName, path, httpMethods, stageName) {
   const region = await asyncGetRegion();
-
   bamSpinner.start();
 
   // deploy sequence:
@@ -44,8 +43,8 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
     // api endpoint
     const endpoint = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}`;
 
-    // write to library
-    await writeApi(endpoint, lambdaName, restApiId, path);
+    // write to libraries
+    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
     const bamAscii = await readFile(`${__dirname}/../../ascii/bam.txt`, 'utf8');
     bamSpinner.stop();
     bamLog(bamAscii);

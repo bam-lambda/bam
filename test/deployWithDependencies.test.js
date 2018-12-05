@@ -1,28 +1,27 @@
 const https = require('https');
 
+const { createBamRole } = require('../src/aws/createRoles');
+const deployLambda = require('../src/aws/deployLambda.js');
+const deployApi = require('../src/aws/deployApi.js');
+const destroy = require('../src/commands/destroy');
+const delay = require('../src/util/delay.js');
+const { bamError } = require('../src/util/logger');
+const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
+const { asyncGetRegion } = require('../src/util/getRegion');
+
 const {
   asyncDeleteRole,
   asyncDetachPolicy,
 } = require('../src/aws/awsFunctions');
 
-const configTemplate = require('../templates/configTemplate');
-const { createBamRole } = require('../src/aws/createRoles');
-
-const deployLambda = require('../src/aws/deployLambda.js');
-const deployApi = require('../src/aws/deployApi.js');
-
-const destroy = require('../src/commands/destroy');
-const delay = require('../src/util/delay.js');
-
-const { bamError } = require('../src/util/logger');
-
 const {
   writeFile,
+  readConfig,
+  writeConfig,
+  unlink,
   exists,
   readFile,
-  readFuncLibrary,
-  createDirectory,
-  createJSONFile,
+  readApisLibrary,
   promisifiedRimraf,
 } = require('../src/util/fileUtils');
 
@@ -43,19 +42,18 @@ const asyncHttpsGet = endpoint => (
 
 describe('bam deploy api', () => {
   beforeEach(async () => {
-    const config = await configTemplate(roleName);
-    config.accountNumber = process.env.AWS_ID;
     jest.setTimeout(60000);
-    await createDirectory('.bam', path);
-    await createDirectory('functions', `${path}/.bam/`);
-    await createJSONFile('config', `${path}/.bam`, config);
-    await createJSONFile('library', `${path}/.bam/functions`, {});
+    await setupBamDirAndFiles(roleName, path);
+    const config = await readConfig(path);
+    config.accountNumber = process.env.AWS_ID;
+    await writeConfig(path, config);
     await createBamRole(roleName);
   });
 
   afterEach(async () => {
     await destroy(lambdaName, path);
     await promisifiedRimraf(`${path}/.bam`);
+    await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
     await delay(30000);
@@ -70,8 +68,9 @@ describe('bam deploy api', () => {
     });
 
     test('Response contains output from dependencies in body', async () => {
-      const library = await readFuncLibrary(path);
-      const url = library[lambdaName].api.endpoint;
+      const region = await asyncGetRegion();
+      const apis = await readApisLibrary(path);
+      const url = apis[region][lambdaName].endpoint;
       let responseBody;
 
       try {

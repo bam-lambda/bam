@@ -1,6 +1,7 @@
 const deleteApi = require('../aws/deleteApi.js');
 const bamBam = require('../util/bamBam');
 const deleteAwsLambda = require('../aws/deleteLambda');
+const { asyncGetRegion } = require('../util/getRegion');
 
 const bamSpinner = require('../util/spinner');
 const {
@@ -10,21 +11,19 @@ const {
 
 const {
   promisifiedRimraf,
-  readFuncLibrary,
-  writeFuncLibrary,
-  unlink,
-  exists,
+  readApisLibrary,
+  deleteApiFromLibraries,
+  deleteLambdaFromLibrary,
 } = require('../util/fileUtils');
-
-const cwd = process.cwd();
 
 module.exports = async function destroy(lambdaName, path) {
   bamSpinner.start();
 
-  const library = await readFuncLibrary(path);
-  const { restApiId } = library[lambdaName].api;
+  const region = await asyncGetRegion();
+  const apis = await readApisLibrary(path);
+  const { restApiId } = apis[region][lambdaName];
   const optionalParamsObj = {
-    asyncFuncParams: [restApiId, path],
+    asyncFuncParams: [lambdaName, restApiId, path],
     retryError: 'TooManyRequestsException',
     interval: 15000,
   };
@@ -34,21 +33,13 @@ module.exports = async function destroy(lambdaName, path) {
   // delete from local directories
   try {
     await promisifiedRimraf(`${path}/.bam/functions/${lambdaName}`);
-    const lambdaFileExists = await exists(`${cwd}/${lambdaName}.js`);
-
-    if (lambdaFileExists) {
-      await unlink(`${cwd}/${lambdaName}.js`);
-    }
   } catch (err) {
     bamError(err);
   }
 
-  // read from library and remove property
-  delete library[lambdaName];
-
-  // write back to library
-  await writeFuncLibrary(path, library);
-
+  // remove from libraries
+  await deleteApiFromLibraries(lambdaName, path);
+  await deleteLambdaFromLibrary(lambdaName, path);
   bamSpinner.stop();
   bamLog(`Lambda "${lambdaName}" has been deleted`);
 };

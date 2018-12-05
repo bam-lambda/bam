@@ -10,7 +10,8 @@ const {
 } = require('../util/listHelpers');
 const checkForOptionType = require('../util/checkForOptionType');
 const {
-  readFuncLibrary,
+  readLambdasLibrary,
+  readApisLibrary,
   readFile,
   exists,
 } = require('../util/fileUtils');
@@ -41,14 +42,17 @@ const logBamTables = (bamTablesList) => {
 };
 
 module.exports = async function list(path, options) {
-  let library = {};
+  let lambdas = {};
+  let apis = {};
   let bamFunctionsList = [];
-  const libraryFileExists = await exists(`${path}/.bam/functions/library.json`);
-  if (libraryFileExists) {
-    library = await readFuncLibrary(path) || {};
-    bamFunctionsList = await getBamFunctionsList(path, library);
+  const lambdasFileExists = await exists(`${path}/.bam/lambdas.json`);
+  const apisFileExists = await exists(`${path}/.bam/apis.json`);
+  if (lambdasFileExists && apisFileExists) {
+    lambdas = await readLambdasLibrary(path) || {};
+    apis = await readApisLibrary(path) || {};
+    bamFunctionsList = await getBamFunctionsList(path, lambdas, apis);
   }
-  const awsFunctionsList = await getAwsFunctionsList(path, library);
+  const awsFunctionsList = await getAwsFunctionsList(path, lambdas);
 
   let dbtables = {};
   let bamTablesList = [];

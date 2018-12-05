@@ -1,29 +1,32 @@
 const https = require('https');
 
-const {
-  asyncDeleteRole,
-  asyncDetachPolicy,
-} = require('../src/aws/awsFunctions');
-const {
-  createDirectory,
-  createJSONFile,
-  promisifiedRimraf,
-  exists,
-  readFile,
-  writeFile,
-  writeLambda,
-  readFuncLibrary,
-} = require('../src/util/fileUtils');
 const { bamError } = require('../src/util/logger');
-const configTemplate = require('../templates/configTemplate');
 const { createBamRole } = require('../src/aws/createRoles');
 const deployLambda = require('../src/aws/deployLambda');
 const deployApi = require('../src/aws/deployApi');
 const redeploy = require('../src/commands/redeploy');
 const destroy = require('../src/commands/destroy');
 const delay = require('../src/util/delay');
+const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
+const { asyncGetRegion } = require('../src/util/getRegion');
 
-const accountNumber = process.env.AWS_ID;
+const {
+  asyncDeleteRole,
+  asyncDetachPolicy,
+} = require('../src/aws/awsFunctions');
+
+const {
+  promisifiedRimraf,
+  exists,
+  unlink,
+  readFile,
+  writeFile,
+  readConfig,
+  writeConfig,
+  writeLambda,
+  readApisLibrary,
+} = require('../src/util/fileUtils');
+
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
@@ -55,13 +58,11 @@ const asyncHttpsRequest = opts => (
 describe('bam redeploy lambda', () => {
   beforeEach(async () => {
     jest.setTimeout(200000);
-    const config = await configTemplate(roleName);
-    config.accountNumber = accountNumber;
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
-    await createDirectory('.bam', path);
-    await createDirectory('functions', `${path}/.bam/`);
-    await createJSONFile('config', `${path}/.bam`, config);
-    await createJSONFile('library', `${path}/.bam/functions`, {});
+    await setupBamDirAndFiles(roleName, path);
+    const config = await readConfig(path);
+    config.accountNumber = process.env.AWS_ID;
+    await writeConfig(path, config);
     await createBamRole(roleName);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
   });
@@ -69,17 +70,19 @@ describe('bam redeploy lambda', () => {
   afterEach(async () => {
     await destroy(lambdaName, path);
     await promisifiedRimraf(`${path}/.bam`);
+    await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
   });
 
   test('Response still 200 from same url after changing lambda', async () => {
+    const region = await asyncGetRegion();
     const data = await deployLambda(lambdaName, 'test description', path);
     await writeLambda(data, path, 'test description');
     await deployApi(lambdaName, path, httpMethods, stageName);
 
-    const library = await readFuncLibrary(path);
-    const url = library[lambdaName].api.endpoint;
+    const apis = await readApisLibrary(path);
+    const url = apis[region][lambdaName].endpoint;
     let responseStatus;
 
     const testLambdaWithDependenciesFile = await readFile('./test/templates/testLambdaWithDependencies.js');
@@ -97,12 +100,13 @@ describe('bam redeploy lambda', () => {
   });
 
   test('Response contains different body before and after redeployment', async () => {
+    const region = await asyncGetRegion();
     const data = await deployLambda(lambdaName, 'test description', path);
     await writeLambda(data, path, 'test description');
     await deployApi(lambdaName, path, httpMethods, stageName);
 
-    const library = await readFuncLibrary(path);
-    const url = library[lambdaName].api.endpoint;
+    const apis = await readApisLibrary(path);
+    const url = apis[region][lambdaName].endpoint;
     let responseBody;
 
     try {
@@ -147,14 +151,15 @@ describe('bam redeploy lambda', () => {
   });
 
   test('Different requests return corresponding status codes', async () => {
+    const region = await asyncGetRegion();
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
     await deployLambda(lambdaName, 'test description', path);
     await deployApi(lambdaName, path, httpMethods, stageName);
     await redeploy(lambdaName, path, { methods: ['POST', 'PUT', 'DELETE'] });
 
-    const library = await readFuncLibrary(path);
-    const url = library[lambdaName].api.endpoint;
+    const apis = await readApisLibrary(path);
+    const url = apis[region][lambdaName].endpoint;
     const urlParts = url.split('//')[1].split('/');
     const postOptions = {
       hostname: urlParts[0],
@@ -195,14 +200,15 @@ describe('bam redeploy lambda', () => {
   });
 
   test('httpMethod ANY supports all method types', async () => {
+    const region = await asyncGetRegion();
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
     await deployLambda(lambdaName, 'test description', path);
     await deployApi(lambdaName, path, httpMethods, stageName);
     await redeploy(lambdaName, path, { methods: ['ANY'] });
 
-    const library = await readFuncLibrary(path);
-    const url = library[lambdaName].api.endpoint;
+    const apis = await readApisLibrary(path);
+    const url = apis[region][lambdaName].endpoint;
     const urlParts = url.split('//')[1].split('/');
     const postOptions = {
       hostname: urlParts[0],

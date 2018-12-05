@@ -1,88 +1,51 @@
 const { promisify } = require('util');
 const AWS = require('aws-sdk');
 
-const getRegion = require('../util/getRegion');
+const { getRegion } = require('../util/getRegion');
 
 const apiVersion = 'latest';
+const region = getRegion();
+const lambda = new AWS.Lambda({ apiVersion, region });
+const api = new AWS.APIGateway({ apiVersion, region });
+const dynamo = new AWS.DynamoDB({ apiVersion, region });
+const iam = new AWS.IAM();
 
-let asyncAddPermission;
-let asyncPutMethod;
-let asyncPutIntegration;
-let asyncPutMethodResponse;
-let asyncCreateTable;
-let asyncCreatePolicy;
-let asyncCreateRole;
-let asyncAttachPolicy;
-let asyncDetachPolicy;
-let asyncDeleteRole;
-let asyncDeletePolicy;
-let asyncDeleteRestApi;
-let asyncDeleteMethod;
-let asyncDeleteTable;
-let asyncLambdaDeleteFunction;
-let asyncCreateApi;
-let asyncGetResources;
-let asyncCreateDeployment;
-let asyncLambdaCreateFunction;
-let asyncListRolePolicies;
-let asyncGetRole;
-let asyncGetFunction;
-let asyncDescribeTable;
-let asyncGetRestApi;
-let asyncListAttachedRolePolicies;
-let asyncLambdaUpdateFunctionCode;
-let asyncLambdaUpdateFunctionConfiguration;
-let asyncListFunctions;
-let asyncListTables;
+// lambda
+const asyncAddPermission = promisify(lambda.addPermission.bind(lambda));
+const asyncLambdaDeleteFunction = promisify(lambda.deleteFunction.bind(lambda));
+const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
+const asyncGetFunction = promisify(lambda.getFunction.bind(lambda));
+const asyncLambdaUpdateFunctionCode = promisify(lambda.updateFunctionCode.bind(lambda));
+const asyncLambdaUpdateFunctionConfiguration = promisify(lambda.updateFunctionConfiguration.bind(lambda));
+const asyncListFunctions = promisify(lambda.listFunctions.bind(lambda));
 
-// const lambdaMethods = {};
+// api
+const asyncPutMethod = promisify(api.putMethod.bind(api));
+const asyncPutIntegration = promisify(api.putIntegration.bind(api));
+const asyncPutMethodResponse = promisify(api.putMethodResponse.bind(api));
+const asyncDeleteRestApi = promisify(api.deleteRestApi.bind(api));
+const asyncDeleteMethod = promisify(api.deleteMethod.bind(api));
+const asyncCreateApi = promisify(api.createRestApi.bind(api));
+const asyncGetResources = promisify(api.getResources.bind(api));
+const asyncCreateDeployment = promisify(api.createDeployment.bind(api));
+const asyncGetRestApi = promisify(api.getRestApi.bind(api));
 
-// (async () => {
-  // const region = await getRegion();
-// console.log(region);
-  const region = getRegion();
-  const lambda = new AWS.Lambda({ apiVersion, region });
-  const api = new AWS.APIGateway({ apiVersion, region });
-  const dynamo = new AWS.DynamoDB({ apiVersion, region });
-  const iam = new AWS.IAM();
+// dynamo
+const asyncCreateTable = promisify(dynamo.createTable.bind(dynamo));
+const asyncDeleteTable = promisify(dynamo.deleteTable.bind(dynamo));
+const asyncDescribeTable = promisify(dynamo.describeTable.bind(dynamo));
+const asyncListTables = promisify(dynamo.listTables.bind(dynamo));
 
-  // lambda
-  asyncAddPermission = promisify(lambda.addPermission.bind(lambda));
-  asyncLambdaDeleteFunction = promisify(lambda.deleteFunction.bind(lambda));
-  asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
-  asyncGetFunction = promisify(lambda.getFunction.bind(lambda));
-  asyncLambdaUpdateFunctionCode = promisify(lambda.updateFunctionCode.bind(lambda));
-  asyncLambdaUpdateFunctionConfiguration = promisify(lambda.updateFunctionConfiguration.bind(lambda));
-  asyncListFunctions = promisify(lambda.listFunctions.bind(lambda));
-
-  // api
-  asyncPutMethod = promisify(api.putMethod.bind(api));
-  asyncPutIntegration = promisify(api.putIntegration.bind(api));
-  asyncPutMethodResponse = promisify(api.putMethodResponse.bind(api));
-  asyncDeleteRestApi = promisify(api.deleteRestApi.bind(api));
-  asyncDeleteMethod = promisify(api.deleteMethod.bind(api));
-  asyncCreateApi = promisify(api.createRestApi.bind(api));
-  asyncGetResources = promisify(api.getResources.bind(api));
-  asyncCreateDeployment = promisify(api.createDeployment.bind(api));
-  asyncGetRestApi = promisify(api.getRestApi.bind(api));
-
-  // dynamo
-  asyncCreateTable = promisify(dynamo.createTable.bind(dynamo));
-  asyncDeleteTable = promisify(dynamo.deleteTable.bind(dynamo));
-  asyncDescribeTable = promisify(dynamo.describeTable.bind(dynamo));
-  asyncListTables = promisify(dynamo.listTables.bind(dynamo));
-
-  // iam
-  asyncCreateRole = promisify(iam.createRole.bind(iam));
-  asyncCreatePolicy = promisify(iam.createPolicy.bind(iam));
-  asyncAttachPolicy = promisify(iam.attachRolePolicy.bind(iam));
-  asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
-  asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
-  asyncDeletePolicy = promisify(iam.deletePolicy.bind(iam));
-  asyncListRolePolicies = promisify(iam.listAttachedRolePolicies.bind(iam));
-  asyncGetRole = promisify(iam.getRole.bind(iam));
-  asyncListAttachedRolePolicies = promisify(iam.listAttachedRolePolicies.bind(iam));
-// })();
+// iam
+const asyncCreateRole = promisify(iam.createRole.bind(iam));
+const asyncCreatePolicy = promisify(iam.createPolicy.bind(iam));
+const asyncAttachPolicy = promisify(iam.attachRolePolicy.bind(iam));
+const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
+const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
+const asyncDeletePolicy = promisify(iam.deletePolicy.bind(iam));
+const asyncListRolePolicies = promisify(iam.listAttachedRolePolicies.bind(iam));
+const asyncGetRole = promisify(iam.getRole.bind(iam));
+const asyncListAttachedRolePolicies = promisify(iam.listAttachedRolePolicies.bind(iam));
 
 module.exports = {
   asyncAddPermission,

@@ -1,7 +1,7 @@
-const getRegion = require('../src/util/getRegion');
+const { asyncGetRegion } = require('../src/util/getRegion');
 
 module.exports = async function configTemplate(roleName) {
-  const region = await getRegion();
+  const region = await asyncGetRegion();
 
   return {
     role: roleName,

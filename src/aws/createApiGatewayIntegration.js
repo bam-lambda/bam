@@ -2,7 +2,7 @@ const uuid = require('uuid');
 const bamBam = require('../util/bamBam');
 const { readConfig } = require('../util/fileUtils');
 
-const getRegion = require('../util/getRegion');
+const { asyncGetRegion } = require('../util/getRegion');
 const {
   asyncAddPermission,
   asyncPutMethod,
@@ -12,7 +12,7 @@ const {
 
 module.exports = async function createApiGatewayIntegration(httpMethod, resourceId, restApiId, lambdaName, path) { 
   const config = await readConfig(path);
-  const region = getRegion();
+  const region = await asyncGetRegion();
   const { accountNumber } = config;
 
   // add permission to lambda

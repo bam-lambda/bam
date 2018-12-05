@@ -11,14 +11,14 @@ const {
   writeApi,
   readFile,
 } = require('../util/fileUtils');
-const getRegion = require('../util/getRegion');
+const { asyncGetRegion } = require('../util/getRegion');
 const {
   bamLog,
   bamError,
 } = require('../util/logger');
 
 module.exports = async function deployApi(lambdaName, path, httpMethods, stageName) {
-  const region = getRegion();
+  const region = await asyncGetRegion();
 
   bamSpinner.start();
 

@@ -77,7 +77,10 @@ module.exports = async function redeploy(lambdaName, path, options) {
       const resources = (await asyncGetResources({ restApiId })).items;
       const resource = resources.find(res => res.path === '/');
       await updateHttpMethods(resource, lambdaName, restApiId, addMethods, removeMethods, path);
-      await bamBam(asyncCreateDeployment, { params: [{ restApiId, stageName }], retryError: 'TooManyRequestsException' });
+      await bamBam(asyncCreateDeployment, {
+        asyncFuncParams: [{ restApiId, stageName }],
+        retryError: 'TooManyRequestsException',
+      });
     }
   };
 

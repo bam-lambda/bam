@@ -64,7 +64,10 @@ module.exports = async function deployLambda(lambdaName, description, path, dbFl
       Description: description,
     };
 
-    const data = await bamBam(asyncLambdaCreateFunction, { params: [createFunctionParams] });
+    const data = await bamBam(asyncLambdaCreateFunction, {
+      asyncFuncParams: [createFunctionParams],
+    });
+
     return data;
   };
 

@@ -21,6 +21,7 @@ const deployLambda = require('../src/aws/deployLambda');
 const deployApi = require('../src/aws/deployApi');
 const redeploy = require('../src/commands/redeploy');
 const destroy = require('../src/commands/destroy');
+const delay = require('../src/util/delay');
 
 const accountNumber = process.env.AWS_ID;
 const roleName = 'testBamRole';
@@ -53,7 +54,7 @@ const asyncHttpsRequest = opts => (
 
 describe('bam redeploy lambda', () => {
   beforeEach(async () => {
-    jest.setTimeout(60000);
+    jest.setTimeout(200000);
     const config = await configTemplate(roleName);
     config.accountNumber = accountNumber;
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
@@ -178,6 +179,7 @@ describe('bam redeploy lambda', () => {
     let responseGet;
     let responseDelete;
     try {
+      await delay(60000);
       responseGet = await asyncHttpsGet(url);
       responsePost = await asyncHttpsRequest(postOptions);
       responsePut = await asyncHttpsRequest(putOptions);
@@ -225,6 +227,7 @@ describe('bam redeploy lambda', () => {
     let responseGet;
     let responseDelete;
     try {
+      await delay(60000);
       responseGet = await asyncHttpsGet(url);
       responsePost = await asyncHttpsRequest(postOptions);
       responsePut = await asyncHttpsRequest(putOptions);

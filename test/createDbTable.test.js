@@ -21,7 +21,7 @@ describe('bam dbtable', async () => {
 
   afterEach(async () => {
     await bamBam(deleteTable, {
-      params: [testTable],
+      asyncFuncParams: [testTable],
       retryError: 'ResourceInUseException',
       interval: 30000,
     });

@@ -49,7 +49,7 @@ module.exports = async function updateLambda(lambdaName, path, options) {
       FunctionName: lambdaName,
       ZipFile: zipContents,
     };
-    const data = await bamBam(asyncLambdaUpdateFunctionCode, { params: [codeParams] });
+    const data = await asyncLambdaUpdateFunctionCode(codeParams);
     return data;
   };
 

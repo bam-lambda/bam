@@ -52,8 +52,6 @@ module.exports = async function updateLambdaConfig(lambdaName, path, options) {
       Role: updatedRoleArn,
     };
 
-    await bamBam(asyncLambdaUpdateFunctionConfiguration, {
-      params: [configParams], retryError: 'TooManyRequestsException',
-    });
+    await asyncLambdaUpdateFunctionConfiguration(configParams);
   }
 };

@@ -1,6 +1,7 @@
-const { promisify } = require('util');
-const AWS = require('aws-sdk');
-
+const {
+  asyncDeleteRole,
+  asyncDetachPolicy,
+} = require('../src/aws/awsFunctions');
 const destroy = require('../src/commands/destroy');
 const get = require('../src/commands/get');
 const deployLambda = require('../src/aws/deployLambda');
@@ -24,10 +25,6 @@ const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const stageName = 'bam';
 const httpMethods = ['GET'];
-
-const iam = new AWS.IAM();
-const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
-const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 
 describe('bam get', async () => {
   beforeEach(async () => {

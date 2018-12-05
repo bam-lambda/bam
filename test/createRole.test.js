@@ -1,5 +1,8 @@
-const { promisify } = require('util');
-const AWS = require('aws-sdk');
+const {
+  asyncDeleteRole,
+  asyncDetachPolicy,
+  asyncDeletePolicy,
+} = require('../src/aws/awsFunctions');
 
 const {
   promisifiedRimraf,
@@ -14,15 +17,11 @@ const { createBamRole, createDatabaseBamRole } = require('../src/aws/createRoles
 const configTemplate = require('../templates/configTemplate.js');
 
 const accountNumber = process.env.AWS_ID;
-const iam = new AWS.IAM();
 const roleName = 'testBamRole';
 const databaseBamRole = 'testDatabaseBamRole';
 const policyName = 'AWSLambdaBasicExecutionRole';
 const databasePolicyARN = `arn:aws:iam::${accountNumber}:policy/testDatabaseBamRolePolicy`;
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
-const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
-const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
-const asyncDeletePolicy = promisify(iam.deletePolicy.bind(iam));
 const path = './test';
 
 describe('createBamRole', async () => {

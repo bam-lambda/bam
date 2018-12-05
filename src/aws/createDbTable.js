@@ -1,18 +1,9 @@
-const AWS = require('aws-sdk');
-const { promisify } = require('util');
 const { bamError, bamLog } = require('../util/logger');
 const bamSpinner = require('../util/spinner');
-
-const getRegion = require('../util/getRegion');
-
-const apiVersion = 'latest';
+const { asyncCreateTable } = require('./awsFunctions');
 
 module.exports = async function createDbTable(tableName, partitionKey, sortKey) {
   bamSpinner.start();
-
-  const region = await getRegion();
-  const dynamo = new AWS.DynamoDB({ apiVersion, region });
-  const asyncCreateTable = promisify(dynamo.createTable.bind(dynamo));
 
   const provisionedThroughput = {
     ReadCapacityUnits: 100,

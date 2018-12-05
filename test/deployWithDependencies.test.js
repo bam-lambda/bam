@@ -1,6 +1,9 @@
-const { promisify } = require('util');
 const https = require('https');
-const AWS = require('aws-sdk');
+
+const {
+  asyncDeleteRole,
+  asyncDetachPolicy,
+} = require('../src/aws/awsFunctions');
 
 const configTemplate = require('../templates/configTemplate');
 const { createBamRole } = require('../src/aws/createRoles');
@@ -24,7 +27,6 @@ const {
 } = require('../src/util/fileUtils');
 
 
-const iam = new AWS.IAM();
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
@@ -38,9 +40,6 @@ const asyncHttpsGet = endpoint => (
     https.get(endpoint, resolve);
   })
 );
-
-const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
-const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 
 describe('bam deploy api', () => {
   beforeEach(async () => {

@@ -1,5 +1,7 @@
-const AWS = require('aws-sdk');
-const { promisify } = require('util');
+const {
+  asyncListFunctions,
+  asyncListTables,
+} = require('../aws/awsFunctions');
 
 const {
   bamText,
@@ -7,9 +9,7 @@ const {
   indentFurthest,
   vertPadding,
 } = require('../util/logger');
-const getRegion = require('../util/getRegion');
 
-const apiVersion = 'latest';
 const friendlyDataTypes = {
   S: 'string',
   N: 'number',
@@ -17,11 +17,7 @@ const friendlyDataTypes = {
 };
 
 const getLambdaNamesFromAws = async () => {
-  const region = await getRegion();
-
-  const lambda = new AWS.Lambda({ apiVersion, region });
-  const listFunctions = promisify(lambda.listFunctions.bind(lambda, {}));
-  const functionsObjects = await listFunctions();
+  const functionsObjects = await asyncListFunctions({});
   const functionNames = functionsObjects.Functions
     .map(functionObj => functionObj.FunctionName);
   return functionNames;
@@ -91,9 +87,6 @@ const getFormattedTablesList = (tableNames, dbtables) => (
 );
 
 const getBamTablesList = async (path, dbtables) => {
-  const region = await getRegion();
-  const dynamo = new AWS.DynamoDB({ apiVersion, region });
-  const asyncListTables = promisify(dynamo.listTables.bind(dynamo));
   const tablesNamesOnAws = await asyncListTables();
   const tablesOnAws = tablesNamesOnAws.TableNames;
 

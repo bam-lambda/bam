@@ -35,7 +35,7 @@ const homedir = os.homedir();
   } else if (command === 'redeploy') {
     await redeploy(resourceName, homedir, options);
   } else if (command === 'get') {
-    await get(resourceName, homedir);
+    await get(resourceName);
   } else if (command === 'delete') {
     await destroy(resourceName, homedir);
   } else if (command === 'dbtable') {

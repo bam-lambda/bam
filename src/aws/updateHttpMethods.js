@@ -12,7 +12,7 @@ module.exports = async function updateHttpMethods(resource, lambdaName, restApiI
     for (let i = 0; i < addMethods.length; i += 1) {
       const httpMethod = addMethods[i];
       if (!existingMethods.includes(httpMethod)) {
-        const params = [httpMethod, resourceId, restApiId, lambdaName, path];       
+        const params = [httpMethod, resourceId, restApiId, lambdaName, path];
         await bamBam(createApiGatewayIntegration, { params, retryError: 'TooManyRequestsException' });
       }
     }
@@ -21,10 +21,10 @@ module.exports = async function updateHttpMethods(resource, lambdaName, restApiI
   // remove specified methods except for GET
   const removeHttpMethodIntegrations = async () => {
     for (let i = 0; i < removeMethods.length; i += 1) {
-      const httpMethod = removeMethods[i];      
+      const httpMethod = removeMethods[i];
       if (existingMethods.includes(httpMethod)) {
-        const params = [httpMethod, resourceId, restApiId, path];        
-        await bamBam(deleteApiGatewayIntegration, { params, retryError: 'TooManyRequestsException' });    
+        const params = [httpMethod, resourceId, restApiId];
+        await bamBam(deleteApiGatewayIntegration, { params, retryError: 'TooManyRequestsException' });
       }
     }
   };
@@ -32,5 +32,5 @@ module.exports = async function updateHttpMethods(resource, lambdaName, restApiI
   await addHttpMethodIntegrations();
   // update existing methods to include newly added methods
   existingMethods = unique(existingMethods.concat(addMethods));
-  await removeHttpMethodIntegrations(); 
+  await removeHttpMethodIntegrations();
 };

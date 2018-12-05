@@ -1,21 +1,18 @@
-const { promisify } = require('util');
-const AWS = require('aws-sdk');
+const {
+  asyncCreateDeployment,
+  asyncGetResources,
+} = require('../aws/awsFunctions');
 
 const updateLambda = require('../aws/updateLambda');
 const deployApi = require('../aws/deployApi.js');
 const { doesApiExist } = require('../aws/doesResourceExist');
 const getLambda = require('../aws/getLambda');
-
 const {
   validateApiMethods,
   validateLambdaReDeployment,
 } = require('../util/validations');
-
-const getRegion = require('../util/getRegion');
-
 const updateHttpMethods = require('../aws/updateHttpMethods');
 const bamBam = require('../util/bamBam');
-
 const {
   writeLambda,
   promisifiedRimraf,
@@ -24,14 +21,12 @@ const {
   readFuncLibrary,
   unique,
 } = require('../util/fileUtils');
-
 const {
   bamLog,
   bamWarn,
   bamError,
 } = require('../util/logger');
 
-const apiVersion = 'latest';
 const stageName = 'bam';
 
 module.exports = async function redeploy(lambdaName, path, options) {
@@ -54,10 +49,6 @@ module.exports = async function redeploy(lambdaName, path, options) {
 
   // helper methods
   const existsLocally = await exists(`${path}/.bam/functions/${lambdaName}`);
-  const region = await getRegion();
-  const api = new AWS.APIGateway({ apiVersion, region });
-  const asyncCreateDeployment = promisify(api.createDeployment.bind(api));
-  const asyncGetResources = promisify(api.getResources.bind(api));
 
   const overwriteLocalPkg = async () => {
     if (existsLocally) await promisifiedRimraf(`${path}/.bam/functions/${lambdaName}`);

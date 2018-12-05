@@ -1,15 +1,17 @@
-const AWS = require('aws-sdk');
-const { promisify } = require('util');
 const { readConfig, readFile } = require('../util/fileUtils');
 const { doesRoleExist, doesPolicyExist, isPolicyAttached } = require('./doesResourceExist');
 const bamSpinner = require('../util/spinner');
+const {
+  asyncCreatePolicy,
+  asyncCreateRole,
+  asyncAttachPolicy,
+} = require('./awsFunctions');
 
 const {
   bamLog,
   bamError,
 } = require('../util/logger');
 
-const iam = new AWS.IAM();
 const AWSLambdaBasicExecutionRolePolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 
 const rolePolicy = {
@@ -38,10 +40,6 @@ const getRoleParams = roleName => (
     AssumeRolePolicyDocument: JSON.stringify(rolePolicy),
   }
 );
-
-const asyncCreateRole = promisify(iam.createRole.bind(iam));
-const asyncCreatePolicy = promisify(iam.createPolicy.bind(iam));
-const asyncAttachPolicy = promisify(iam.attachRolePolicy.bind(iam));
 
 const createRole = async (roleName) => {
   const roleParams = getRoleParams(roleName);

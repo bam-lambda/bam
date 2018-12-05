@@ -1,5 +1,4 @@
-const AWS = require('aws-sdk');
-const { promisify } = require('util');
+const { asyncLambdaUpdateFunctionCode } = require('./awsFunctions');
 const {
   createDirectory,
   readFile,
@@ -9,20 +8,14 @@ const {
   exists,
 } = require('../util/fileUtils');
 const { zipper } = require('../util/zipper');
-const getRegion = require('../util/getRegion');
 const installLambdaDependencies = require('../util/installLambdaDependencies');
 const bamBam = require('../util/bamBam');
 const bamSpinner = require('../util/spinner');
 const updateLambdaConfig = require('./updateLambdaConfig');
 
-const apiVersion = 'latest';
 const cwd = process.cwd();
 
 module.exports = async function updateLambda(lambdaName, path, options) {
-  const region = await getRegion();
-  const lambda = new AWS.Lambda({ apiVersion, region });
-  const asyncLambdaUpdateFunctionCode = promisify(lambda.updateFunctionCode.bind(lambda));
-
   const lambdaNameDirExists = await exists(`${cwd}/${lambdaName}`);
   const renameLambdaFileToIndexJs = async () => {
     await rename(`${path}/.bam/functions/${lambdaName}-temp/${lambdaName}.js`,

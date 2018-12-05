@@ -82,6 +82,7 @@ describe('bam deploy api', () => {
     let responseStatus;
 
     try {
+      await delay(30000);
       const response = await asyncHttpsGet(url);
       responseStatus = response.statusCode;
     } catch (err) {

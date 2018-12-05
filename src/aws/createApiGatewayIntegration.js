@@ -6,7 +6,7 @@ const { readConfig } = require('../util/fileUtils');
 
 const apiVersion = 'latest';
 
-module.exports = async function createApiGatewayIntegration(httpMethod, resourceId, restApiId, lambdaName, path) { 
+module.exports = async function createApiGatewayIntegration(httpMethod, resourceId, restApiId, lambdaName, path) {
   const config = await readConfig(path);
   const { region, accountNumber } = config;
   const lambda = new AWS.Lambda({ apiVersion, region });
@@ -26,7 +26,7 @@ module.exports = async function createApiGatewayIntegration(httpMethod, resource
     Action: 'lambda:InvokeFunction',
     SourceArn: sourceArn,
   };
-  await bamBam(asyncAddPermission, { params: [addPermissionParams] });
+  await bamBam(asyncAddPermission, { asyncFuncParams: [addPermissionParams] });
 
   // put method
   const putMethodParams = {

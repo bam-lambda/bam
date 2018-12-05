@@ -23,12 +23,12 @@ module.exports = async function destroy(lambdaName, path) {
 
   const library = await readFuncLibrary(path);
   const { restApiId } = library[lambdaName].api;
-  const bamBamParams = {
-    params: [restApiId, path],
+  const optionalParamsObj = {
+    asyncFuncParams: [restApiId, path],
     retryError: 'TooManyRequestsException',
     interval: 15000,
   };
-  await bamBam(deleteApi, bamBamParams);
+  await bamBam(deleteApi, optionalParamsObj);
   await deleteAwsLambda(lambdaName);
 
   // delete from local directories

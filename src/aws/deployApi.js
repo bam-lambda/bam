@@ -39,16 +39,12 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
 
     for (let i = 0; i < httpMethods.length; i += 1) {
       const httpMethod = httpMethods[i];
-      const params = [httpMethod, resourceId, restApiId, lambdaName, path];
-      await bamBam(createApiGatewayIntegration, {
-        params,
-        retryError: 'TooManyRequestsException',
-      });
+      await createApiGatewayIntegration(httpMethod, resourceId, restApiId, lambdaName, path);
     }
 
     // create deployment
     await bamBam(asyncCreateDeployment, {
-      params: [{ restApiId, stageName }],
+      asyncFuncParams: [{ restApiId, stageName }],
       retryError: 'TooManyRequestsException',
     });
 

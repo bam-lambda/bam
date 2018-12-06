@@ -1,17 +1,15 @@
+const createApiGatewayIntegration = require('./createApiGatewayIntegration');
+const bamBam = require('../util/bamBam');
+const bamSpinner = require('../util/spinner');
+const { readFile } = require('../util/fileUtils');
+const { asyncGetRegion } = require('../util/getRegion');
+
 const {
   asyncCreateApi,
   asyncGetResources,
   asyncCreateDeployment,
 } = require('./awsFunctions');
 
-const createApiGatewayIntegration = require('./createApiGatewayIntegration');
-const bamBam = require('../util/bamBam');
-const bamSpinner = require('../util/spinner');
-const {
-  writeApi,
-  readFile,
-} = require('../util/fileUtils');
-const { asyncGetRegion } = require('../util/getRegion');
 const {
   bamLog,
   bamError,
@@ -19,7 +17,6 @@ const {
 
 module.exports = async function deployApi(lambdaName, path, httpMethods, stageName) {
   const region = await asyncGetRegion();
-
   bamSpinner.start();
 
   // deploy sequence:
@@ -41,16 +38,14 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
       retryError: 'TooManyRequestsException',
     });
 
-    // api endpoint
     const endpoint = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}`;
 
-    // write to library
-    await writeApi(endpoint, lambdaName, restApiId, path);
     const bamAscii = await readFile(`${__dirname}/../../ascii/bam.txt`, 'utf8');
     bamSpinner.stop();
     bamLog(bamAscii);
     bamLog('API Gateway endpoint has been deployed:');
     bamLog(endpoint);
+    return { restApiId, endpoint };
   } catch (err) {
     bamSpinner.stop();
     bamError(err);

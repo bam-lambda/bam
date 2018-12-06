@@ -9,30 +9,31 @@ const {
 } = require('../util/logger');
 const {
   createDirectory,
-  writeLambda,
   readConfig,
   copyDir,
   copyFile,
   readFile,
   rename,
+  getStagingPath,
   exists,
 } = require('../util/fileUtils');
 
 const cwd = process.cwd();
 
 module.exports = async function deployLambda(lambdaName, description, path, roleName) {
+  const stagingPath = getStagingPath(path);
   const config = await readConfig(path);
   const { accountNumber } = config;
   const role = roleName || config.role;
   const lambdaNameDirExists = await exists(`${cwd}/${lambdaName}`);
   const renameLambdaFileToIndexJs = async () => {
-    await rename(`${path}/.bam/functions/${lambdaName}/${lambdaName}.js`,
-      `${path}/.bam/functions/${lambdaName}/index.js`);
+    await rename(`${stagingPath}/${lambdaName}/${lambdaName}.js`,
+      `${stagingPath}/${lambdaName}/index.js`);
   };
 
   const createDeploymentPackageFromDir = async () => {
-    await copyDir(`${cwd}/${lambdaName}`, `${path}/.bam/functions/${lambdaName}`);
-    const lambdaNameJSExists = await exists(`${path}/.bam/functions/${lambdaName}/${lambdaName}.js`);
+    await copyDir(`${cwd}/${lambdaName}`, `${stagingPath}/${lambdaName}`);
+    const lambdaNameJSExists = await exists(`${stagingPath}/${lambdaName}/${lambdaName}.js`);
     if (lambdaNameJSExists) await renameLambdaFileToIndexJs();
   };
 
@@ -40,8 +41,8 @@ module.exports = async function deployLambda(lambdaName, description, path, role
     if (lambdaNameDirExists) {
       await createDeploymentPackageFromDir();
     } else {
-      await createDirectory(lambdaName, `${path}/.bam/functions`);
-      await copyFile(`${cwd}/${lambdaName}.js`, `${path}/.bam/functions/${lambdaName}/index.js`);
+      await createDirectory(lambdaName, stagingPath);
+      await copyFile(`${cwd}/${lambdaName}.js`, `${stagingPath}/${lambdaName}/index.js`);
     }
   };
 
@@ -73,7 +74,6 @@ module.exports = async function deployLambda(lambdaName, description, path, role
   const data = await createAwsLambda();
 
   if (data) {
-    await writeLambda(data, path);
     bamSpinner.stop();
     bamLog(`Lambda "${lambdaName}" has been created`);
     return data;

@@ -1,7 +1,12 @@
 const getUserDefaults = require('./getUserDefaults');
 const init = require('./init');
 const { bamLog, bamWarn } = require('./logger');
-const { readConfig, exists, isConfigured } = require('./fileUtils');
+const {
+  readConfig,
+  exists,
+  isConfigured,
+  getBamPath,
+} = require('./fileUtils');
 const { createBamRole, createDatabaseBamRole } = require('../aws/createRoles');
 const { doesRoleExist } = require('../aws/doesResourceExist');
 
@@ -24,7 +29,8 @@ const commandIsNotValid = command => !commands.includes(command);
 module.exports = async function catchSetupAndConfig(path, command, options) {
   if (commandIsNotValid(command) || ['help', 'version'].includes(command)) return true;
 
-  const bamDirExists = await exists(`${path}/.bam`);
+  const bamPath = getBamPath(path);
+  const bamDirExists = await exists(bamPath);
   if (!bamDirExists) {
     const isInitialized = await init(bamRole, path);
     // don't continue if init incomplete, don't config twice

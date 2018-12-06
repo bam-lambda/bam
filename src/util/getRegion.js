@@ -1,7 +1,14 @@
-const { homedir } = require('os');
-const { readFileSync } = require('fs');
+const os = require('os');
+const { promisify } = require('util');
+const fs = require('fs');
 
-const { readFile } = require('./fileUtils');
+const { readFileSync } = fs;
+// const { readFileSync } = require('fs');
+
+// const { readFile } = require('./fileUtils');
+
+const readFile = promisify(fs.readFile);
+const homedir = os.homedir();
 
 const getRegionFromConfigStr = (configStr) => {
   const defaultProfile = configStr.split('[').find(el => el.match('default'));

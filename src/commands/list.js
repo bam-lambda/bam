@@ -10,9 +10,11 @@ const {
 } = require('../util/listHelpers');
 const checkForOptionType = require('../util/checkForOptionType');
 const {
-  readFuncLibrary,
-  readFile,
+  readLambdasLibrary,
+  readApisLibrary,
+  readDbtablesLibrary,
   exists,
+  getBamPath,
 } = require('../util/fileUtils');
 
 const logBamFunctions = (bamFunctionsList) => {
@@ -41,22 +43,25 @@ const logBamTables = (bamTablesList) => {
 };
 
 module.exports = async function list(path, options) {
-  let library = {};
+  const bamPath = getBamPath(path);
+  let lambdas = {};
+  let apis = {};
   let bamFunctionsList = [];
-  const libraryFileExists = await exists(`${path}/.bam/functions/library.json`);
-  if (libraryFileExists) {
-    library = await readFuncLibrary(path) || {};
-    bamFunctionsList = await getBamFunctionsList(path, library);
+  const lambdasFileExists = await exists(`${bamPath}/lambdas.json`);
+  const apisFileExists = await exists(`${bamPath}/apis.json`);
+  if (lambdasFileExists && apisFileExists) {
+    lambdas = await readLambdasLibrary(path) || {};
+    apis = await readApisLibrary(path) || {};
+    bamFunctionsList = await getBamFunctionsList(path, lambdas, apis);
   }
-  const awsFunctionsList = await getAwsFunctionsList(path, library);
+  const awsFunctionsList = await getAwsFunctionsList(path, lambdas);
 
   let dbtables = {};
   let bamTablesList = [];
-  const dbtablesFilePath = `${path}/.bam/dbtables.json`;
+  const dbtablesFilePath = `${bamPath}/dbtables.json`;
   const dbtablesFileExists = await exists(dbtablesFilePath);
   if (dbtablesFileExists) {
-    const dbtablesJSON = await readFile(dbtablesFilePath, 'utf8');
-    dbtables = JSON.parse(dbtablesJSON);
+    dbtables = await readDbtablesLibrary(path);
     bamTablesList = await getBamTablesList(path, dbtables);
   }
 

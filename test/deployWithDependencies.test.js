@@ -1,37 +1,41 @@
 const https = require('https');
 
+const { createBamRole } = require('../src/aws/createRoles');
+const deployLambda = require('../src/aws/deployLambda.js');
+const deployApi = require('../src/aws/deployApi.js');
+const destroy = require('../src/commands/destroy');
+const delay = require('../src/util/delay.js');
+const { bamError } = require('../src/util/logger');
+const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
+const { asyncGetRegion } = require('../src/util/getRegion');
+const { writeLambda, writeApi } = require('../src/util/fileUtils');
+
 const {
   asyncDeleteRole,
   asyncDetachPolicy,
 } = require('../src/aws/awsFunctions');
 
-const configTemplate = require('../templates/configTemplate');
-const { createBamRole } = require('../src/aws/createRoles');
-
-const deployLambda = require('../src/aws/deployLambda.js');
-const deployApi = require('../src/aws/deployApi.js');
-
-const destroy = require('../src/commands/destroy');
-const delay = require('../src/util/delay.js');
-
-const { bamError } = require('../src/util/logger');
-
 const {
   writeFile,
+  readConfig,
+  writeConfig,
+  unlink,
   exists,
   readFile,
-  readFuncLibrary,
-  createDirectory,
-  createJSONFile,
+  readApisLibrary,
+  getStagingPath,
   promisifiedRimraf,
+  getBamPath,
 } = require('../src/util/fileUtils');
-
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
+const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const otherTestPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 const path = './test';
+const bamPath = getBamPath(path);
+const stagingPath = getStagingPath(path);
 const cwd = process.cwd();
 const stageName = 'bam';
 const httpMethods = ['GET'];
@@ -44,19 +48,18 @@ const asyncHttpsGet = endpoint => (
 
 describe('bam deploy api', () => {
   beforeEach(async () => {
-    const config = await configTemplate(roleName);
-    config.accountNumber = process.env.AWS_ID;
     jest.setTimeout(60000);
-    await createDirectory('.bam', path);
-    await createDirectory('functions', `${path}/.bam/`);
-    await createJSONFile('config', `${path}/.bam`, config);
-    await createJSONFile('library', `${path}/.bam/functions`, {});
+    await setupBamDirAndFiles(roleName, path);
+    const config = await readConfig(path);
+    config.accountNumber = process.env.AWS_ID;
+    await writeConfig(path, config);
     await createBamRole(roleName);
   });
 
   afterEach(async () => {
     await destroy(lambdaName, path);
-    await promisifiedRimraf(`${path}/.bam`);
+    await promisifiedRimraf(bamPath);
+    await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDetachPolicy({ PolicyArn: otherTestPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
@@ -67,13 +70,16 @@ describe('bam deploy api', () => {
     beforeEach(async () => {
       const testLambdaWithDependencies = await readFile(`${path}/templates/testLambdaWithDependencies.js`);
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependencies);
-      await deployLambda(lambdaName, 'test description', path);
-      await deployApi(lambdaName, path, httpMethods, stageName);
+      const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+      const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+      await writeLambda(lambdaData, path, lambdaDescription);
+      await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
     });
 
     test('Response contains output from dependencies in body', async () => {
-      const library = await readFuncLibrary(path);
-      const url = library[lambdaName].api.endpoint;
+      const region = await asyncGetRegion();
+      const apis = await readApisLibrary(path);
+      const url = apis[region][lambdaName].endpoint;
       let responseBody;
 
       try {
@@ -91,26 +97,26 @@ describe('bam deploy api', () => {
     });
 
     test('package.json file is created', async () => {
-      const packageJSONExists = await exists(`${path}/.bam/functions/${lambdaName}/package.json`);
-      const packageLockJSONExists = await exists(`${path}/.bam/functions/${lambdaName}/package-lock.json`);
+      const packageJSONExists = await exists(`${stagingPath}/${lambdaName}/package.json`);
+      const packageLockJSONExists = await exists(`${stagingPath}/${lambdaName}/package-lock.json`);
       expect(packageJSONExists).toBe(true);
       expect(packageLockJSONExists).toBe(true);
     });
 
     test('node modules directory is created', async () => {
-      const nodeModulesDirExists = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`);
+      const nodeModulesDirExists = await exists(`${stagingPath}/${lambdaName}/node_modules`);
       expect(nodeModulesDirExists).toBe(true);
     });
 
     test('node modules directory contains dependencies', async () => {
-      const uuid = await exists(`${path}/.bam/functions/${lambdaName}/node_modules/uuid`);
-      const moment = await exists(`${path}/.bam/functions/${lambdaName}/node_modules/moment`);
+      const uuid = await exists(`${stagingPath}/${lambdaName}/node_modules/uuid`);
+      const moment = await exists(`${stagingPath}/${lambdaName}/node_modules/moment`);
       expect(uuid).toBe(true);
       expect(moment).toBe(true);
     });
 
     test('node modules directory does not contain native node modules', async () => {
-      const util = await exists(`${path}/.bam/functions/${lambdaName}/node_modules/util`);
+      const util = await exists(`${stagingPath}/${lambdaName}/node_modules/util`);
       expect(util).toBe(false);
     });
   });
@@ -119,12 +125,14 @@ describe('bam deploy api', () => {
     beforeEach(async () => {
       const testLambdaWithIncorrectDependencies = await readFile('./test/templates/testLambdaWithIncorrectDependencies.js');
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithIncorrectDependencies);
-      await deployLambda(lambdaName, 'test description', path);
-      await deployApi(lambdaName, path, httpMethods, stageName);
+      const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+      const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+      await writeLambda(lambdaData, path, lambdaDescription);
+      await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
     });
 
     test('node modules directory does not contain modules listed after exports.handler', async () => {
-      const moment = await exists(`${path}/.bam/functions/${lambdaName}/node_modules/moment`);
+      const moment = await exists(`${stagingPath}/${lambdaName}/node_modules/moment`);
       expect(moment).toBe(false);
     });
   });

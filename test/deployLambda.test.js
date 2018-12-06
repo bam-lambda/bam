@@ -19,6 +19,8 @@ const {
   readLambdasLibrary,
   readFile,
   createDirectory,
+  getStagingPath,
+  getBamPath,
   promisifiedRimraf,
 } = require('../src/util/fileUtils');
 
@@ -26,6 +28,8 @@ const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
+const bamPath = getBamPath(path);
+const stagingPath = getStagingPath(path);
 const cwd = process.cwd();
 
 describe('bam deploy lambda', () => {
@@ -40,16 +44,16 @@ describe('bam deploy lambda', () => {
 
   afterEach(async () => {
     await deleteLambda(lambdaName, path);
-    await promisifiedRimraf(`${path}/.bam`);
+    await promisifiedRimraf(bamPath);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
   });
 
-  test(`Zip file exists within ./test/.bam/functions/${lambdaName}`, async () => {
+  test(`Zip file exists within ${stagingPath}/${lambdaName}`, async () => {
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
     await deployLambda(lambdaName, 'test description', path);
-    const zipFile = await exists(`${path}/.bam/functions/${lambdaName}/${lambdaName}.zip`);
+    const zipFile = await exists(`${stagingPath}/${lambdaName}/${lambdaName}.zip`);
     await unlink(`${cwd}/${lambdaName}.js`);
     expect(zipFile).toBe(true);
   });
@@ -63,7 +67,7 @@ describe('bam deploy lambda', () => {
     expect(lambda).toBe(true);
   });
 
-  test('Lambda metadata exists within ./test/.bam/lambdas.json', async () => {
+  test('Lambda metadata exists within bamPath/lambdas.json', async () => {
     const region = await asyncGetRegion();
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);

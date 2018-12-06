@@ -1,5 +1,6 @@
 const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
+const { getStagingPath } = require('./fileUtils');
 
 const { bamError } = require('./logger');
 
@@ -16,8 +17,10 @@ const unzipper = async (lambdaName) => {
 };
 
 const zipper = async (lambdaName, path, dirName) => {
+  const stagingPath = getStagingPath(path);
+
   if (dirName === undefined) dirName = lambdaName; // may be lambdaName-temp
-  const dir = `${path}/.bam/functions/${dirName}`;
+  const dir = `${stagingPath}/${dirName}`;
 
   try {
     await exec(`zip -r ${lambdaName} .`, { cwd: dir });

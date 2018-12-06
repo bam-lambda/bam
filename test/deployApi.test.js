@@ -23,12 +23,14 @@ const {
   writeConfig,
   readApisLibrary,
   promisifiedRimraf,
+  getBamPath,
 } = require('../src/util/fileUtils');
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
+const bamPath = getBamPath(path);
 const cwd = process.cwd();
 const stageName = 'bam';
 const httpMethods = ['GET'];
@@ -67,7 +69,7 @@ describe('bam deploy api', () => {
 
   afterEach(async () => {
     await destroy(lambdaName, path);
-    await promisifiedRimraf(`${path}/.bam`);
+    await promisifiedRimraf(bamPath);
     await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
@@ -94,7 +96,7 @@ describe('bam deploy api', () => {
     expect(responseStatus).toEqual(200);
   });
 
-  test('Api metadata exists within ./test/.bam/apis.json', async () => {
+  test('Api metadata exists within bamPath/apis.json', async () => {
     const region = await asyncGetRegion();
     await deployLambda(lambdaName, 'test description', path);
     await deployApi(lambdaName, path, httpMethods, stageName);

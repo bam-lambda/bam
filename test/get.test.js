@@ -17,11 +17,13 @@ const {
   promisifiedRimraf,
   writeFile,
   exists,
+  getBamPath,
   unlink,
 } = require('../src/util/fileUtils');
 
 const roleName = 'testBamRole';
 const path = './test';
+const bamPath = getBamPath(path);
 const cwd = process.cwd();
 const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
@@ -40,7 +42,7 @@ describe('bam get', async () => {
 
   afterEach(async () => {
     await destroy(lambdaName, path);
-    await promisifiedRimraf(`${path}/.bam`);
+    await promisifiedRimraf(bamPath);
     await promisifiedRimraf(`${cwd}/${lambdaName}`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });

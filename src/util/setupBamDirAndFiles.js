@@ -1,4 +1,4 @@
-const { createDirectory, createJSONFile } = require('./fileUtils');
+const { createDirectory, createJSONFile, getBamPath } = require('./fileUtils');
 const configTemplate = require('../../templates/configTemplate');
 
 const regions = ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2',
@@ -13,10 +13,11 @@ const startingTemplate = regions.reduce((acc, region) => {
 
 module.exports = async function setupBamDirAndFiles(roleName, path) {
   const configJSON = await configTemplate(roleName);
+  const bamPath = getBamPath(path);
   await createDirectory('.bam', path);
-  await createDirectory('functions', `${path}/.bam`);
-  await createJSONFile('config', `${path}/.bam`, configJSON);
-  await createJSONFile('lambdas', `${path}/.bam`, startingTemplate);
-  await createJSONFile('apis', `${path}/.bam`, startingTemplate);
-  await createJSONFile('dbTables', `${path}/.bam`, startingTemplate);
+  await createDirectory('staging', bamPath);
+  await createJSONFile('config', bamPath, configJSON);
+  await createJSONFile('lambdas', bamPath, startingTemplate);
+  await createJSONFile('apis', bamPath, startingTemplate);
+  await createJSONFile('dbTables', bamPath, startingTemplate);
 };

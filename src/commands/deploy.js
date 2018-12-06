@@ -4,6 +4,7 @@ const getUserInput = require('../util/getUserInput');
 const { bamWarn } = require('../util/logger');
 const { validateLambdaDeployment, validateApiMethods } = require('../util/validations');
 const checkForOptionType = require('../util/checkForOptionType');
+const { deleteStagingDirForLambda } = require('../util/fileUtils');
 
 const stage = 'bam';
 
@@ -43,6 +44,8 @@ module.exports = async function deploy(lambdaName, path, options) {
     await deployLambda(lambdaName, description, path, permitDb);
     if (deployLambdaOnly) return;
     await deployApi(lambdaName, path, httpMethods, stage);
+
+    await deleteStagingDirForLambda(lambdaName, path);
   } catch (err) {
     bamWarn(err);
   }

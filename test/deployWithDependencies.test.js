@@ -22,14 +22,17 @@ const {
   exists,
   readFile,
   readApisLibrary,
+  getStagingPath,
   promisifiedRimraf,
+  getBamPath,
 } = require('../src/util/fileUtils');
-
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
+const bamPath = getBamPath(path);
+const stagingPath = getStagingPath(path);
 const cwd = process.cwd();
 const stageName = 'bam';
 const httpMethods = ['GET'];
@@ -52,7 +55,7 @@ describe('bam deploy api', () => {
 
   afterEach(async () => {
     await destroy(lambdaName, path);
-    await promisifiedRimraf(`${path}/.bam`);
+    await promisifiedRimraf(bamPath);
     await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
@@ -88,26 +91,26 @@ describe('bam deploy api', () => {
     });
 
     test('package.json file is created', async () => {
-      const packageJSONExists = await exists(`${path}/.bam/functions/${lambdaName}/package.json`);
-      const packageLockJSONExists = await exists(`${path}/.bam/functions/${lambdaName}/package-lock.json`);
+      const packageJSONExists = await exists(`${stagingPath}/${lambdaName}/package.json`);
+      const packageLockJSONExists = await exists(`${stagingPath}/${lambdaName}/package-lock.json`);
       expect(packageJSONExists).toBe(true);
       expect(packageLockJSONExists).toBe(true);
     });
 
     test('node modules directory is created', async () => {
-      const nodeModulesDirExists = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`);
+      const nodeModulesDirExists = await exists(`${stagingPath}/${lambdaName}/node_modules`);
       expect(nodeModulesDirExists).toBe(true);
     });
 
     test('node modules directory contains dependencies', async () => {
-      const uuid = await exists(`${path}/.bam/functions/${lambdaName}/node_modules/uuid`);
-      const moment = await exists(`${path}/.bam/functions/${lambdaName}/node_modules/moment`);
+      const uuid = await exists(`${stagingPath}/${lambdaName}/node_modules/uuid`);
+      const moment = await exists(`${stagingPath}/${lambdaName}/node_modules/moment`);
       expect(uuid).toBe(true);
       expect(moment).toBe(true);
     });
 
     test('node modules directory does not contain native node modules', async () => {
-      const util = await exists(`${path}/.bam/functions/${lambdaName}/node_modules/util`);
+      const util = await exists(`${stagingPath}/${lambdaName}/node_modules/util`);
       expect(util).toBe(false);
     });
   });
@@ -121,7 +124,7 @@ describe('bam deploy api', () => {
     });
 
     test('node modules directory does not contain modules listed after exports.handler', async () => {
-      const moment = await exists(`${path}/.bam/functions/${lambdaName}/node_modules/moment`);
+      const moment = await exists(`${stagingPath}/${lambdaName}/node_modules/moment`);
       expect(moment).toBe(false);
     });
   });

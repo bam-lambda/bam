@@ -23,6 +23,8 @@ const {
   rename,
   readApisLibrary,
   distinctElements,
+  deleteStagingDirForLambda,
+  getStagingPath,
 } = require('../util/fileUtils');
 
 const {
@@ -34,6 +36,8 @@ const {
 const stageName = 'bam';
 
 module.exports = async function redeploy(lambdaName, path, options) {
+  const stagingPath = getStagingPath(path);
+
   // validations
   const invalidLambdaMsg = await validateLambdaReDeployment(lambdaName);
   if (invalidLambdaMsg) {
@@ -52,11 +56,11 @@ module.exports = async function redeploy(lambdaName, path, options) {
   }
 
   // helper methods
-  const existsLocally = await exists(`${path}/.bam/functions/${lambdaName}`);
+  const existsLocally = await exists(`${stagingPath}/${lambdaName}`);
 
   const overwriteLocalPkg = async () => {
-    if (existsLocally) await promisifiedRimraf(`${path}/.bam/functions/${lambdaName}`);
-    await rename(`${path}/.bam/functions/${lambdaName}-temp`, `${path}/.bam/functions/${lambdaName}`);
+    if (existsLocally) await promisifiedRimraf(`${stagingPath}/${lambdaName}`);
+    await rename(`${stagingPath}/${lambdaName}-temp`, `${stagingPath}/${lambdaName}`);
   };
 
   const syncLocalToCloudLambda = async () => {
@@ -90,7 +94,7 @@ module.exports = async function redeploy(lambdaName, path, options) {
   };
 
   const revertToPriorState = async () => {
-    await promisifiedRimraf(`${path}/.bam/functions/${lambdaName}-temp`);
+    await promisifiedRimraf(`${stagingPath}/${lambdaName}-temp`);
   };
 
   // redeploy sequence
@@ -100,6 +104,8 @@ module.exports = async function redeploy(lambdaName, path, options) {
     await overwriteLocalPkg();
     await syncLocalToCloudLambda();
     await provideNewApiOrIntegrations();
+
+    await deleteStagingDirForLambda(lambdaName, path);
     bamLog(`Lambda "${lambdaName}" has been updated`);
   } else {
     await revertToPriorState();

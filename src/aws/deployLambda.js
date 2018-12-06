@@ -9,7 +9,6 @@ const {
 } = require('../util/logger');
 const {
   createDirectory,
-  writeLambda,
   readConfig,
   copyDir,
   copyFile,
@@ -74,7 +73,6 @@ module.exports = async function deployLambda(lambdaName, description, path, dbFl
   const data = await createAwsLambda();
 
   if (data) {
-    await writeLambda(data, path);
     bamSpinner.stop();
     bamLog(`Lambda "${lambdaName}" has been created`);
     return data;

@@ -8,7 +8,6 @@ const redeploy = require('../src/commands/redeploy');
 const destroy = require('../src/commands/destroy');
 const delay = require('../src/util/delay');
 const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
-const { asyncGetRegion } = require('../src/util/getRegion');
 
 const {
   asyncDeleteRole,
@@ -22,11 +21,13 @@ const {
   writeFile,
   readConfig,
   writeConfig,
-  readApisLibrary,
+  writeLambda,
+  writeApi,
 } = require('../src/util/fileUtils');
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
+const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
 const cwd = process.cwd();
@@ -74,16 +75,15 @@ describe('bam redeploy lambda', () => {
   });
 
   test('specified httpMethods are created when api is deployed', async () => {
-    const region = await asyncGetRegion();
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
-    await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
-    await deployLambda(lambdaName, 'test description', path);
     const specifiedMethods = ['PUT', 'DELETE'];
-    await deployApi(lambdaName, path, specifiedMethods, stageName);
+    await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
+    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, specifiedMethods, stageName);
+    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeApi(endpoint, specifiedMethods, lambdaName, restApiId, path);
 
-    const apis = await readApisLibrary(path);
-    const url = apis[region][lambdaName].endpoint;
-    const urlParts = url.split('//')[1].split('/');
+    const urlParts = endpoint.split('//')[1].split('/');
     const postOptions = {
       hostname: urlParts[0],
       path: `/${urlParts.slice(1).join('/')}`,
@@ -108,7 +108,7 @@ describe('bam redeploy lambda', () => {
     let responseDelete;
     try {
       await delay(60000);
-      responseGet = await asyncHttpsGet(url);
+      responseGet = await asyncHttpsGet(endpoint);
       responsePost = await asyncHttpsRequest(postOptions);
       responsePut = await asyncHttpsRequest(putOptions);
       responseDelete = await asyncHttpsRequest(deleteOptions);
@@ -123,20 +123,19 @@ describe('bam redeploy lambda', () => {
   });
 
   test('httpMethods update upon redeploy', async () => {
-    const region = await asyncGetRegion();
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
-    await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, httpMethods, stageName);
+    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
     const options = {
       methods: ['POST', 'POST', 'PUT', 'DELETE'],
       rmMethods: ['PUT', 'DELETE'],
     };
     await redeploy(lambdaName, path, options);
 
-    const apis = await readApisLibrary(path);
-    const url = apis[region][lambdaName].endpoint;
-    const urlParts = url.split('//')[1].split('/');
+    const urlParts = endpoint.split('//')[1].split('/');
     const postOptions = {
       hostname: urlParts[0],
       path: `/${urlParts.slice(1).join('/')}`,
@@ -161,7 +160,7 @@ describe('bam redeploy lambda', () => {
     let responseDelete;
     try {
       await delay(60000);
-      responseGet = await asyncHttpsGet(url);
+      responseGet = await asyncHttpsGet(endpoint);
       responsePost = await asyncHttpsRequest(postOptions);
       responsePut = await asyncHttpsRequest(putOptions);
       responseDelete = await asyncHttpsRequest(deleteOptions);
@@ -176,17 +175,16 @@ describe('bam redeploy lambda', () => {
   });
 
   test('method "ANY" accepts all methods', async () => {
-    const region = await asyncGetRegion();
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
-    await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, httpMethods, stageName);
+    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
     const addAny = { methods: ['ANY'] };
     const rmAny = { rmMethods: ['ANY'] };
 
-    const apis = await readApisLibrary(path);
-    const url = apis[region][lambdaName].endpoint;
-    const urlParts = url.split('//')[1].split('/');
+    const urlParts = endpoint.split('//')[1].split('/');
     const postOptions = {
       hostname: urlParts[0],
       path: `/${urlParts.slice(1).join('/')}`,
@@ -211,7 +209,7 @@ describe('bam redeploy lambda', () => {
     let responseDelete;
     try {
       await delay(60000);
-      responseGet = await asyncHttpsGet(url);
+      responseGet = await asyncHttpsGet(endpoint);
       responsePost = await asyncHttpsRequest(postOptions);
       responsePut = await asyncHttpsRequest(putOptions);
       responseDelete = await asyncHttpsRequest(deleteOptions);
@@ -223,7 +221,7 @@ describe('bam redeploy lambda', () => {
 
       await redeploy(lambdaName, path, addAny);
       await delay(60000);
-      responseGet = await asyncHttpsGet(url);
+      responseGet = await asyncHttpsGet(endpoint);
       responsePost = await asyncHttpsRequest(postOptions);
       responsePut = await asyncHttpsRequest(putOptions);
       responseDelete = await asyncHttpsRequest(deleteOptions);
@@ -235,7 +233,7 @@ describe('bam redeploy lambda', () => {
 
       await redeploy(lambdaName, path, rmAny);
       await delay(60000);
-      responseGet = await asyncHttpsGet(url);
+      responseGet = await asyncHttpsGet(endpoint);
       responsePost = await asyncHttpsRequest(postOptions);
       responsePut = await asyncHttpsRequest(putOptions);
       responseDelete = await asyncHttpsRequest(deleteOptions);

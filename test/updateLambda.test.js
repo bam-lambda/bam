@@ -8,7 +8,6 @@ const redeploy = require('../src/commands/redeploy');
 const destroy = require('../src/commands/destroy');
 const delay = require('../src/util/delay');
 const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
-const { asyncGetRegion } = require('../src/util/getRegion');
 
 const {
   asyncDeleteRole,
@@ -24,11 +23,12 @@ const {
   readConfig,
   writeConfig,
   writeLambda,
-  readApisLibrary,
+  writeApi,
 } = require('../src/util/fileUtils');
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
+const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
 const cwd = process.cwd();
@@ -76,21 +76,17 @@ describe('bam redeploy lambda', () => {
   });
 
   test('Response still 200 from same url after changing lambda', async () => {
-    const region = await asyncGetRegion();
-    const data = await deployLambda(lambdaName, 'test description', path);
-    await writeLambda(data, path, 'test description');
-    await deployApi(lambdaName, path, httpMethods, stageName);
-
-    const apis = await readApisLibrary(path);
-    const url = apis[region][lambdaName].endpoint;
     let responseStatus;
-
+    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
     const testLambdaWithDependenciesFile = await readFile('./test/templates/testLambdaWithDependencies.js');
 
     try {
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
       await redeploy(lambdaName, path, {});
-      const response = await asyncHttpsGet(url);
+      const response = await asyncHttpsGet(endpoint);
       responseStatus = response.statusCode;
     } catch (err) {
       bamError(err);
@@ -100,17 +96,14 @@ describe('bam redeploy lambda', () => {
   });
 
   test('Response contains different body before and after redeployment', async () => {
-    const region = await asyncGetRegion();
-    const data = await deployLambda(lambdaName, 'test description', path);
-    await writeLambda(data, path, 'test description');
-    await deployApi(lambdaName, path, httpMethods, stageName);
-
-    const apis = await readApisLibrary(path);
-    const url = apis[region][lambdaName].endpoint;
     let responseBody;
+    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
 
     try {
-      const preResponse = await asyncHttpsGet(url);
+      const preResponse = await asyncHttpsGet(endpoint);
       preResponse.setEncoding('utf8');
       preResponse.on('data', (response) => {
         responseBody = response;
@@ -121,7 +114,7 @@ describe('bam redeploy lambda', () => {
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
       await redeploy(lambdaName, path, {});
 
-      const postResponse = await asyncHttpsGet(url);
+      const postResponse = await asyncHttpsGet(endpoint);
       postResponse.setEncoding('utf8');
       postResponse.on('data', (response) => {
         responseBody = response;
@@ -135,9 +128,10 @@ describe('bam redeploy lambda', () => {
   });
 
   test('Local node modules exist for dependencies only post redeployment', async () => {
-    const data = await deployLambda(lambdaName, 'test description', path);
-    await writeLambda(data, path, 'test description');
-    await deployApi(lambdaName, path, httpMethods, stageName);
+    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
 
     let nodeModules = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`);
     expect(nodeModules).toBe(false);
@@ -151,16 +145,15 @@ describe('bam redeploy lambda', () => {
   });
 
   test('Different requests return corresponding status codes', async () => {
-    const region = await asyncGetRegion();
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
-    await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, httpMethods, stageName);
+    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
     await redeploy(lambdaName, path, { methods: ['POST', 'PUT', 'DELETE'] });
 
-    const apis = await readApisLibrary(path);
-    const url = apis[region][lambdaName].endpoint;
-    const urlParts = url.split('//')[1].split('/');
+    const urlParts = endpoint.split('//')[1].split('/');
     const postOptions = {
       hostname: urlParts[0],
       path: `/${urlParts.slice(1).join('/')}`,
@@ -185,7 +178,7 @@ describe('bam redeploy lambda', () => {
     let responseDelete;
     try {
       await delay(60000);
-      responseGet = await asyncHttpsGet(url);
+      responseGet = await asyncHttpsGet(endpoint);
       responsePost = await asyncHttpsRequest(postOptions);
       responsePut = await asyncHttpsRequest(putOptions);
       responseDelete = await asyncHttpsRequest(deleteOptions);
@@ -200,16 +193,15 @@ describe('bam redeploy lambda', () => {
   });
 
   test('httpMethod ANY supports all method types', async () => {
-    const region = await asyncGetRegion();
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
-    await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, httpMethods, stageName);
+    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
     await redeploy(lambdaName, path, { methods: ['ANY'] });
 
-    const apis = await readApisLibrary(path);
-    const url = apis[region][lambdaName].endpoint;
-    const urlParts = url.split('//')[1].split('/');
+    const urlParts = endpoint.split('//')[1].split('/');
     const postOptions = {
       hostname: urlParts[0],
       path: `/${urlParts.slice(1).join('/')}`,
@@ -234,7 +226,7 @@ describe('bam redeploy lambda', () => {
     let responseDelete;
     try {
       await delay(60000);
-      responseGet = await asyncHttpsGet(url);
+      responseGet = await asyncHttpsGet(endpoint);
       responsePost = await asyncHttpsRequest(postOptions);
       responsePut = await asyncHttpsRequest(putOptions);
       responseDelete = await asyncHttpsRequest(deleteOptions);

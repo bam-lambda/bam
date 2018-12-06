@@ -18,6 +18,8 @@ const {
   writeFile,
   readConfig,
   writeConfig,
+  writeLambda,
+  writeApi,
   readApisLibrary,
   readLambdasLibrary,
   exists,
@@ -25,6 +27,7 @@ const {
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
+const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
 const cwd = process.cwd();
@@ -41,8 +44,10 @@ describe('bam delete lambda', () => {
     await createBamRole(roleName);
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
-    await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, httpMethods, stageName);
+    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
   });
 
   afterEach(async () => {
@@ -60,17 +65,23 @@ describe('bam delete lambda', () => {
     expect(template).toBe(false);
   });
 
-  test('Lambda metadata is removed from ./test/.bam/lambdas.json', async () => {
+  test('Lambda metadata is removed from ./test/.bam/lambdas.json and ./test/.bam/apis.json', async () => {
     const region = await asyncGetRegion();
     let lambdas = await readLambdasLibrary(path);
     let lambda = lambdas[region][lambdaName];
+    let apis = await readApisLibrary(path);
+    let api = apis[region][lambdaName];
     expect(lambda).toBeDefined();
+    expect(api).toBeDefined();
 
     await destroy(lambdaName, path);
 
     lambdas = await readLambdasLibrary(path);
     lambda = lambdas[region][lambdaName];
+    apis = await readApisLibrary(path);
+    api = apis[region][lambdaName];
     expect(lambda).toBeUndefined();
+    expect(api).toBeUndefined();
   });
 
   test('Lambda does not exists on AWS', async () => {

@@ -9,7 +9,6 @@ const {
 } = require('../util/fileUtils');
 const { zipper } = require('../util/zipper');
 const installLambdaDependencies = require('../util/installLambdaDependencies');
-const bamBam = require('../util/bamBam');
 const bamSpinner = require('../util/spinner');
 const updateLambdaConfig = require('./updateLambdaConfig');
 

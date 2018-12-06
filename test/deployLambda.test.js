@@ -24,6 +24,7 @@ const {
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
+const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
 const cwd = process.cwd();
@@ -48,7 +49,7 @@ describe('bam deploy lambda', () => {
   test(`Zip file exists within ./test/.bam/functions/${lambdaName}`, async () => {
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
-    await deployLambda(lambdaName, 'test description', path);
+    await deployLambda(lambdaName, lambdaDescription, path);
     const zipFile = await exists(`${path}/.bam/functions/${lambdaName}/${lambdaName}.zip`);
     await unlink(`${cwd}/${lambdaName}.js`);
     expect(zipFile).toBe(true);
@@ -57,28 +58,17 @@ describe('bam deploy lambda', () => {
   test('Lambda exists on AWS', async () => {
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
-    await deployLambda(lambdaName, 'test description', path);
+    await deployLambda(lambdaName, lambdaDescription, path);
     const lambda = await doesLambdaExist(lambdaName);
     await unlink(`${cwd}/${lambdaName}.js`);
     expect(lambda).toBe(true);
-  });
-
-  test('Lambda metadata exists within ./test/.bam/lambdas.json', async () => {
-    const region = await asyncGetRegion();
-    const testLambdaFile = await readFile('./test/templates/testLambda.js');
-    await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
-    await deployLambda(lambdaName, 'test description', path);
-    const lambdas = await readLambdasLibrary(path);
-    const lambda = lambdas[region][lambdaName];
-    await unlink(`${cwd}/${lambdaName}.js`);
-    expect(lambda).toBeTruthy();
   });
 
   test('Lambda deployed with folder exists on AWS', async () => {
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await createDirectory(lambdaName, cwd);
     await writeFile(`${cwd}/${lambdaName}/${lambdaName}.js`, testLambdaFile);
-    await deployLambda(lambdaName, 'test description', path);
+    await deployLambda(lambdaName, lambdaDescription, path);
     const lambda = await doesLambdaExist(lambdaName);
     await promisifiedRimraf(`${cwd}/${lambdaName}`);
     expect(lambda).toBe(true);

@@ -4,16 +4,13 @@ const deleteAwsLambda = require('../aws/deleteLambda');
 const { asyncGetRegion } = require('../util/getRegion');
 
 const bamSpinner = require('../util/spinner');
-const {
-  bamLog,
-  bamError,
-} = require('../util/logger');
+const { bamLog } = require('../util/logger');
 
 const {
-  promisifiedRimraf,
   readApisLibrary,
   deleteApiFromLibraries,
   deleteLambdaFromLibrary,
+  deleteStagingDirForLambda,
 } = require('../util/fileUtils');
 
 module.exports = async function destroy(lambdaName, path) {
@@ -31,11 +28,7 @@ module.exports = async function destroy(lambdaName, path) {
   await deleteAwsLambda(lambdaName);
 
   // delete from local directories
-  try {
-    await promisifiedRimraf(`${path}/.bam/functions/${lambdaName}`);
-  } catch (err) {
-    bamError(err);
-  }
+  await deleteStagingDirForLambda(lambdaName, path);
 
   // remove from libraries
   await deleteApiFromLibraries(lambdaName, path);

@@ -12,6 +12,8 @@ const unlink = promisify(fs.unlink);
 const rename = promisify(fs.rename);
 const readdir = promisify(fs.readdir);
 const { createWriteStream } = fs;
+const getBamPath = path => `${path}/.bam`;
+const getStagingPath = path => `${getBamPath(path)}/staging`;
 
 const exists = async path => (
   new Promise((res) => {
@@ -23,13 +25,15 @@ const exists = async path => (
 );
 
 const readConfig = async (path) => {
-  const config = await readFile(`${path}/.bam/config.json`);
+  const bamPath = getBamPath(path);
+  const config = await readFile(`${bamPath}/config.json`);
   return JSON.parse(config);
 };
 
 const writeConfig = async (path, config) => {
+  const bamPath = getBamPath(path);
   const configJSON = JSON.stringify(config, null, 2);
-  await writeFile(`${path}/.bam/config.json`, configJSON);
+  await writeFile(`${bamPath}/config.json`, configJSON);
 };
 
 const isConfigured = async (path) => {
@@ -38,33 +42,39 @@ const isConfigured = async (path) => {
 };
 
 const readLambdasLibrary = async (path) => {
-  const json = await readFile(`${path}/.bam/lambdas.json`);
+  const bamPath = getBamPath(path);
+  const json = await readFile(`${bamPath}/lambdas.json`);
   return JSON.parse(json);
 };
 
 const writeLambdasLibrary = async (path, lambdas) => {
+  const bamPath = getBamPath(path);
   const json = JSON.stringify(lambdas, null, 2);
-  await writeFile(`${path}/.bam/lambdas.json`, json);
+  await writeFile(`${bamPath}/lambdas.json`, json);
 };
 
 const readApisLibrary = async (path) => {
-  const json = await readFile(`${path}/.bam/apis.json`);
+  const bamPath = getBamPath(path);
+  const json = await readFile(`${bamPath}/apis.json`);
   return JSON.parse(json);
 };
 
 const writeApisLibrary = async (path, apis) => {
+  const bamPath = getBamPath(path);
   const json = JSON.stringify(apis, null, 2);
-  await writeFile(`${path}/.bam/apis.json`, json);
+  await writeFile(`${bamPath}/apis.json`, json);
 };
 
 const readDbtablesLibrary = async (path) => {
-  const json = await readFile(`${path}/.bam/dbtables.json`);
+  const bamPath = getBamPath(path);
+  const json = await readFile(`${bamPath}/dbtables.json`);
   return JSON.parse(json);
 };
 
 const writeDbtablesLibrary = async (path, dbtables) => {
+  const bamPath = getBamPath(path);
   const json = JSON.stringify(dbtables, null, 2);
-  await writeFile(`${path}/.bam/dbtables.json`, json);
+  await writeFile(`${bamPath}/dbtables.json`, json);
 };
 
 const writeLambda = async (data, path, description = '') => {
@@ -181,7 +191,18 @@ const copyDir = async (src, dest) => {
   }
 };
 
+const deleteStagingDirForLambda = async (lambdaName, path) => {
+  const stagingPath = getStagingPath(path);
+  const stagingPathForLambdaName = `${stagingPath}/${lambdaName}`;
+  const stagingDirExists = await exists(stagingPathForLambdaName);
+  if (stagingDirExists) {
+    await promisifiedRimraf(stagingPathForLambdaName);
+  }
+};
+
 module.exports = {
+  getBamPath,
+  getStagingPath,
   readFile,
   writeFile,
   copyDir,
@@ -211,4 +232,5 @@ module.exports = {
   deleteTableFromLibrary,
   promisifiedRimraf,
   distinctElements,
+  deleteStagingDirForLambda,
 };

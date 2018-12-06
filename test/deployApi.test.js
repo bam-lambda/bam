@@ -23,6 +23,7 @@ const {
   writeLambda,
   writeApi,
   promisifiedRimraf,
+  getBamPath,
 } = require('../src/util/fileUtils');
 
 const roleName = 'testBamRole';
@@ -30,6 +31,7 @@ const lambdaName = 'testBamLambda';
 const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
+const bamPath = getBamPath(path);
 const cwd = process.cwd();
 const stageName = 'bam';
 const httpMethods = ['GET'];
@@ -68,7 +70,7 @@ describe('bam deploy api', () => {
 
   afterEach(async () => {
     await destroy(lambdaName, path);
-    await promisifiedRimraf(`${path}/.bam`);
+    await promisifiedRimraf(bamPath);
     await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });

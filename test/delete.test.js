@@ -22,7 +22,9 @@ const {
   writeApi,
   readApisLibrary,
   readLambdasLibrary,
+  getStagingPath,
   exists,
+  getBamPath,
 } = require('../src/util/fileUtils');
 
 const roleName = 'testBamRole';
@@ -30,6 +32,8 @@ const lambdaName = 'testBamLambda';
 const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
+const bamPath = getBamPath(path);
+const stagingPath = getStagingPath(path);
 const cwd = process.cwd();
 const stageName = 'bam';
 const httpMethods = ['GET'];
@@ -51,17 +55,17 @@ describe('bam delete lambda', () => {
   });
 
   afterEach(async () => {
-    await promisifiedRimraf(`${path}/.bam`);
+    await promisifiedRimraf(bamPath);
     await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
   });
 
-  test('Lambda directory does not exists within ./test/.bam/functions', async () => {
-    let template = await exists(`${path}/.bam/functions/${lambdaName}`);
+  test('Lambda directory does not exists within stagingPath', async () => {
+    let template = await exists(`${stagingPath}/${lambdaName}`);
     expect(template).toBe(true);
     await destroy(lambdaName, path);
-    template = await exists(`${path}/.bam/functions/${lambdaName}`);
+    template = await exists(`${stagingPath}/${lambdaName}`);
     expect(template).toBe(false);
   });
 

@@ -14,6 +14,7 @@ const {
   readApisLibrary,
   readDbtablesLibrary,
   exists,
+  getBamPath,
 } = require('../util/fileUtils');
 
 const logBamFunctions = (bamFunctionsList) => {
@@ -42,11 +43,12 @@ const logBamTables = (bamTablesList) => {
 };
 
 module.exports = async function list(path, options) {
+  const bamPath = getBamPath(path);
   let lambdas = {};
   let apis = {};
   let bamFunctionsList = [];
-  const lambdasFileExists = await exists(`${path}/.bam/lambdas.json`);
-  const apisFileExists = await exists(`${path}/.bam/apis.json`);
+  const lambdasFileExists = await exists(`${bamPath}/lambdas.json`);
+  const apisFileExists = await exists(`${bamPath}/apis.json`);
   if (lambdasFileExists && apisFileExists) {
     lambdas = await readLambdasLibrary(path) || {};
     apis = await readApisLibrary(path) || {};
@@ -56,7 +58,7 @@ module.exports = async function list(path, options) {
 
   let dbtables = {};
   let bamTablesList = [];
-  const dbtablesFilePath = `${path}/.bam/dbtables.json`;
+  const dbtablesFilePath = `${bamPath}/dbtables.json`;
   const dbtablesFileExists = await exists(dbtablesFilePath);
   if (dbtablesFileExists) {
     dbtables = await readDbtablesLibrary(path);

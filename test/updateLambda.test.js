@@ -16,13 +16,13 @@ const {
 
 const {
   promisifiedRimraf,
-  exists,
   unlink,
   readFile,
   writeFile,
   readConfig,
   writeConfig,
   writeLambda,
+  getBamPath,
   writeApi,
 } = require('../src/util/fileUtils');
 
@@ -31,6 +31,7 @@ const lambdaName = 'testBamLambda';
 const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
+const bamPath = getBamPath(path);
 const cwd = process.cwd();
 const stageName = 'bam';
 const httpMethods = ['GET'];
@@ -69,7 +70,7 @@ describe('bam redeploy lambda', () => {
 
   afterEach(async () => {
     await destroy(lambdaName, path);
-    await promisifiedRimraf(`${path}/.bam`);
+    await promisifiedRimraf(bamPath);
     await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
@@ -125,23 +126,6 @@ describe('bam redeploy lambda', () => {
     } catch (err) {
       bamError(err);
     }
-  });
-
-  test('Local node modules exist for dependencies only post redeployment', async () => {
-    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
-    await writeLambda(lambdaData, path, lambdaDescription);
-    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
-
-    let nodeModules = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`);
-    expect(nodeModules).toBe(false);
-
-    const testLambdaWithDependenciesFile = await readFile('./test/templates/testLambdaWithDependencies.js');
-    await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
-    await redeploy(lambdaName, path, {});
-
-    nodeModules = await exists(`${path}/.bam/functions/${lambdaName}/node_modules`);
-    expect(nodeModules).toBe(true);
   });
 
   test('Different requests return corresponding status codes', async () => {

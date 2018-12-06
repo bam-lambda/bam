@@ -5,6 +5,7 @@ const {
   copyFile,
   rename,
   copyDir,
+  getStagingPath,
   exists,
 } = require('../util/fileUtils');
 const { zipper } = require('../util/zipper');
@@ -15,31 +16,32 @@ const updateLambdaConfig = require('./updateLambdaConfig');
 const cwd = process.cwd();
 
 module.exports = async function updateLambda(lambdaName, path, options) {
+  const stagingPath = getStagingPath(path);
   const lambdaNameDirExists = await exists(`${cwd}/${lambdaName}`);
   const renameLambdaFileToIndexJs = async () => {
-    await rename(`${path}/.bam/functions/${lambdaName}-temp/${lambdaName}.js`,
-      `${path}/.bam/functions/${lambdaName}-temp/index.js`);
+    await rename(`${stagingPath}/${lambdaName}/${lambdaName}.js`,
+      `${stagingPath}/${lambdaName}/index.js`);
   };
 
   const createDeploymentPackageFromDir = async () => {
-    await copyDir(`${cwd}/${lambdaName}`, `${path}/.bam/functions/${lambdaName}-temp`);
-    const lambdaNameJSExists = await exists(`${path}/.bam/functions/${lambdaName}-temp/${lambdaName}.js`);
+    await copyDir(`${cwd}/${lambdaName}`, `${stagingPath}/${lambdaName}`);
+    const lambdaNameJSExists = await exists(`${stagingPath}/${lambdaName}/${lambdaName}.js`);
     if (lambdaNameJSExists) await renameLambdaFileToIndexJs();
   };
 
-  const createTempDeployPkg = async () => {
+  const createDeployPkg = async () => {
     if (lambdaNameDirExists) {
       await createDeploymentPackageFromDir();
     } else {
-      await createDirectory(`${lambdaName}-temp`, `${path}/.bam/functions`);
-      await copyFile(`${cwd}/${lambdaName}.js`, `${path}/.bam/functions/${lambdaName}-temp/index.js`);
+      await createDirectory(`${lambdaName}`, stagingPath);
+      await copyFile(`${cwd}/${lambdaName}.js`, `${stagingPath}/${lambdaName}/index.js`);
     }
   };
 
   bamSpinner.start();
-  await createTempDeployPkg();
-  await installLambdaDependencies(`${lambdaName}-temp`, path);
-  const zippedFileName = await zipper(lambdaName, path, `${lambdaName}-temp`);
+  await createDeployPkg();
+  await installLambdaDependencies(lambdaName, path);
+  const zippedFileName = await zipper(lambdaName, path, lambdaName);
   const zipContents = await readFile(zippedFileName);
 
   const updateAwsLambda = async () => {

@@ -10,6 +10,7 @@ const {
   createJSONFile,
   readConfig,
   writeConfig,
+  getBamPath,
 } = require('../src/util/fileUtils');
 
 const { doesRoleExist, doesPolicyExist } = require('../src/aws/doesResourceExist.js');
@@ -23,17 +24,18 @@ const policyName = 'AWSLambdaBasicExecutionRole';
 const databasePolicyARN = `arn:aws:iam::${accountNumber}:policy/testDatabaseBamRolePolicy`;
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
+const bamPath = getBamPath(path);
 
 describe('createBamRole', async () => {
   beforeEach(async () => {
     jest.setTimeout(10000);
     await createDirectory('.bam', path);
     const config = await configTemplate(roleName);
-    await createJSONFile('config', `${path}/.bam`, config);
+    await createJSONFile('config', bamPath, config);
   });
 
   afterEach(async () => {
-    await promisifiedRimraf(`${path}/.bam`);
+    await promisifiedRimraf(bamPath);
   });
 
   describe('aws integration', async () => {
@@ -77,7 +79,7 @@ describe('createDatabaseBamRole', () => {
     await createDirectory('.bam', path);
     const config = await configTemplate(roleName);
     config.accountNumber = process.env.AWS_ID;
-    await createJSONFile('config', `${path}/.bam`, config);
+    await createJSONFile('config', bamPath, config);
     await writeConfig(path, config);
   });
 
@@ -85,7 +87,7 @@ describe('createDatabaseBamRole', () => {
     await asyncDetachPolicy({ PolicyArn: databasePolicyARN, RoleName: databaseBamRole });
     await asyncDeletePolicy({ PolicyArn: databasePolicyARN });
     await asyncDeleteRole({ RoleName: databaseBamRole });
-    await promisifiedRimraf(`${path}/.bam`);
+    await promisifiedRimraf(bamPath);
   });
 
   test('databaseBamRole is created', async () => {

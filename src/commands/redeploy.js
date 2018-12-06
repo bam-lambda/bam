@@ -18,11 +18,9 @@ const {
 
 const {
   writeLambda,
-  promisifiedRimraf,
-  exists,
-  rename,
   readApisLibrary,
   distinctElements,
+  deleteStagingDirForLambda,
 } = require('../util/fileUtils');
 
 const {
@@ -51,19 +49,9 @@ module.exports = async function redeploy(lambdaName, path, options) {
     return;
   }
 
-  // helper methods
-  const existsLocally = await exists(`${path}/.bam/functions/${lambdaName}`);
-
-  const overwriteLocalPkg = async () => {
-    if (existsLocally) await promisifiedRimraf(`${path}/.bam/functions/${lambdaName}`);
-    await rename(`${path}/.bam/functions/${lambdaName}-temp`, `${path}/.bam/functions/${lambdaName}`);
-  };
-
   const syncLocalToCloudLambda = async () => {
-    if (!existsLocally) {
-      const { Configuration } = await getLambda(lambdaName);
-      await writeLambda(Configuration, path);
-    }
+    const { Configuration } = await getLambda(lambdaName);
+    await writeLambda(Configuration, path);
   };
 
   const getApiId = async () => {
@@ -76,7 +64,7 @@ module.exports = async function redeploy(lambdaName, path, options) {
     const restApiId = await getApiId();
     const apiExists = await doesApiExist(restApiId);
 
-    if (!existsLocally || !restApiId || !apiExists) {
+    if (!restApiId || !apiExists) {
       await deployApi(lambdaName, path, addMethods, stageName);
     } else {
       const resources = (await asyncGetResources({ restApiId })).items;
@@ -89,20 +77,16 @@ module.exports = async function redeploy(lambdaName, path, options) {
     }
   };
 
-  const revertToPriorState = async () => {
-    await promisifiedRimraf(`${path}/.bam/functions/${lambdaName}-temp`);
-  };
-
   // redeploy sequence
   const data = await updateLambda(lambdaName, path, options);
 
   if (data) {
-    await overwriteLocalPkg();
     await syncLocalToCloudLambda();
     await provideNewApiOrIntegrations();
+
+    await deleteStagingDirForLambda(lambdaName, path);
     bamLog(`Lambda "${lambdaName}" has been updated`);
   } else {
-    await revertToPriorState();
-    bamError(`Lambda "${lambdaName}" could not be updated in the cloud. Reverted to previous local state`);
+    bamError(`Lambda "${lambdaName}" could not be updated in the cloud`);
   }
 };

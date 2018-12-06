@@ -1,4 +1,8 @@
-const { doesLambdaExist, doesTableExist } = require('../aws/doesResourceExist');
+const { 
+  doesLambdaExist,
+  doesTableExist,
+  doesRoleExist,
+} = require('../aws/doesResourceExist');
 const {
   readdir,
   exists,
@@ -8,6 +12,7 @@ const {
   customizeLambdaWarnings,
   customizeApiWarnings,
   customizeTableWarnings,
+  customizeRoleWarnings,
 } = require('./validationMessages.js');
 
 const cwd = process.cwd();
@@ -61,6 +66,11 @@ const tableHasValidName = (name) => {
 
 const tableExistsOnAws = async (name) => {
   const status = await doesTableExist(name);
+  return status;
+};
+
+const roleExistsOnAws = async (name) => {
+  const status = await doesRoleExist(name);
   return status;
 };
 
@@ -182,6 +192,18 @@ const validateTableCreation = async (name) => {
   return status;
 };
 
+const validateRoleAssumption = async (name) => {
+  const validations = [
+    {
+      validation: roleExistsOnAws,
+      feedbackType: 'roleDoesNotExistOnAws',
+      affirmative: false,
+    },
+  ];
+  const status = await validateResource(name, validations, customizeRoleWarnings);
+  return status;
+};
+
 const validateApiMethods = (methods) => {
   const warnings = customizeApiWarnings(methods);
   const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'ANY'];
@@ -202,4 +224,5 @@ module.exports = {
   validateLambdaCreation,
   validateApiMethods,
   validateTableCreation,
+  validateRoleAssumption,
 };

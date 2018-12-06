@@ -31,6 +31,7 @@ const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
 const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
+const otherTestPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 const path = './test';
 const bamPath = getBamPath(path);
 const stagingPath = getStagingPath(path);
@@ -58,6 +59,7 @@ describe('bam delete lambda', () => {
     await promisifiedRimraf(bamPath);
     await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
+    await asyncDetachPolicy({ PolicyArn: otherTestPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
   });
 

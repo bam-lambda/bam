@@ -22,7 +22,7 @@ const {
   exists,
   rename,
   readApisLibrary,
-  unique,
+  distinctElements,
 } = require('../util/fileUtils');
 
 const {
@@ -41,9 +41,9 @@ module.exports = async function redeploy(lambdaName, path, options) {
     return;
   }
   const addMethods = options.methods
-    ? unique(options.methods.map(method => method.toUpperCase())) : [];
+    ? distinctElements(options.methods.map(method => method.toUpperCase())) : [];
   const removeMethods = options.rmMethods
-    ? unique(options.rmMethods.map(method => method.toUpperCase())) : [];
+    ? distinctElements(options.rmMethods.map(method => method.toUpperCase())) : [];
   const invalidHttp = validateApiMethods(addMethods) || validateApiMethods(removeMethods);
 
   if (invalidHttp) {

@@ -97,6 +97,13 @@ const writeApi = async (endpoint, methods, resourceName, restApiId, path) => {
   await writeApisLibrary(path, apis);
 };
 
+const writeDbtable = async (tableName, dbConfig, path) => {
+  const region = await asyncGetRegion();
+  const tables = await readDbtablesLibrary(path);
+  tables[region][tableName] = dbConfig;
+  await writeDbtablesLibrary(path, tables);
+};
+
 const deleteLambdaFromLibrary = async (resourceName, path) => {
   const region = await asyncGetRegion();
   const lambdas = await readLambdasLibrary(path);
@@ -117,6 +124,13 @@ const deleteApiFromLibraries = async (resourceName, path) => {
   await writeApisLibrary(path, apis);
 };
 
+const deleteTableFromLibrary = async (resourceName, path) => {
+  const region = await asyncGetRegion();
+  const tables = await readDbtablesLibrary(path);
+  delete tables[region][resourceName];
+  await writeDbtablesLibrary(path, tables);
+};
+
 const mkdir = promisify(fs.mkdir);
 
 const createDirectory = async (name, path) => {
@@ -135,7 +149,7 @@ const createJSONFile = async (fileName, path, json) => {
 
 const promisifiedRimraf = dir => new Promise(res => rimraf(dir, res));
 
-const unique = (arr) => {
+const distinctElements = (arr) => {
   const present = {};
   return arr.reduce((acc, e) => {
     if (!present[e]) {
@@ -194,8 +208,10 @@ module.exports = {
   writeDbtablesLibrary,
   writeLambda,
   writeApi,
+  writeDbtable,
   deleteLambdaFromLibrary,
   deleteApiFromLibraries,
+  deleteTableFromLibrary,
   promisifiedRimraf,
-  unique,
+  distinctElements,
 };

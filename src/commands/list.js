@@ -12,7 +12,7 @@ const checkForOptionType = require('../util/checkForOptionType');
 const {
   readLambdasLibrary,
   readApisLibrary,
-  readFile,
+  readDbtablesLibrary,
   exists,
 } = require('../util/fileUtils');
 
@@ -59,8 +59,7 @@ module.exports = async function list(path, options) {
   const dbtablesFilePath = `${path}/.bam/dbtables.json`;
   const dbtablesFileExists = await exists(dbtablesFilePath);
   if (dbtablesFileExists) {
-    const dbtablesJSON = await readFile(dbtablesFilePath, 'utf8');
-    dbtables = JSON.parse(dbtablesJSON);
+    dbtables = await readDbtablesLibrary(path);
     bamTablesList = await getBamTablesList(path, dbtables);
   }
 

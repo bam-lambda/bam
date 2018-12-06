@@ -41,7 +41,6 @@ describe('bam deploy lambda', () => {
   afterEach(async () => {
     await deleteLambda(lambdaName, path);
     await promisifiedRimraf(`${path}/.bam`);
-    await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
   });

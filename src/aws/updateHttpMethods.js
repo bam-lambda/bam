@@ -1,7 +1,7 @@
 const createApiGatewayIntegration = require('./createApiGatewayIntegration');
 const deleteApiGatewayIntegration = require('./deleteApiGatewayIntegration');
 const bamBam = require('../util/bamBam');
-const { unique } = require('../util/fileUtils');
+const { distinctElements } = require('../util/fileUtils');
 
 module.exports = async function updateHttpMethods(resource, lambdaName, restApiId, addMethods, removeMethods, path) {
   const resourceId = resource.id;
@@ -29,6 +29,6 @@ module.exports = async function updateHttpMethods(resource, lambdaName, restApiI
 
   await addHttpMethodIntegrations();
   // update existing methods to include newly added methods
-  existingMethods = unique(existingMethods.concat(addMethods));
+  existingMethods = distinctElements(existingMethods.concat(addMethods));
   await removeHttpMethodIntegrations();
 };

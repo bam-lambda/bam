@@ -36,12 +36,21 @@ const getLocalFunctionsAlsoOnAws = async (path, lambdas) => {
 
 const formatBamFunctionsList = async (funcName, lambdas, apis) => {
   const region = await asyncGetRegion();
-  const funcObj = lambdas[region][funcName];
-  const apiObj = apis[region][funcName];
-  const funcNameStr = bamText(`${funcName}:`);
-  const descriptionStr = `${indentFurthest}${bamText('description:')} ${funcObj.description}`;
-  const endpointStr = `${indentFurthest}${bamText('url:')} ${apiObj.endpoint}`;
-  const fields = [funcNameStr, descriptionStr, endpointStr];
+  const fields = [];
+
+  if (Object.keys(lambdas[region]).length > 0) {
+    const funcObj = lambdas[region][funcName];
+    const funcNameStr = bamText(`${funcName}:`);
+    const descriptionStr = `${indentFurthest}${bamText('description:')} ${funcObj.description}`;
+    fields.push(funcNameStr);
+    fields.push(descriptionStr);
+
+    if (Object.keys(apis[region]).length > 0) {
+      const apiObj = apis[region][funcName];
+      const endpointStr = apiObj ? `${indentFurthest}${bamText('url:')} ${apiObj.endpoint}` : '';
+      fields.push(endpointStr);
+    }
+  }
   return fields.join('\n');
 };
 
@@ -94,7 +103,8 @@ const formatTablesList = async (tableName, dbtables) => {
 const getFormattedTablesList = async (tableNames, dbtables) => {
   const dbListItems = [];
 
-  for (let i = 0; i < dbListItems.length; i += 1) {
+  for (let i = 0; i < tableNames.length; i += 1) {
+    const tableName = tableNames[i];
     const listItem = await formatTablesList(tableName, dbtables);
     dbListItems.push(listItem);
   }
@@ -103,10 +113,12 @@ const getFormattedTablesList = async (tableNames, dbtables) => {
 };
 
 const getBamTablesList = async (path, dbtables) => {
+  const region = await asyncGetRegion();
   const tablesNamesOnAws = await asyncListTables();
   const tablesOnAws = tablesNamesOnAws.TableNames;
 
-  const tableNames = Object.keys(dbtables).filter(table => tablesOnAws.includes(table));
+  const regionalTables = dbtables[region];
+  const tableNames = Object.keys(regionalTables).filter(table => tablesOnAws.includes(table));
   const numOfTables = tableNames.length;
   const formattedTablesList = await getFormattedTablesList(tableNames, dbtables);
 

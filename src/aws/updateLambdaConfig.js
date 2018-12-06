@@ -4,7 +4,6 @@ const { readConfig } = require('../util/fileUtils');
 const { bamWarn, bamError } = require('../util/logger');
 const bamSpinner = require('../util/spinner');
 const checkForOptionType = require('../util/checkForOptionType');
-const bamBam = require('../util/bamBam');
 const { doesRoleExist } = require('./doesResourceExist');
 const getLambda = require('./getLambda');
 

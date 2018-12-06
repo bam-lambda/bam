@@ -41,7 +41,6 @@ const isConfigured = async (path) => {
   return config.accountNumber && config.region && config.role;
 };
 
-// lambdas
 const readLambdasLibrary = async (path) => {
   const bamPath = getBamPath(path);
   const json = await readFile(`${bamPath}/lambdas.json`);
@@ -54,7 +53,6 @@ const writeLambdasLibrary = async (path, lambdas) => {
   await writeFile(`${bamPath}/lambdas.json`, json);
 };
 
-// apis
 const readApisLibrary = async (path) => {
   const bamPath = getBamPath(path);
   const json = await readFile(`${bamPath}/apis.json`);
@@ -67,7 +65,6 @@ const writeApisLibrary = async (path, apis) => {
   await writeFile(`${bamPath}/apis.json`, json);
 };
 
-// dbtables
 const readDbtablesLibrary = async (path) => {
   const bamPath = getBamPath(path);
   const json = await readFile(`${bamPath}/dbtables.json`);
@@ -126,7 +123,7 @@ const deleteApiFromLibraries = async (resourceName, path) => {
   const lambdas = await readLambdasLibrary(path);
   const apis = await readApisLibrary(path);
 
-  // only if lambda exists
+  // TODO: do these steps only if lambda exists
   lambdas[region][resourceName].api = '';
   await writeLambdasLibrary(path, lambdas);
 

@@ -8,7 +8,6 @@ const destroy = require('../src/commands/destroy');
 const delay = require('../src/util/delay');
 const { bamError } = require('../src/util/logger');
 const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
-const { asyncGetRegion } = require('../src/util/getRegion');
 
 const {
   asyncDeleteRole,
@@ -21,13 +20,15 @@ const {
   readFile,
   readConfig,
   writeConfig,
-  readApisLibrary,
+  writeLambda,
+  writeApi,
   promisifiedRimraf,
   getBamPath,
 } = require('../src/util/fileUtils');
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
+const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
 const bamPath = getBamPath(path);
@@ -77,17 +78,15 @@ describe('bam deploy api', () => {
   });
 
   test('Response is 200 when hitting endpoint from apis.json', async () => {
-    const region = await asyncGetRegion();
-    await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, httpMethods, stageName);
-
-    const apis = await readApisLibrary(path);
-    const url = apis[region][lambdaName].endpoint;
     let responseStatus;
+    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
 
     try {
       await delay(60000);
-      const response = await asyncHttpsGet(url);
+      const response = await asyncHttpsGet(endpoint);
       responseStatus = response.statusCode;
     } catch (err) {
       bamError(err);
@@ -96,36 +95,25 @@ describe('bam deploy api', () => {
     expect(responseStatus).toEqual(200);
   });
 
-  test('Api metadata exists within bamPath/apis.json', async () => {
-    const region = await asyncGetRegion();
-    await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, httpMethods, stageName);
-
-    const apis = await readApisLibrary(path);
-    const api = apis[region][lambdaName];
-    expect(api).toBeTruthy();
-  });
-
   test('Api endpoint exists on AWS', async () => {
-    const region = await asyncGetRegion();
-    await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, httpMethods, stageName);
+    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
 
-    const apis = await readApisLibrary(path);
-    const { restApiId } = apis[region][lambdaName];
     const apiExists = await doesApiExist(restApiId);
     expect(apiExists).toBe(true);
   });
 
   test('Response contains query param in body', async () => {
-    const region = await asyncGetRegion();
     const testLambdaWithQueryParams = await readFile(`${path}/templates/testLambdaWithQueryParams.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithQueryParams);
-    await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, httpMethods, stageName);
+    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
 
-    const apis = await readApisLibrary(path);
-    const url = `${apis[region][lambdaName].endpoint}?name=John`;
+    const url = `${endpoint}?name=John`;
     let responseBody;
 
     try {
@@ -141,15 +129,14 @@ describe('bam deploy api', () => {
   });
 
   test('POST request returns 201 status code', async () => {
-    const region = await asyncGetRegion();
     const testLambdaForPostMethod = await readFile(`${path}/templates/testLambdaForPostMethod.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaForPostMethod);
-    await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, ['POST'], stageName);
+    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, ['POST'], stageName);
+    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
 
-    const apis = await readApisLibrary(path);
-    const url = apis[region][lambdaName].endpoint;
-    const urlParts = url.split('//')[1].split('/');
+    const urlParts = endpoint.split('//')[1].split('/');
     const options = {
       hostname: urlParts[0],
       path: `/${urlParts.slice(1).join('/')}`,

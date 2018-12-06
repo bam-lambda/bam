@@ -8,6 +8,7 @@ const delay = require('../src/util/delay.js');
 const { bamError } = require('../src/util/logger');
 const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
 const { asyncGetRegion } = require('../src/util/getRegion');
+const { writeLambda, writeApi } = require('../src/util/fileUtils');
 
 const {
   asyncDeleteRole,
@@ -29,6 +30,7 @@ const {
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
+const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
 const bamPath = getBamPath(path);
@@ -66,8 +68,10 @@ describe('bam deploy api', () => {
     beforeEach(async () => {
       const testLambdaWithDependencies = await readFile(`${path}/templates/testLambdaWithDependencies.js`);
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependencies);
-      await deployLambda(lambdaName, 'test description', path);
-      await deployApi(lambdaName, path, httpMethods, stageName);
+      const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+      const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+      await writeLambda(lambdaData, path, lambdaDescription);
+      await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
     });
 
     test('Response contains output from dependencies in body', async () => {
@@ -119,8 +123,10 @@ describe('bam deploy api', () => {
     beforeEach(async () => {
       const testLambdaWithIncorrectDependencies = await readFile('./test/templates/testLambdaWithIncorrectDependencies.js');
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithIncorrectDependencies);
-      await deployLambda(lambdaName, 'test description', path);
-      await deployApi(lambdaName, path, httpMethods, stageName);
+      const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+      const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+      await writeLambda(lambdaData, path, lambdaDescription);
+      await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
     });
 
     test('node modules directory does not contain modules listed after exports.handler', async () => {

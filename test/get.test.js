@@ -16,6 +16,8 @@ const {
   readConfig,
   promisifiedRimraf,
   writeFile,
+  writeLambda,
+  writeApi,
   exists,
   getBamPath,
   unlink,
@@ -26,6 +28,7 @@ const path = './test';
 const bamPath = getBamPath(path);
 const cwd = process.cwd();
 const lambdaName = 'testBamLambda';
+const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const stageName = 'bam';
 const httpMethods = ['GET'];
@@ -51,8 +54,10 @@ describe('bam get', async () => {
   test('lambdaName directory and lambdaName.js will be created in cwd', async () => {
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
-    await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, httpMethods, stageName);
+    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
     await unlink(`${cwd}/${lambdaName}.js`);
     await get(lambdaName, path);
     const lambdaNameDirExists = await exists(`${cwd}/${lambdaName}`);
@@ -64,8 +69,10 @@ describe('bam get', async () => {
   test('lambdaName.js in lambdaName dir will contain lambda code', async () => {
     const testLambdaFile = await readFile('./test/templates/testLambdaGet.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
-    await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, httpMethods, stageName);
+    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
     await unlink(`${cwd}/${lambdaName}.js`);
     await get(lambdaName, path);
     const lambdaFile = await readFile(`${cwd}/${lambdaName}/${lambdaName}.js`, 'utf8');
@@ -79,8 +86,10 @@ describe('bam get', async () => {
   test('retrieved dir of lambda with dependencies will contain node_modules', async () => {
     const testLambdaFile = await readFile('./test/templates/testLambdaWithDependencies.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
-    await deployLambda(lambdaName, 'test description', path);
-    await deployApi(lambdaName, path, httpMethods, stageName);
+    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
     await unlink(`${cwd}/${lambdaName}.js`);
     await get(lambdaName, path);
     const lambdaNameDirContainsNodeModules = await exists(`${cwd}/${lambdaName}/node_modules`);

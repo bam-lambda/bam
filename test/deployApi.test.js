@@ -21,7 +21,6 @@ const {
   readFile,
   readConfig,
   writeConfig,
-  readLambdasLibrary,
   readApisLibrary,
   promisifiedRimraf,
 } = require('../src/util/fileUtils');
@@ -57,7 +56,7 @@ const asyncHttpsPost = opts => (
 describe('bam deploy api', () => {
   beforeEach(async () => {
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
-    jest.setTimeout(60000);
+    jest.setTimeout(120000);
     await setupBamDirAndFiles(roleName, path);
     const config = await readConfig(path);
     config.accountNumber = process.env.AWS_ID;
@@ -85,7 +84,7 @@ describe('bam deploy api', () => {
     let responseStatus;
 
     try {
-      await delay(30000);
+      await delay(60000);
       const response = await asyncHttpsGet(url);
       responseStatus = response.statusCode;
     } catch (err) {

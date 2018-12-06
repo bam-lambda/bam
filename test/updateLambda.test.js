@@ -17,7 +17,6 @@ const {
 
 const {
   promisifiedRimraf,
-  exists,
   unlink,
   readFile,
   writeFile,
@@ -25,7 +24,6 @@ const {
   writeConfig,
   writeLambda,
   readApisLibrary,
-  getStagingPath,
   getBamPath,
 } = require('../src/util/fileUtils');
 
@@ -33,7 +31,6 @@ const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const path = './test';
-const stagingPath = getStagingPath(path);
 const bamPath = getBamPath(path);
 const cwd = process.cwd();
 const stageName = 'bam';

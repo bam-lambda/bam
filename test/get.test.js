@@ -23,6 +23,7 @@ const path = './test';
 const cwd = process.cwd();
 const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
+const otherTestPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 const stageName = 'bam';
 const httpMethods = ['GET'];
 
@@ -43,6 +44,7 @@ describe('bam get', async () => {
     await promisifiedRimraf(`${path}/.bam`);
     await promisifiedRimraf(`${cwd}/${lambdaName}`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
+    await asyncDetachPolicy({ PolicyArn: otherTestPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
   });
 

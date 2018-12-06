@@ -24,7 +24,6 @@ module.exports = async function deployLambda(lambdaName, description, path, role
   const config = await readConfig(path);
   const { accountNumber } = config;
   const role = roleName || config.role;
-console.log(role, roleName, config.role)  
   const lambdaNameDirExists = await exists(`${cwd}/${lambdaName}`);
   const renameLambdaFileToIndexJs = async () => {
     await rename(`${path}/.bam/functions/${lambdaName}/${lambdaName}.js`,

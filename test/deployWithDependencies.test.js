@@ -30,6 +30,7 @@ const {
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
+const otherTestPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 const path = './test';
 const cwd = process.cwd();
 const stageName = 'bam';
@@ -57,6 +58,7 @@ describe('bam deploy api', () => {
     await destroy(lambdaName, path);
     await promisifiedRimraf(`${path}/.bam`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
+    await asyncDetachPolicy({ PolicyArn: otherTestPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
     await delay(30000);
   });

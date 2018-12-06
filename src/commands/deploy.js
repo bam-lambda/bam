@@ -55,7 +55,6 @@ module.exports = async function deploy(lambdaName, path, options) {
       bamWarn('Lambda deployment aborted');
       return;
     }
-console.log(roleName)
     const [description] = input;
     await deployLambda(lambdaName, description, path, roleName);
     if (deployLambdaOnly) return;

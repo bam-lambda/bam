@@ -184,7 +184,7 @@ const validateTableCreation = async (name) => {
       affirmative: false,
     }, {
       validation: tableExistsOnAws,
-      feedbackType: 'tableDoesNotExistOnAws',
+      feedbackType: 'tableDoesExistOnAws',
       affirmative: true,
     },
   ];

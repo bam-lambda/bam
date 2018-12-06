@@ -18,13 +18,9 @@ const {
 
 const {
   writeLambda,
-  promisifiedRimraf,
-  exists,
-  rename,
   readApisLibrary,
   distinctElements,
   deleteStagingDirForLambda,
-  getStagingPath,
 } = require('../util/fileUtils');
 
 const {
@@ -36,8 +32,6 @@ const {
 const stageName = 'bam';
 
 module.exports = async function redeploy(lambdaName, path, options) {
-  const stagingPath = getStagingPath(path);
-
   // validations
   const invalidLambdaMsg = await validateLambdaReDeployment(lambdaName);
   if (invalidLambdaMsg) {
@@ -55,19 +49,9 @@ module.exports = async function redeploy(lambdaName, path, options) {
     return;
   }
 
-  // helper methods
-  const existsLocally = await exists(`${stagingPath}/${lambdaName}`);
-
-  const overwriteLocalPkg = async () => {
-    if (existsLocally) await promisifiedRimraf(`${stagingPath}/${lambdaName}`);
-    await rename(`${stagingPath}/${lambdaName}-temp`, `${stagingPath}/${lambdaName}`);
-  };
-
   const syncLocalToCloudLambda = async () => {
-    if (!existsLocally) {
-      const { Configuration } = await getLambda(lambdaName);
-      await writeLambda(Configuration, path);
-    }
+    const { Configuration } = await getLambda(lambdaName);
+    await writeLambda(Configuration, path);
   };
 
   const getApiId = async () => {
@@ -80,7 +64,7 @@ module.exports = async function redeploy(lambdaName, path, options) {
     const restApiId = await getApiId();
     const apiExists = await doesApiExist(restApiId);
 
-    if (!existsLocally || !restApiId || !apiExists) {
+    if (!restApiId || !apiExists) {
       await deployApi(lambdaName, path, addMethods, stageName);
     } else {
       const resources = (await asyncGetResources({ restApiId })).items;
@@ -93,22 +77,16 @@ module.exports = async function redeploy(lambdaName, path, options) {
     }
   };
 
-  const revertToPriorState = async () => {
-    await promisifiedRimraf(`${stagingPath}/${lambdaName}-temp`);
-  };
-
   // redeploy sequence
   const data = await updateLambda(lambdaName, path, options);
 
   if (data) {
-    await overwriteLocalPkg();
     await syncLocalToCloudLambda();
     await provideNewApiOrIntegrations();
 
     await deleteStagingDirForLambda(lambdaName, path);
     bamLog(`Lambda "${lambdaName}" has been updated`);
   } else {
-    await revertToPriorState();
-    bamError(`Lambda "${lambdaName}" could not be updated in the cloud. Reverted to previous local state`);
+    bamError(`Lambda "${lambdaName}" could not be updated in the cloud`);
   }
 };

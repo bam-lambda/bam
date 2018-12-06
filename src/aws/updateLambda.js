@@ -19,29 +19,29 @@ module.exports = async function updateLambda(lambdaName, path, options) {
   const stagingPath = getStagingPath(path);
   const lambdaNameDirExists = await exists(`${cwd}/${lambdaName}`);
   const renameLambdaFileToIndexJs = async () => {
-    await rename(`${stagingPath}/${lambdaName}-temp/${lambdaName}.js`,
-      `${stagingPath}/${lambdaName}-temp/index.js`);
+    await rename(`${stagingPath}/${lambdaName}/${lambdaName}.js`,
+      `${stagingPath}/${lambdaName}/index.js`);
   };
 
   const createDeploymentPackageFromDir = async () => {
-    await copyDir(`${cwd}/${lambdaName}`, `${stagingPath}/${lambdaName}-temp`);
-    const lambdaNameJSExists = await exists(`${stagingPath}/${lambdaName}-temp/${lambdaName}.js`);
+    await copyDir(`${cwd}/${lambdaName}`, `${stagingPath}/${lambdaName}`);
+    const lambdaNameJSExists = await exists(`${stagingPath}/${lambdaName}/${lambdaName}.js`);
     if (lambdaNameJSExists) await renameLambdaFileToIndexJs();
   };
 
-  const createTempDeployPkg = async () => {
+  const createDeployPkg = async () => {
     if (lambdaNameDirExists) {
       await createDeploymentPackageFromDir();
     } else {
-      await createDirectory(`${lambdaName}-temp`, stagingPath);
-      await copyFile(`${cwd}/${lambdaName}.js`, `${stagingPath}/${lambdaName}-temp/index.js`);
+      await createDirectory(`${lambdaName}`, stagingPath);
+      await copyFile(`${cwd}/${lambdaName}.js`, `${stagingPath}/${lambdaName}/index.js`);
     }
   };
 
   bamSpinner.start();
-  await createTempDeployPkg();
-  await installLambdaDependencies(`${lambdaName}-temp`, path);
-  const zippedFileName = await zipper(lambdaName, path, `${lambdaName}-temp`);
+  await createDeployPkg();
+  await installLambdaDependencies(lambdaName, path);
+  const zippedFileName = await zipper(lambdaName, path, lambdaName);
   const zipContents = await readFile(zippedFileName);
 
   const updateAwsLambda = async () => {

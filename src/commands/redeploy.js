@@ -32,6 +32,11 @@ const {
 const stageName = 'bam';
 
 module.exports = async function redeploy(lambdaName, path, options) {
+  const getApiId = async () => {
+    const apis = await readApisLibrary(path);
+    return apis[region] && apis[region][lambdaName] && apis[region][lambdaName].restApiId;
+  };
+
   // validations
   const invalidLambdaMsg = await validateLambdaReDeployment(lambdaName);
   if (invalidLambdaMsg) {
@@ -48,22 +53,20 @@ module.exports = async function redeploy(lambdaName, path, options) {
   removeMethods = removeMethods
     ? distinctElements(removeMethods.map(m => m.toUpperCase())) : [];
 
-  const invalidHttp = validateApiMethods(addMethods) || validateApiMethods(removeMethods);
+  const region = await asyncGetRegion();
+  const restApiId = await getApiId();
+  const resources = (await asyncGetResources({ restApiId })).items;
+  const resource = resources.find(res => res.path === '/');
+  const existingMethods = Object.keys(resource.resourceMethods || {});
+
+  const invalidHttp = await validateApiMethods(addMethods, removeMethods, existingMethods);
 
   if (invalidHttp) {
     bamWarn(invalidHttp);
     return;
   }
 
-  const region = await asyncGetRegion();
-
-  const getApiId = async () => {
-    const apis = await readApisLibrary(path);
-    return apis[region] && apis[region][lambdaName] && apis[region][lambdaName].restApiId;
-  };
-
   const deployIntegrations = async (restApiId) => {
-    const resources = (await asyncGetResources({ restApiId })).items;
     const rootResource = resources.find(res => res.path === '/');
     const greedyPathResource = resources.find(res => res.path === '/{proxy+}');
     const rootPath = '/';
@@ -78,7 +81,6 @@ module.exports = async function redeploy(lambdaName, path, options) {
   };
 
   const updateApiGateway = async () => {
-    const restApiId = await getApiId();
     const apiExistsInLocalLibrary = !!restApiId;
     const apiExistsOnAws = await doesApiExist(restApiId);
     let apiData;

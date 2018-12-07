@@ -1,10 +1,11 @@
 const createApiGatewayIntegration = require('./createApiGatewayIntegration');
 const deleteApiGatewayIntegration = require('./deleteApiGatewayIntegration');
 const { distinctElements } = require('../util/fileUtils');
+const { bamWarn } = require('../util/logger');
 
 module.exports = async function updateHttpMethods(resource, lambdaName, restApiId, addMethods, removeMethods, apiPath, path) {
   const resourceId = resource.id;
-  let existingMethods = Object.keys(resource.resourceMethods || {});
+  const existingMethods = Object.keys(resource.resourceMethods || {});
 
   // add specified methods to API Gateway
   const addHttpMethodIntegrations = async () => {
@@ -12,6 +13,7 @@ module.exports = async function updateHttpMethods(resource, lambdaName, restApiI
       const httpMethod = addMethods[i];
       if (!existingMethods.includes(httpMethod)) {
         await createApiGatewayIntegration(httpMethod, resourceId, restApiId, lambdaName, apiPath, path);
+        existingMethods.push(httpMethod);
       }
     }
   };
@@ -27,7 +29,5 @@ module.exports = async function updateHttpMethods(resource, lambdaName, restApiI
   };
 
   await addHttpMethodIntegrations();
-  // update existing methods to include newly added methods
-  existingMethods = distinctElements(existingMethods.concat(addMethods));
   await removeHttpMethodIntegrations();
 };

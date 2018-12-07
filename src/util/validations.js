@@ -76,6 +76,19 @@ const roleExistsOnAws = async (name) => {
   return status;
 };
 
+const methodsAreValid = (resourceData) => {
+  const { addMethods, removeMethods } = resourceData;
+  const methods = addMethods.concat(removeMethods);
+  const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'ANY'];
+  return methods.every(method => validMethods.includes(method));
+};
+
+const removingLastMethod = (resourceData) => {
+  const { addMethods, removeMethods, existingMethods } = resourceData;
+  const result = existingMethods.concat(addMethods).filter(m => !removeMethods.includes(m));
+  return result.length === 0;
+};
+
 const validateResource = async (name, validations, customWarnings) => {
   const warnings = customWarnings(name);
   let msg;
@@ -206,17 +219,23 @@ const validateRoleAssumption = async (name) => {
   return status;
 };
 
-const validateApiMethods = (methods) => {
-  const warnings = customizeApiWarnings(methods);
-  const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'ANY'];
-  const methodsAreValid = methods.every(method => validMethods.includes(method));
-  let msg;
+const validateApiMethods = async (addMethods = [], removeMethods = [], existingMethods = []) => {
+  const validations = [
+    {
+      validation: methodsAreValid,
+      feedbackType: 'methodsAreInvalid',
+      affirmative: false,
+    },
+    {
+      validation: removingLastMethod,
+      feedbackType: 'willRemoveAllMethods',
+      affirmative: true,
+    },
+  ];
 
-  if (!methodsAreValid) {
-    msg = warnings.invalidMethods;
-  }
-
-  return msg;
+  const resourceData = { existingMethods, addMethods, removeMethods };
+  const status = await validateResource(resourceData, validations, customizeApiWarnings);
+  return status;
 };
 
 module.exports = {

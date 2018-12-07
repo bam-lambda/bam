@@ -8,7 +8,6 @@ const {
   getBamFunctionsList,
   getBamTablesList,
 } = require('../util/listHelpers');
-const checkForOptionType = require('../util/checkForOptionType');
 const {
   readLambdasLibrary,
   readApisLibrary,
@@ -16,6 +15,9 @@ const {
   exists,
   getBamPath,
 } = require('../util/fileUtils');
+
+const checkForOptionType = require('../util/checkForOptionType');
+const { asyncGetRegion } = require('../util/getRegion');
 
 const logBamFunctions = (bamFunctionsList) => {
   if (bamFunctionsList.length > 0) {
@@ -43,6 +45,7 @@ const logBamTables = (bamTablesList) => {
 };
 
 module.exports = async function list(path, options) {
+  const region = await asyncGetRegion();
   const bamPath = getBamPath(path);
   let lambdas = {};
   let apis = {};
@@ -52,9 +55,9 @@ module.exports = async function list(path, options) {
   if (lambdasFileExists && apisFileExists) {
     lambdas = await readLambdasLibrary(path) || {};
     apis = await readApisLibrary(path) || {};
-    bamFunctionsList = await getBamFunctionsList(path, lambdas, apis);
+    bamFunctionsList = await getBamFunctionsList(path, lambdas, apis, region);
   }
-  const awsFunctionsList = await getAwsFunctionsList(path, lambdas);
+  const awsFunctionsList = await getAwsFunctionsList(path, lambdas, region);
 
   let dbtables = {};
   let bamTablesList = [];
@@ -62,7 +65,7 @@ module.exports = async function list(path, options) {
   const dbtablesFileExists = await exists(dbtablesFilePath);
   if (dbtablesFileExists) {
     dbtables = await readDbtablesLibrary(path);
-    bamTablesList = await getBamTablesList(path, dbtables);
+    bamTablesList = await getBamTablesList(path, dbtables, region);
   }
 
   const dbFlag = checkForOptionType(options, 'db');

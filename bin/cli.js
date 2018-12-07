@@ -27,7 +27,7 @@ const homedir = os.homedir();
   if (!shouldContinue) return;
 
   if (command === 'create') {
-    create(resourceName);
+    create(resourceName, options);
   } else if (command === 'deploy') {
     deploy(resourceName, homedir, options);
   } else if (command === 'redeploy') {

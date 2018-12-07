@@ -10,13 +10,13 @@ const {
   asyncPutMethodResponse,
 } = require('./awsFunctions');
 
-module.exports = async function createApiGatewayIntegration(httpMethod, resourceId, restApiId, lambdaName, path) {
+module.exports = async function createApiGatewayIntegration(httpMethod, resourceId, restApiId, lambdaName, apiPath, path) {
   const config = await readConfig(path);
   const region = await asyncGetRegion();
   const { accountNumber } = config;
 
   // add permission to lambda
-  const sourceArn = `arn:aws:execute-api:${region}:${accountNumber}:${restApiId}/*/${httpMethod}/`;
+  const sourceArn = `arn:aws:execute-api:${region}:${accountNumber}:${restApiId}/*/${httpMethod}${apiPath}`;
   const addPermissionParams = {
     FunctionName: lambdaName,
     StatementId: uuid.v4(),

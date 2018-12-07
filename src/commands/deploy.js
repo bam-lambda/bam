@@ -2,14 +2,36 @@ const deployLambda = require('../aws/deployLambda');
 const deployApi = require('../aws/deployApi');
 const getUserInput = require('../util/getUserInput');
 const { bamWarn } = require('../util/logger');
-const { validateLambdaDeployment, validateApiMethods } = require('../util/validations');
+const { 
+  validateLambdaDeployment,
+  validateApiMethods,
+  validateRoleAssumption,
+} = require('../util/validations');
 const checkForOptionType = require('../util/checkForOptionType');
+const {
+  writeLambda,
+  writeApi,
+  deleteStagingDirForLambda,
+} = require('../util/fileUtils');
 
 const stage = 'bam';
+const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
 
 module.exports = async function deploy(lambdaName, path, options) {
   const deployLambdaOnly = checkForOptionType(options, 'lambda');
   const permitDb = checkForOptionType(options, 'db');
+
+  const userRole = options.role && options.role[0];
+  let roleName;
+  if (permitDb) roleName = dbRole;  
+  if (userRole) {    
+    const invalidRoleMsg = await validateRoleAssumption(userRole);    
+    if (invalidRoleMsg) {
+      bamWarn(invalidRoleMsg);
+      return;
+    }
+    roleName = userRole;
+  }
 
   const invalidLambdaMsg = await validateLambdaDeployment(lambdaName);
   if (invalidLambdaMsg) {
@@ -38,11 +60,13 @@ module.exports = async function deploy(lambdaName, path, options) {
       bamWarn('Lambda deployment aborted');
       return;
     }
-
     const [description] = input;
-    await deployLambda(lambdaName, description, path, permitDb);
+    const lambdaData = await deployLambda(lambdaName, description, path, roleName);
+    if (lambdaData) await writeLambda(lambdaData, path, description);
     if (deployLambdaOnly) return;
-    await deployApi(lambdaName, path, httpMethods, stage);
+    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stage);
+    if (restApiId) await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+    await deleteStagingDirForLambda(lambdaName, path);
   } catch (err) {
     bamWarn(err);
   }

@@ -1,5 +1,9 @@
 const { readConfig, readFile } = require('../util/fileUtils');
-const { doesRoleExist, doesPolicyExist, isPolicyAttached } = require('./doesResourceExist');
+const { 
+  doesRoleExist,
+  doesPolicyExist,
+  isPolicyAttached
+} = require('./doesResourceExist');
 const bamSpinner = require('../util/spinner');
 const {
   asyncCreatePolicy,
@@ -13,6 +17,7 @@ const {
 } = require('../util/logger');
 
 const AWSLambdaBasicExecutionRolePolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
+const AWSLambdaRolePolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 
 const rolePolicy = {
   Version: '2012-10-17',
@@ -51,8 +56,8 @@ const createRole = async (roleName) => {
   }
 };
 
-const createDatabaseBamRolePolicy = async (databaseBamRole, databasePolicyName) => {
-  const doesDatabasePolicyExist = await doesPolicyExist(databaseBamRole, databasePolicyName);
+const createDatabaseBamRolePolicy = async (databasePolicyName, databasePolicyArn) => {
+  const doesDatabasePolicyExist = await doesPolicyExist(databasePolicyArn);
 
   if (!doesDatabasePolicyExist) {
     const policyDocumentJSON = await readFile(`${__dirname}/../../templates/databaseBamRolePolicy.json`, 'utf8');
@@ -75,11 +80,12 @@ const attachPolicy = async (roleName, policyArn) => {
   }
 };
 
-const createBamRole = async (roleName) => {
+const createBamRole = async (roleName) => { 
   bamSpinner.start();
   try {
     await createRole(roleName);
     await attachPolicy(roleName, AWSLambdaBasicExecutionRolePolicyARN);
+    await attachPolicy(roleName, AWSLambdaRolePolicyARN);
     bamSpinner.stop();
   } catch (err) {
     bamSpinner.stop();
@@ -97,8 +103,9 @@ const createDatabaseBamRole = async (databaseBamRole, path) => {
 
   try {
     await createRole(databaseBamRole);
-    await createDatabaseBamRolePolicy(databaseBamRole, databasePolicyName);
+    await createDatabaseBamRolePolicy(databasePolicyName, databasePolicyArn);
     await attachPolicy(databaseBamRole, databasePolicyArn);
+    await attachPolicy(databaseBamRole, AWSLambdaRolePolicyARN);
     bamSpinner.stop();
   } catch (err) {
     bamSpinner.stop();

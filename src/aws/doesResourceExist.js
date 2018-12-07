@@ -5,6 +5,7 @@ const {
   asyncDescribeTable,
   asyncGetRestApi,
   asyncListAttachedRolePolicies,
+  asyncGetPolicy,
 } = require('./awsFunctions');
 
 const doesRoleExist = async (role) => {
@@ -16,10 +17,10 @@ const doesRoleExist = async (role) => {
   }
 };
 
-const doesPolicyExist = async (roleName, policyName) => {
+const doesPolicyExist = async (policyArn) => {
   try {
-    const result = await asyncListRolePolicies({ RoleName: roleName });
-    return result.AttachedPolicies[0].PolicyName === policyName;
+    const result = await asyncGetPolicy({ PolicyArn: policyArn });
+    return true;
   } catch (err) {
     return false;
   }

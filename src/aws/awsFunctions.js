@@ -44,6 +44,7 @@ const asyncDetachPolicy = promisify(iam.detachRolePolicy.bind(iam));
 const asyncDeleteRole = promisify(iam.deleteRole.bind(iam));
 const asyncDeletePolicy = promisify(iam.deletePolicy.bind(iam));
 const asyncListRolePolicies = promisify(iam.listAttachedRolePolicies.bind(iam));
+const asyncGetPolicy = promisify(iam.getPolicy.bind(iam));
 const asyncGetRole = promisify(iam.getRole.bind(iam));
 const asyncListAttachedRolePolicies = promisify(iam.listAttachedRolePolicies.bind(iam));
 
@@ -73,6 +74,7 @@ module.exports = {
   asyncDescribeTable,
   asyncGetRestApi,
   asyncListAttachedRolePolicies,
+  asyncGetPolicy,
   asyncLambdaUpdateFunctionCode,
   asyncLambdaUpdateFunctionConfiguration,
   asyncListFunctions,

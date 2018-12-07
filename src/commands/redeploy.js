@@ -1,7 +1,6 @@
 const updateLambda = require('../aws/updateLambda');
 const deployApi = require('../aws/deployApi.js');
 const { doesApiExist } = require('../aws/doesResourceExist');
-const getLambda = require('../aws/getLambda');
 const updateHttpMethods = require('../aws/updateHttpMethods');
 const bamBam = require('../util/bamBam');
 const { asyncGetRegion } = require('../util/getRegion');
@@ -17,7 +16,8 @@ const {
 } = require('../util/validations');
 
 const {
-  writeLambda,
+  writeApi,
+  writeApisLibrary,
   readApisLibrary,
   distinctElements,
   deleteStagingDirForLambda,
@@ -49,41 +49,59 @@ module.exports = async function redeploy(lambdaName, path, options) {
     return;
   }
 
-  const syncLocalToCloudLambda = async () => {
-    const { Configuration } = await getLambda(lambdaName);
-    await writeLambda(Configuration, path);
-  };
+  const region = await asyncGetRegion();
 
   const getApiId = async () => {
-    const region = await asyncGetRegion();
     const apis = await readApisLibrary(path);
     return apis[region] && apis[region][lambdaName] && apis[region][lambdaName].restApiId;
   };
 
-  const provideNewApiOrIntegrations = async () => {
-    const restApiId = await getApiId();
-    const apiExists = await doesApiExist(restApiId);
+  const deployIntegrations = async (restApiId) => {
+    const resources = (await asyncGetResources({ restApiId })).items;
+    const resource = resources.find(res => res.path === '/');
+    await updateHttpMethods(resource, lambdaName, restApiId, addMethods, removeMethods, path);
+    await bamBam(asyncCreateDeployment, {
+      asyncFuncParams: [{ restApiId, stageName }],
+      retryError: 'TooManyRequestsException',
+    });
+  };
 
-    if (!restApiId || !apiExists) {
-      await deployApi(lambdaName, path, addMethods, stageName);
+  const updateApiGateway = async () => {
+    const restApiId = await getApiId();
+    const apiExistsInLocalLibrary = !!restApiId;
+    const apiExistsOnAws = await doesApiExist(restApiId);
+    let apiData;
+
+    if (!apiExistsInLocalLibrary || !apiExistsOnAws) {
+      apiData = await deployApi(lambdaName, path, addMethods, stageName);
     } else {
-      const resources = (await asyncGetResources({ restApiId })).items;
-      const resource = resources.find(res => res.path === '/');
-      await updateHttpMethods(resource, lambdaName, restApiId, addMethods, removeMethods, path);
-      await bamBam(asyncCreateDeployment, {
-        asyncFuncParams: [{ restApiId, stageName }],
-        retryError: 'TooManyRequestsException',
-      });
+      await deployIntegrations(restApiId);
+    }
+
+    return apiData;
+  };
+
+  const updateLocalLibraries = async (newApiData) => {
+    if (newApiData) {
+      const { restApiId, endpoint } = newApiData;
+      await writeApi(endpoint, addMethods, lambdaName, restApiId, path);
+    } else {
+      const apis = await readApisLibrary(path);
+      const regionalApis = apis[region];
+      const api = regionalApis[lambdaName];
+      const existingApis = api.methods;
+      api.methods = existingApis.concat(addMethods)
+        .filter(method => !removeMethods.includes(method));
+      await writeApisLibrary(path, apis);
     }
   };
 
   // redeploy sequence
-  const data = await updateLambda(lambdaName, path, options);
+  const lambdaUpdateSuccess = await updateLambda(lambdaName, path, options);
 
-  if (data) {
-    await syncLocalToCloudLambda();
-    await provideNewApiOrIntegrations();
-
+  if (lambdaUpdateSuccess) {
+    const apiData = await updateApiGateway();
+    await updateLocalLibraries(apiData);
     await deleteStagingDirForLambda(lambdaName, path);
     bamLog(`Lambda "${lambdaName}" has been updated`);
   } else {

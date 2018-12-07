@@ -74,7 +74,7 @@ describe('bam redeploy lambda', () => {
     await promisifiedRimraf(bamPath);
     await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
-    await asyncDetachPolicy({ PolicyArn: otherTestPolicyARN, RoleName: roleName }); 
+    await asyncDetachPolicy({ PolicyArn: otherTestPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
   });
 

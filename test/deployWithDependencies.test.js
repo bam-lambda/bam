@@ -1,10 +1,10 @@
 const https = require('https');
 
 const { createBamRole } = require('../src/aws/createRoles');
-const deployLambda = require('../src/aws/deployLambda.js');
-const deployApi = require('../src/aws/deployApi.js');
+const deployLambda = require('../src/aws/deployLambda');
+const deployApi = require('../src/aws/deployApi');
 const destroy = require('../src/commands/destroy');
-const delay = require('../src/util/delay.js');
+const delay = require('../src/util/delay');
 const { bamError } = require('../src/util/logger');
 const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
 const { asyncGetRegion } = require('../src/util/getRegion');

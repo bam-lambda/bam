@@ -1,11 +1,9 @@
 const { readConfig, writeConfig } = require('./fileUtils');
 const getUserInput = require('./getUserInput');
-
 const { doesRoleExist } = require('../aws/doesResourceExist');
 
 const badNum = 'Account number must have 12 numerical digits';
 const badRole = 'The role name you supplied is not registered to the account provided';
-
 const validNum = r => /^[0-9]{12}$/.test(r);
 
 module.exports = async function getUserDefaults(path) {

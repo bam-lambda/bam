@@ -1,19 +1,21 @@
-const { 
+const {
   doesLambdaExist,
   doesTableExist,
   doesRoleExist,
 } = require('../aws/doesResourceExist');
+
 const {
   readdir,
   exists,
   readFile,
 } = require('../util/fileUtils');
+
 const {
   customizeLambdaWarnings,
   customizeApiWarnings,
   customizeTableWarnings,
   customizeRoleWarnings,
-} = require('./validationMessages.js');
+} = require('./validationMessages');
 
 const cwd = process.cwd();
 

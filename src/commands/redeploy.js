@@ -1,5 +1,5 @@
 const updateLambda = require('../aws/updateLambda');
-const deployApi = require('../aws/deployApi.js');
+const deployApi = require('../aws/deployApi');
 const { doesApiExist } = require('../aws/doesResourceExist');
 const updateHttpMethods = require('../aws/updateHttpMethods');
 const bamBam = require('../util/bamBam');

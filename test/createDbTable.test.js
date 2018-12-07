@@ -1,7 +1,7 @@
 const createDbTable = require('../src/aws/createDbTable');
 const deleteTable = require('../src/aws/deleteDbTable');
-const bamBam = require('../src/util/bamBam');
 const { doesTableExist } = require('../src/aws/doesResourceExist');
+const bamBam = require('../src/util/bamBam');
 const delay = require('../src/util/delay');
 
 const testTable = 'testBamTable';

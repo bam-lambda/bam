@@ -7,6 +7,7 @@ const { asyncGetRegion } = require('../util/getRegion');
 const {
   asyncCreateApi,
   asyncGetResources,
+  asyncCreateResource,
   asyncCreateDeployment,
 } = require('./awsFunctions');
 
@@ -24,12 +25,28 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
     // create rest api
     const restApiId = (await asyncCreateApi({ name: lambdaName })).id;
 
-    // get resource
-    const resourceId = (await asyncGetResources({ restApiId })).items[0].id;
+    // get root resource
+    const rootResourceId = (await asyncGetResources({ restApiId })).items[0].id;
+
+    const createResourceParams = {
+      parentId: rootResourceId,
+      pathPart: '{proxy+}',
+      restApiId,
+    };
+
+    // create greedy path resource to allow path params
+    const greedyPathResourceId = (await asyncCreateResource(createResourceParams)).id;
 
     for (let i = 0; i < httpMethods.length; i += 1) {
       const httpMethod = httpMethods[i];
-      await createApiGatewayIntegration(httpMethod, resourceId, restApiId, lambdaName, path);
+      const rootPath = '/';
+      const greedyPath = '/*';
+
+      // root resource
+      await createApiGatewayIntegration(httpMethod, rootResourceId, restApiId, lambdaName, rootPath, path);
+
+      // greedy path
+      await createApiGatewayIntegration(httpMethod, greedyPathResourceId, restApiId, lambdaName, greedyPath, path);
     }
 
     // create deployment

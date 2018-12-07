@@ -64,8 +64,13 @@ module.exports = async function redeploy(lambdaName, path, options) {
 
   const deployIntegrations = async (restApiId) => {
     const resources = (await asyncGetResources({ restApiId })).items;
-    const resource = resources.find(res => res.path === '/');
-    await updateHttpMethods(resource, lambdaName, restApiId, addMethods, removeMethods, path);
+    const rootResource = resources.find(res => res.path === '/');
+    const greedyPathResource = resources.find(res => res.path === '/{proxy+}');
+    const rootPath = '/';
+    const greedyPath = '/*';
+
+    await updateHttpMethods(rootResource, lambdaName, restApiId, addMethods, removeMethods, rootPath, path);
+    await updateHttpMethods(greedyPathResource, lambdaName, restApiId, addMethods, removeMethods, greedyPath, path);
     await bamBam(asyncCreateDeployment, {
       asyncFuncParams: [{ restApiId, stageName }],
       retryError: 'TooManyRequestsException',

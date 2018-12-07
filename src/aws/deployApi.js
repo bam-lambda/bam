@@ -26,16 +26,16 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
     const restApiId = (await asyncCreateApi({ name: lambdaName })).id;
 
     // get root resource
-    const parentId = (await asyncGetResources({ restApiId })).items[0].id;
+    const rootResourceId = (await asyncGetResources({ restApiId })).items[0].id;
 
     const createResourceParams = {
-      parentId,
+      parentId: rootResourceId,
       pathPart: '{proxy+}',
       restApiId,
     };
 
     // create greedy path resource to allow path params
-    const resourceId = (await asyncCreateResource(createResourceParams)).id;
+    const greedyPathResourceId = (await asyncCreateResource(createResourceParams)).id;
 
     for (let i = 0; i < httpMethods.length; i += 1) {
       const httpMethod = httpMethods[i];
@@ -43,10 +43,10 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
       const greedyPath = '/*';
 
       // root resource
-      await createApiGatewayIntegration(httpMethod, parentId, restApiId, lambdaName, rootPath, path);
+      await createApiGatewayIntegration(httpMethod, rootResourceId, restApiId, lambdaName, rootPath, path);
 
       // greedy path
-      await createApiGatewayIntegration(httpMethod, resourceId, restApiId, lambdaName, greedyPath, path);
+      await createApiGatewayIntegration(httpMethod, greedyPathResourceId, restApiId, lambdaName, greedyPath, path);
     }
 
     // create deployment

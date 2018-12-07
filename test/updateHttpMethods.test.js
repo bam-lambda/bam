@@ -59,7 +59,7 @@ const asyncHttpsRequest = opts => (
 
 describe('bam redeploy lambda', () => {
   beforeEach(async () => {
-    jest.setTimeout(200000);
+    jest.setTimeout(260000);
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await setupBamDirAndFiles(roleName, path);
     const config = await readConfig(path);

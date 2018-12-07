@@ -2,12 +2,14 @@ const deployLambda = require('../aws/deployLambda');
 const deployApi = require('../aws/deployApi');
 const getUserInput = require('../util/getUserInput');
 const { bamWarn } = require('../util/logger');
+const checkForOptionType = require('../util/checkForOptionType');
+
 const {
   validateLambdaDeployment,
   validateApiMethods,
   validateRoleAssumption,
 } = require('../util/validations');
-const checkForOptionType = require('../util/checkForOptionType');
+
 const {
   writeLambda,
   writeApi,

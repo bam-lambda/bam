@@ -1,4 +1,9 @@
 const { asyncLambdaUpdateFunctionCode } = require('./awsFunctions');
+const updateLambdaConfig = require('./updateLambdaConfig');
+const { zipper } = require('../util/zipper');
+const installLambdaDependencies = require('../util/installLambdaDependencies');
+const bamSpinner = require('../util/spinner');
+
 const {
   createDirectory,
   readFile,
@@ -8,10 +13,6 @@ const {
   getStagingPath,
   exists,
 } = require('../util/fileUtils');
-const { zipper } = require('../util/zipper');
-const installLambdaDependencies = require('../util/installLambdaDependencies');
-const bamSpinner = require('../util/spinner');
-const updateLambdaConfig = require('./updateLambdaConfig');
 
 const cwd = process.cwd();
 

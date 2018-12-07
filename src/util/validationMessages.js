@@ -25,7 +25,7 @@ const customizeTableWarnings = name => (
   }
 );
 
-const customizeRoleWarnings = (name) => (
+const customizeRoleWarnings = name => (
   {
     roleDoesNotExistOnAws: `Role "${name}" does not exist on AWS`,
   }

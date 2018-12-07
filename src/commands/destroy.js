@@ -1,8 +1,7 @@
-const deleteApi = require('../aws/deleteApi.js');
-const bamBam = require('../util/bamBam');
+const deleteApi = require('../aws/deleteApi');
 const deleteAwsLambda = require('../aws/deleteLambda');
+const bamBam = require('../util/bamBam');
 const { asyncGetRegion } = require('../util/getRegion');
-
 const bamSpinner = require('../util/spinner');
 const { bamLog } = require('../util/logger');
 

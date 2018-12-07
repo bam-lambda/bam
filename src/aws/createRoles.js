@@ -1,10 +1,12 @@
 const { readConfig, readFile } = require('../util/fileUtils');
-const { 
+const bamSpinner = require('../util/spinner');
+
+const {
   doesRoleExist,
   doesPolicyExist,
-  isPolicyAttached
+  isPolicyAttached,
 } = require('./doesResourceExist');
-const bamSpinner = require('../util/spinner');
+
 const {
   asyncCreatePolicy,
   asyncCreateRole,
@@ -80,7 +82,7 @@ const attachPolicy = async (roleName, policyArn) => {
   }
 };
 
-const createBamRole = async (roleName) => { 
+const createBamRole = async (roleName) => {
   bamSpinner.start();
   try {
     await createRole(roleName);

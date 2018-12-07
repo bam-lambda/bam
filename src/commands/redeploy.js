@@ -1,5 +1,5 @@
 const updateLambda = require('../aws/updateLambda');
-const deployApi = require('../aws/deployApi.js');
+const deployApi = require('../aws/deployApi');
 const { doesApiExist } = require('../aws/doesResourceExist');
 const updateHttpMethods = require('../aws/updateHttpMethods');
 const bamBam = require('../util/bamBam');
@@ -32,34 +32,48 @@ const {
 const stageName = 'bam';
 
 module.exports = async function redeploy(lambdaName, path, options) {
+  const getApiId = async () => {
+    const apis = await readApisLibrary(path);
+    return apis[region] && apis[region][lambdaName] && apis[region][lambdaName].restApiId;
+  };
+
   // validations
   const invalidLambdaMsg = await validateLambdaReDeployment(lambdaName);
   if (invalidLambdaMsg) {
     bamWarn(invalidLambdaMsg);
     return;
   }
-  const addMethods = options.methods
-    ? distinctElements(options.methods.map(method => method.toUpperCase())) : [];
-  const removeMethods = options.rmMethods
-    ? distinctElements(options.rmMethods.map(method => method.toUpperCase())) : [];
-  const invalidHttp = validateApiMethods(addMethods) || validateApiMethods(removeMethods);
+
+  let addMethods = options.methods || options.method;
+  let removeMethods = options.rmMethods || options.rmMethod;
+
+  addMethods = addMethods
+    ? distinctElements(addMethods.map(m => m.toUpperCase())) : [];
+
+  removeMethods = removeMethods
+    ? distinctElements(removeMethods.map(m => m.toUpperCase())) : [];
+
+  const region = await asyncGetRegion();
+  const restApiId = await getApiId();
+  const resources = (await asyncGetResources({ restApiId })).items;
+  const resource = resources.find(res => res.path === '/');
+  const existingMethods = Object.keys(resource.resourceMethods || {});
+
+  const invalidHttp = await validateApiMethods(addMethods, removeMethods, existingMethods);
 
   if (invalidHttp) {
     bamWarn(invalidHttp);
     return;
   }
 
-  const region = await asyncGetRegion();
-
-  const getApiId = async () => {
-    const apis = await readApisLibrary(path);
-    return apis[region] && apis[region][lambdaName] && apis[region][lambdaName].restApiId;
-  };
-
   const deployIntegrations = async (restApiId) => {
-    const resources = (await asyncGetResources({ restApiId })).items;
-    const resource = resources.find(res => res.path === '/');
-    await updateHttpMethods(resource, lambdaName, restApiId, addMethods, removeMethods, path);
+    const rootResource = resources.find(res => res.path === '/');
+    const greedyPathResource = resources.find(res => res.path === '/{proxy+}');
+    const rootPath = '/';
+    const greedyPath = '/*';
+
+    await updateHttpMethods(rootResource, lambdaName, restApiId, addMethods, removeMethods, rootPath, path);
+    await updateHttpMethods(greedyPathResource, lambdaName, restApiId, addMethods, removeMethods, greedyPath, path);
     await bamBam(asyncCreateDeployment, {
       asyncFuncParams: [{ restApiId, stageName }],
       retryError: 'TooManyRequestsException',
@@ -67,7 +81,6 @@ module.exports = async function redeploy(lambdaName, path, options) {
   };
 
   const updateApiGateway = async () => {
-    const restApiId = await getApiId();
     const apiExistsInLocalLibrary = !!restApiId;
     const apiExistsOnAws = await doesApiExist(restApiId);
     let apiData;

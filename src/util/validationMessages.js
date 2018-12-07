@@ -11,9 +11,10 @@ const customizeLambdaWarnings = (name) => {
   return warningMessages;
 };
 
-const customizeApiWarnings = (methods) => {
+const customizeApiWarnings = (resourceData) => {
   const warningMessages = {
-    invalidMethods: `One or more of the HTTP methods are invalid: ${methods.join(' ')}`,
+    methodsAreInvalid: `One or more of the HTTP methods are invalid: ${resourceData.addMethods.join(' ')}.`,
+    willRemoveAllMethods: 'Cannot delete all methods from the api',
   };
   return warningMessages;
 };
@@ -25,7 +26,7 @@ const customizeTableWarnings = name => (
   }
 );
 
-const customizeRoleWarnings = (name) => (
+const customizeRoleWarnings = name => (
   {
     roleDoesNotExistOnAws: `Role "${name}" does not exist on AWS`,
   }

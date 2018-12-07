@@ -1,13 +1,18 @@
+const checkForOptionType = require('../util/checkForOptionType');
+const { asyncGetRegion } = require('../util/getRegion');
+
 const {
   log,
   logInColor,
   indent,
 } = require('../util/logger');
+
 const {
   getAwsFunctionsList,
   getBamFunctionsList,
   getBamTablesList,
 } = require('../util/listHelpers');
+
 const {
   readLambdasLibrary,
   readApisLibrary,
@@ -15,9 +20,6 @@ const {
   exists,
   getBamPath,
 } = require('../util/fileUtils');
-
-const checkForOptionType = require('../util/checkForOptionType');
-const { asyncGetRegion } = require('../util/getRegion');
 
 const logBamFunctions = (bamFunctionsList) => {
   if (bamFunctionsList.length > 0) {

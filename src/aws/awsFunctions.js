@@ -29,6 +29,7 @@ const asyncCreateApi = promisify(api.createRestApi.bind(api));
 const asyncGetResources = promisify(api.getResources.bind(api));
 const asyncCreateDeployment = promisify(api.createDeployment.bind(api));
 const asyncGetRestApi = promisify(api.getRestApi.bind(api));
+const asyncCreateResource = promisify(api.createResource.bind(api));
 
 // dynamo
 const asyncCreateTable = promisify(dynamo.createTable.bind(dynamo));
@@ -55,6 +56,7 @@ module.exports = {
   asyncPutMethodResponse,
   asyncCreateTable,
   asyncCreatePolicy,
+  asyncCreateResource,
   asyncCreateRole,
   asyncAttachPolicy,
   asyncDetachPolicy,

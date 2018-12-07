@@ -1,5 +1,9 @@
 const getUserDefaults = require('./getUserDefaults');
 const init = require('./init');
+const { log, bamLog, bamWarn } = require('./logger');
+const { getRegion } = require('./getRegion');
+const { createBamRole, createDatabaseBamRole } = require('../aws/createRoles');
+const { doesRoleExist } = require('../aws/doesResourceExist');
 
 const {
   readConfig,
@@ -7,11 +11,6 @@ const {
   isConfigured,
   getBamPath,
 } = require('./fileUtils');
-
-const { log, bamLog, bamWarn } = require('./logger');
-const { createBamRole, createDatabaseBamRole } = require('../aws/createRoles');
-const { doesRoleExist } = require('../aws/doesResourceExist');
-const { getRegion } = require('./getRegion');
 
 const bamRole = 'bamRole';
 const databaseBamRole = 'databaseBamRole';
@@ -38,7 +37,7 @@ module.exports = async function catchSetupAndConfig(path, command, options) {
     log('https://docs.aws.amazon.com/cli/latest/topic/config-vars.html');
     return false;
   }
-  
+
   const bamPath = getBamPath(path);
   const bamDirExists = await exists(bamPath);
   if (!bamDirExists) {

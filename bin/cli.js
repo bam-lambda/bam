@@ -1,20 +1,19 @@
 #!/usr/bin/env node
 const os = require('os');
 
-const deploy = require('../src/commands/deploy.js');
-const redeploy = require('../src/commands/redeploy.js');
-const create = require('../src/commands/create.js');
-const get = require('../src/commands/get.js');
-const list = require('../src/commands/list.js');
-const version = require('../src/commands/version.js');
-const destroy = require('../src/commands/destroy.js');
-const dbtable = require('../src/commands/dbtable.js');
-const help = require('../src/commands/help.js');
-const config = require('../src/commands/config.js');
-const handleArgs = require('../src/util/handleArgs.js');
-
-const { bamWarn } = require('../src/util/logger.js');
-const catchSetupAndConfig = require('../src/util/catchSetupAndConfig.js');
+const deploy = require('../src/commands/deploy');
+const redeploy = require('../src/commands/redeploy');
+const create = require('../src/commands/create');
+const get = require('../src/commands/get');
+const list = require('../src/commands/list');
+const version = require('../src/commands/version');
+const destroy = require('../src/commands/destroy');
+const dbtable = require('../src/commands/dbtable');
+const help = require('../src/commands/help');
+const config = require('../src/commands/config');
+const handleArgs = require('../src/util/handleArgs');
+const { bamWarn } = require('../src/util/logger');
+const catchSetupAndConfig = require('../src/util/catchSetupAndConfig');
 
 const [,, command, ...args] = process.argv;
 const homedir = os.homedir();

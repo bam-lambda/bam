@@ -1,9 +1,8 @@
-const deployLambda = require('../src/aws/deployLambda.js');
+const deployLambda = require('../src/aws/deployLambda');
 const deleteLambda = require('../src/aws/deleteLambda');
 const { createBamRole } = require('../src/aws/createRoles');
 const { doesLambdaExist } = require('../src/aws/doesResourceExist');
 const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
-const { asyncGetRegion } = require('../src/util/getRegion');
 
 const {
   asyncDeleteRole,
@@ -16,7 +15,6 @@ const {
   writeConfig,
   unlink,
   exists,
-  readLambdasLibrary,
   readFile,
   createDirectory,
   getStagingPath,

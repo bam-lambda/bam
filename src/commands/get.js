@@ -1,6 +1,9 @@
 const https = require('https');
 
 const { asyncGetFunction } = require('../aws/awsFunctions');
+const bamSpinner = require('../util/spinner');
+const { unzipper } = require('../util/zipper');
+const { validateLambdaRetrieval } = require('../util/validations');
 
 const {
   bamLog,
@@ -14,10 +17,6 @@ const {
   unlink,
   rename,
 } = require('../util/fileUtils');
-
-const bamSpinner = require('../util/spinner');
-const { unzipper } = require('../util/zipper');
-const { validateLambdaRetrieval } = require('../util/validations');
 
 const cwd = process.cwd();
 

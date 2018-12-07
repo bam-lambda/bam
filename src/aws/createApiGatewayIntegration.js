@@ -1,8 +1,8 @@
 const uuid = require('uuid');
 const bamBam = require('../util/bamBam');
 const { readConfig } = require('../util/fileUtils');
-
 const { asyncGetRegion } = require('../util/getRegion');
+
 const {
   asyncAddPermission,
   asyncPutMethod,

@@ -29,21 +29,21 @@ const homedir = os.homedir();
   if (!shouldContinue) return;
 
   if (command === 'create') {
-    await create(resourceName);
+    create(resourceName);
   } else if (command === 'deploy') {
-    await deploy(resourceName, homedir, options);
+    deploy(resourceName, homedir, options);
   } else if (command === 'redeploy') {
-    await redeploy(resourceName, homedir, options);
+    redeploy(resourceName, homedir, options);
   } else if (command === 'get') {
-    await get(resourceName);
+    get(resourceName);
   } else if (command === 'delete') {
-    await destroy(resourceName, homedir);
+    destroy(resourceName, homedir);
   } else if (command === 'dbtable') {
-    await dbtable(resourceName, homedir, options);
+    dbtable(resourceName, homedir, options);
   } else if (command === 'list') {
-    await list(homedir, options);
+    list(homedir, options);
   } else if (command === 'version' || command === '-v') {
-    await version();
+    version();
   } else if (command === 'help' || command === '-h' || command === 'man') {
     help();
   } else if (command === 'config') {

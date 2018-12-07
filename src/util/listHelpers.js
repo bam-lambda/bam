@@ -10,8 +10,6 @@ const {
   vertPadding,
 } = require('../util/logger');
 
-const { asyncGetRegion } = require('./getRegion');
-
 const friendlyDataTypes = {
   S: 'string',
   N: 'number',
@@ -25,17 +23,15 @@ const getLambdaNamesFromAws = async () => {
   return functionNames;
 };
 
-const getLocalFunctionsAlsoOnAws = async (path, lambdas) => {
-  const region = await asyncGetRegion();
-  const functionsOnAws = await getLambdaNamesFromAws(path);
+const getLocalFunctionsAlsoOnAws = async (path, lambdas, region) => {
+  const functionsOnAws = await getLambdaNamesFromAws();
   const regionalFunctions = lambdas[region];
   return Object.keys(regionalFunctions).filter(funcName => (
     functionsOnAws.includes(funcName)
   ));
 };
 
-const formatBamFunctionsList = async (funcName, lambdas, apis) => {
-  const region = await asyncGetRegion();
+const formatBamFunctionsList = async (funcName, lambdas, apis, region) => {
   const fields = [];
 
   if (Object.keys(lambdas[region]).length > 0) {
@@ -59,14 +55,14 @@ const formatBamFunctionsList = async (funcName, lambdas, apis) => {
   return fields.join('\n');
 };
 
-const getBamFunctionsList = async (path, lambdas, apis) => {
-  const localFunctionsAlsoOnAws = await getLocalFunctionsAlsoOnAws(path, lambdas);
+const getBamFunctionsList = async (path, lambdas, apis, region) => {
+  const localFunctionsAlsoOnAws = await getLocalFunctionsAlsoOnAws(path, lambdas, region);
   const numOfLocalFunctionsAlsoOnAws = localFunctionsAlsoOnAws.length;
   const functionsListItems = [];
 
   for (let i = 0; i < localFunctionsAlsoOnAws.length; i += 1) {
     const funcName = localFunctionsAlsoOnAws[i];
-    const listItem = await formatBamFunctionsList(funcName, lambdas, apis);
+    const listItem = await formatBamFunctionsList(funcName, lambdas, apis, region);
     functionsListItems.push(listItem);
   }
 
@@ -79,17 +75,16 @@ const formatAwsFunctionsList = awsFuncs => (
     `${indentFurther}${funcName}`)).join('\n')
 );
 
-const getAwsFunctionsList = async (path, lambdas) => {
+const getAwsFunctionsList = async (path, lambdas, region) => {
   const functionsOnAws = await getLambdaNamesFromAws(path);
-  const localFunctionsAlsoOnAws = await getLocalFunctionsAlsoOnAws(path, lambdas);
+  const localFunctionsAlsoOnAws = await getLocalFunctionsAlsoOnAws(path, lambdas, region);
   const functionsOnlyOnAws = functionsOnAws.filter(funcName => (
     !localFunctionsAlsoOnAws.includes(funcName)));
   const numOfFunctionsOnlyOnAws = functionsOnlyOnAws.length;
   return numOfFunctionsOnlyOnAws === 0 ? '' : formatAwsFunctionsList(functionsOnlyOnAws);
 };
 
-const formatTablesList = async (tableName, dbtables) => {
-  const region = await asyncGetRegion();
+const formatTablesList = async (tableName, dbtables, region) => {
   const { partitionKey, sortKey } = dbtables[region][tableName];
   const tableNameStr = bamText(`${tableName}:`);
   const partitionKeyDataType = friendlyDataTypes[partitionKey.dataType];
@@ -105,27 +100,26 @@ const formatTablesList = async (tableName, dbtables) => {
   return fields.join('\n');
 };
 
-const getFormattedTablesList = async (tableNames, dbtables) => {
+const getFormattedTablesList = async (tableNames, dbtables, region) => {
   const dbListItems = [];
 
   for (let i = 0; i < tableNames.length; i += 1) {
     const tableName = tableNames[i];
-    const listItem = await formatTablesList(tableName, dbtables);
+    const listItem = await formatTablesList(tableName, dbtables, region);
     dbListItems.push(listItem);
   }
 
   return dbListItems.join(`${vertPadding}${indentFurther}`);
 };
 
-const getBamTablesList = async (path, dbtables) => {
-  const region = await asyncGetRegion();
+const getBamTablesList = async (path, dbtables, region) => {
   const tablesNamesOnAws = await asyncListTables();
   const tablesOnAws = tablesNamesOnAws.TableNames;
 
   const regionalTables = dbtables[region];
   const tableNames = Object.keys(regionalTables).filter(table => tablesOnAws.includes(table));
   const numOfTables = tableNames.length;
-  const formattedTablesList = await getFormattedTablesList(tableNames, dbtables);
+  const formattedTablesList = await getFormattedTablesList(tableNames, dbtables, region);
 
   return numOfTables === 0 ? '' : `${indentFurther}${formattedTablesList}`;
 };

@@ -20,7 +20,6 @@ const [,, command, ...args] = process.argv;
 const homedir = os.homedir();
 
 (async () => {
-  // TODO: add new commands to catchSetupAndConfig
   let resourceName;
   let options = {};
 

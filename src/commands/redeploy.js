@@ -38,10 +38,16 @@ module.exports = async function redeploy(lambdaName, path, options) {
     bamWarn(invalidLambdaMsg);
     return;
   }
-  const addMethods = options.methods
-    ? distinctElements(options.methods.map(method => method.toUpperCase())) : [];
-  const removeMethods = options.rmMethods
-    ? distinctElements(options.rmMethods.map(method => method.toUpperCase())) : [];
+
+  let addMethods = options.methods || options.method;
+  let removeMethods = options.rmMethods || options.rmMethod;
+
+  addMethods = addMethods
+    ? distinctElements(addMethods.map(m => m.toUpperCase())) : [];
+
+  removeMethods = removeMethods
+    ? distinctElements(removeMethods.map(m => m.toUpperCase())) : [];
+
   const invalidHttp = validateApiMethods(addMethods) || validateApiMethods(removeMethods);
 
   if (invalidHttp) {

@@ -2,7 +2,7 @@ const deployLambda = require('../aws/deployLambda');
 const deployApi = require('../aws/deployApi');
 const getUserInput = require('../util/getUserInput');
 const { bamWarn } = require('../util/logger');
-const { 
+const {
   validateLambdaDeployment,
   validateApiMethods,
   validateRoleAssumption,
@@ -23,9 +23,9 @@ module.exports = async function deploy(lambdaName, path, options) {
 
   const userRole = options.role && options.role[0];
   let roleName;
-  if (permitDb) roleName = dbRole;  
-  if (userRole) {    
-    const invalidRoleMsg = await validateRoleAssumption(userRole);    
+  if (permitDb) roleName = dbRole;
+  if (userRole) {
+    const invalidRoleMsg = await validateRoleAssumption(userRole);
     if (invalidRoleMsg) {
       bamWarn(invalidRoleMsg);
       return;
@@ -39,8 +39,8 @@ module.exports = async function deploy(lambdaName, path, options) {
     return;
   }
 
-  const httpMethods = options.methods
-    ? options.methods.map(method => method.toUpperCase()) : ['GET'];
+  const methods = options.methods || options.method;
+  const httpMethods = methods ? methods.map(m => m.toUpperCase()) : ['GET'];
   const invalidApiMsg = validateApiMethods(httpMethods);
   if (invalidApiMsg) {
     bamWarn(invalidApiMsg);

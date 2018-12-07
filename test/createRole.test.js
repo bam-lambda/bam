@@ -1,3 +1,7 @@
+const { doesRoleExist, doesPolicyExist } = require('../src/aws/doesResourceExist');
+const { createBamRole, createDatabaseBamRole } = require('../src/aws/createRoles');
+const configTemplate = require('../templates/configTemplate');
+
 const {
   asyncDeleteRole,
   asyncDetachPolicy,
@@ -13,14 +17,9 @@ const {
   getBamPath,
 } = require('../src/util/fileUtils');
 
-const { doesRoleExist, doesPolicyExist } = require('../src/aws/doesResourceExist.js');
-const { createBamRole, createDatabaseBamRole } = require('../src/aws/createRoles.js');
-const configTemplate = require('../templates/configTemplate.js');
-
 const accountNumber = process.env.AWS_ID;
 const roleName = 'testBamRole';
 const databaseBamRole = 'testDatabaseBamRole';
-const policyName = 'AWSLambdaBasicExecutionRole';
 const databasePolicyARN = `arn:aws:iam::${accountNumber}:policy/testDatabaseBamRolePolicy`;
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const otherTestPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
@@ -29,7 +28,7 @@ const bamPath = getBamPath(path);
 
 describe('createBamRole', async () => {
   beforeEach(async () => {
-    jest.setTimeout(10000);
+    jest.setTimeout(15000);
     await createDirectory('.bam', path);
     const config = await configTemplate(roleName);
     await createJSONFile('config', bamPath, config);

@@ -1,8 +1,8 @@
-const deployLambda = require('../src/aws/deployLambda.js');
-const deployApi = require('../src/aws/deployApi.js');
-const destroy = require('../src/commands/destroy');
-const { createBamRole } = require('../src/aws/createRoles');
+const deployLambda = require('../src/aws/deployLambda');
+const deployApi = require('../src/aws/deployApi');
 const { doesLambdaExist, doesApiExist } = require('../src/aws/doesResourceExist');
+const { createBamRole } = require('../src/aws/createRoles');
+const destroy = require('../src/commands/destroy');
 const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
 const { asyncGetRegion } = require('../src/util/getRegion');
 

@@ -1,13 +1,8 @@
 const os = require('os');
 const { promisify } = require('util');
-const fs = require('fs');
+const { readFile, readFileSync } = require('fs');
 
-const { readFileSync } = fs;
-// const { readFileSync } = require('fs');
-
-// const { readFile } = require('./fileUtils');
-
-const readFile = promisify(fs.readFile);
+const asyncReadFile = promisify(readFile);
 const homedir = os.homedir();
 
 const getRegionFromConfigStr = (configStr) => {
@@ -18,12 +13,16 @@ const getRegionFromConfigStr = (configStr) => {
 };
 
 const getRegion = () => {
-  const configStr = readFileSync(`${homedir}/.aws/config`, 'utf8');
-  return getRegionFromConfigStr(configStr);
+  try {
+    const configStr = readFileSync(`${homedir}/.aws/config`, 'utf8');
+    return getRegionFromConfigStr(configStr);
+  } catch (err) {
+    return false;
+  }
 };
 
 const asyncGetRegion = async () => {
-  const configStr = await readFile(`${homedir}/.aws/config`, 'utf8');
+  const configStr = await asyncReadFile(`${homedir}/.aws/config`, 'utf8');
   return getRegionFromConfigStr(configStr);
 };
 

@@ -1,26 +1,24 @@
 #!/usr/bin/env node
 const os = require('os');
 
-const deploy = require('../src/commands/deploy.js');
-const redeploy = require('../src/commands/redeploy.js');
-const create = require('../src/commands/create.js');
-const get = require('../src/commands/get.js');
-const list = require('../src/commands/list.js');
-const version = require('../src/commands/version.js');
-const destroy = require('../src/commands/destroy.js');
-const dbtable = require('../src/commands/dbtable.js');
-const help = require('../src/commands/help.js');
-const config = require('../src/commands/config.js');
-const handleArgs = require('../src/util/handleArgs.js');
-
-const { bamWarn } = require('../src/util/logger.js');
-const catchSetupAndConfig = require('../src/util/catchSetupAndConfig.js');
+const deploy = require('../src/commands/deploy');
+const redeploy = require('../src/commands/redeploy');
+const create = require('../src/commands/create');
+const get = require('../src/commands/get');
+const list = require('../src/commands/list');
+const version = require('../src/commands/version');
+const destroy = require('../src/commands/destroy');
+const dbtable = require('../src/commands/dbtable');
+const help = require('../src/commands/help');
+const config = require('../src/commands/config');
+const handleArgs = require('../src/util/handleArgs');
+const { bamWarn } = require('../src/util/logger');
+const catchSetupAndConfig = require('../src/util/catchSetupAndConfig');
 
 const [,, command, ...args] = process.argv;
 const homedir = os.homedir();
 
 (async () => {
-  // TODO: add new commands to catchSetupAndConfig
   let resourceName;
   let options = {};
 
@@ -29,21 +27,21 @@ const homedir = os.homedir();
   if (!shouldContinue) return;
 
   if (command === 'create') {
-    await create(resourceName, options);
+    create(resourceName, options);
   } else if (command === 'deploy') {
-    await deploy(resourceName, homedir, options);
+    deploy(resourceName, homedir, options);
   } else if (command === 'redeploy') {
-    await redeploy(resourceName, homedir, options);
+    redeploy(resourceName, homedir, options);
   } else if (command === 'get') {
-    await get(resourceName);
+    get(resourceName);
   } else if (command === 'delete') {
-    await destroy(resourceName, homedir);
+    destroy(resourceName, homedir);
   } else if (command === 'dbtable') {
-    await dbtable(resourceName, homedir, options);
+    dbtable(resourceName, homedir, options);
   } else if (command === 'list') {
-    await list(homedir, options);
+    list(homedir, options);
   } else if (command === 'version' || command === '-v') {
-    await version();
+    version();
   } else if (command === 'help' || command === '-h' || command === 'man') {
     help();
   } else if (command === 'config') {

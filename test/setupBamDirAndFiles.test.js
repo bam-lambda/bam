@@ -1,12 +1,12 @@
+const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
+const { bamError } = require('../src/util/logger');
+
 const {
   exists,
   promisifiedRimraf,
   getStagingPath,
   getBamPath,
 } = require('../src/util/fileUtils');
-
-const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
-const { bamError } = require('../src/util/logger');
 
 const roleName = 'testBamRole';
 const path = './test';

@@ -1,11 +1,11 @@
 const https = require('https');
 
-const { bamError } = require('../src/util/logger');
 const { createBamRole } = require('../src/aws/createRoles');
 const deployLambda = require('../src/aws/deployLambda');
 const deployApi = require('../src/aws/deployApi');
 const redeploy = require('../src/commands/redeploy');
 const destroy = require('../src/commands/destroy');
+const { bamError } = require('../src/util/logger');
 const delay = require('../src/util/delay');
 const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
 
@@ -74,7 +74,7 @@ describe('bam redeploy lambda', () => {
     await promisifiedRimraf(bamPath);
     await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
-    await asyncDetachPolicy({ PolicyArn: otherTestPolicyARN, RoleName: roleName }); 
+    await asyncDetachPolicy({ PolicyArn: otherTestPolicyARN, RoleName: roleName });
     await asyncDeleteRole({ RoleName: roleName });
   });
 

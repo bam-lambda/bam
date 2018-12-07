@@ -1,5 +1,4 @@
 const {
-  asyncListRolePolicies,
   asyncGetRole,
   asyncGetFunction,
   asyncDescribeTable,
@@ -19,7 +18,7 @@ const doesRoleExist = async (role) => {
 
 const doesPolicyExist = async (policyArn) => {
   try {
-    const result = await asyncGetPolicy({ PolicyArn: policyArn });
+    await asyncGetPolicy({ PolicyArn: policyArn });
     return true;
   } catch (err) {
     return false;

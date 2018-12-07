@@ -1,14 +1,16 @@
 const getUserDefaults = require('./getUserDefaults');
 const init = require('./init');
-const { bamLog, bamWarn } = require('./logger');
+const { log, bamLog, bamWarn } = require('./logger');
+const { getRegion } = require('./getRegion');
+const { createBamRole, createDatabaseBamRole } = require('../aws/createRoles');
+const { doesRoleExist } = require('../aws/doesResourceExist');
+
 const {
   readConfig,
   exists,
   isConfigured,
   getBamPath,
 } = require('./fileUtils');
-const { createBamRole, createDatabaseBamRole } = require('../aws/createRoles');
-const { doesRoleExist } = require('../aws/doesResourceExist');
 
 const bamRole = 'bamRole';
 const databaseBamRole = 'databaseBamRole';
@@ -28,6 +30,13 @@ const commandIsNotValid = command => !commands.includes(command);
 
 module.exports = async function catchSetupAndConfig(path, command, options) {
   if (commandIsNotValid(command) || ['help', 'version'].includes(command)) return true;
+
+  const awsConfigExistsWithRegionSet = getRegion();
+  if (!awsConfigExistsWithRegionSet) {
+    bamWarn('You have not set up your AWS credentials.  For instructions, please visit:');
+    log('https://docs.aws.amazon.com/cli/latest/topic/config-vars.html');
+    return false;
+  }
 
   const bamPath = getBamPath(path);
   const bamDirExists = await exists(bamPath);

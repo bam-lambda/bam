@@ -1,10 +1,10 @@
-const { bamError, bamWarn, bamLog } = require('../util/logger');
 const createDbTable = require('../aws/createDbTable');
 const deleteDbTable = require('../aws/deleteDbTable');
+const { doesTableExist } = require('../aws/doesResourceExist');
+const { bamError, bamWarn, bamLog } = require('../util/logger');
 const getDbConfigFromUser = require('../util/getDbConfigFromUser');
 const { deleteTableFromLibrary, writeDbtable } = require('../util/fileUtils');
 const { validateTableCreation } = require('../util/validations');
-const { doesTableExist } = require('../aws/doesResourceExist');
 
 module.exports = async function dbtable(tableName, path, options) {
   if (options.delete) {

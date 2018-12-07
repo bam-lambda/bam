@@ -39,7 +39,7 @@ const writeConfig = async (path, config) => {
 
 const isConfigured = async (path) => {
   const config = await readConfig(path);
-  return config.accountNumber && config.region && config.role;
+  return config.accountNumber && config.role;
 };
 
 const readLambdasLibrary = async (path) => {

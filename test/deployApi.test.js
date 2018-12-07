@@ -1,8 +1,8 @@
 const https = require('https');
 
 const { createBamRole } = require('../src/aws/createRoles');
-const deployLambda = require('../src/aws/deployLambda.js');
-const deployApi = require('../src/aws/deployApi.js');
+const deployLambda = require('../src/aws/deployLambda');
+const deployApi = require('../src/aws/deployApi');
 const { doesApiExist } = require('../src/aws/doesResourceExist');
 const destroy = require('../src/commands/destroy');
 const delay = require('../src/util/delay');

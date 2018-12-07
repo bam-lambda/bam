@@ -11,6 +11,7 @@ const copyFile = promisify(fs.copyFile);
 const unlink = promisify(fs.unlink);
 const rename = promisify(fs.rename);
 const readdir = promisify(fs.readdir);
+const mkdir = promisify(fs.mkdir);
 const { createWriteStream } = fs;
 const getBamPath = path => `${path}/.bam`;
 const getStagingPath = path => `${getBamPath(path)}/staging`;
@@ -137,8 +138,6 @@ const deleteTableFromLibrary = async (resourceName, path) => {
   delete tables[region][resourceName];
   await writeDbtablesLibrary(path, tables);
 };
-
-const mkdir = promisify(fs.mkdir);
 
 const createDirectory = async (name, path) => {
   const dir = `${path}/${name}`;

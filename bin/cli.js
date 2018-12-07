@@ -29,7 +29,7 @@ const homedir = os.homedir();
   if (!shouldContinue) return;
 
   if (command === 'create') {
-    await create(resourceName);
+    await create(resourceName, options);
   } else if (command === 'deploy') {
     await deploy(resourceName, homedir, options);
   } else if (command === 'redeploy') {

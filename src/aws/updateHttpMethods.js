@@ -1,6 +1,7 @@
 const createApiGatewayIntegration = require('./createApiGatewayIntegration');
 const deleteApiGatewayIntegration = require('./deleteApiGatewayIntegration');
 const { distinctElements } = require('../util/fileUtils');
+const { bamWarn } = require('../util/logger');
 
 module.exports = async function updateHttpMethods(resource, lambdaName, restApiId, addMethods, removeMethods, path) {
   const resourceId = resource.id;
@@ -12,6 +13,7 @@ module.exports = async function updateHttpMethods(resource, lambdaName, restApiI
       const httpMethod = addMethods[i];
       if (!existingMethods.includes(httpMethod)) {
         await createApiGatewayIntegration(httpMethod, resourceId, restApiId, lambdaName, path);
+        existingMethods.push(httpMethod);
       }
     }
   };
@@ -21,13 +23,17 @@ module.exports = async function updateHttpMethods(resource, lambdaName, restApiI
     for (let i = 0; i < removeMethods.length; i += 1) {
       const httpMethod = removeMethods[i];
       if (existingMethods.includes(httpMethod)) {
-        await deleteApiGatewayIntegration(httpMethod, resourceId, restApiId, path);
+        if (existingMethods.length > 1) {
+          await deleteApiGatewayIntegration(httpMethod, resourceId, restApiId, path);
+          existingMethods = existingMethods.filter(m => httpMethod !== m);
+        } else {
+          bamWarn(`Api ${lambdaName} must be left with at least 1 HTTP method.`);
+          return;
+        }
       }
     }
   };
 
   await addHttpMethodIntegrations();
-  // update existing methods to include newly added methods
-  existingMethods = distinctElements(existingMethods.concat(addMethods));
   await removeHttpMethodIntegrations();
 };

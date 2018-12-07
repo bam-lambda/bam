@@ -210,6 +210,7 @@ module.exports = {
   rename,
   exec,
   readdir,
+  mkdir,
   createWriteStream,
   exists,
   createDirectory,

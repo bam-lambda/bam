@@ -29,7 +29,7 @@ const bamPath = getBamPath(path);
 
 describe('createBamRole', async () => {
   beforeEach(async () => {
-    jest.setTimeout(10000);
+    jest.setTimeout(15000);
     await createDirectory('.bam', path);
     const config = await configTemplate(roleName);
     await createJSONFile('config', bamPath, config);

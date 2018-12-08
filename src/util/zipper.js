@@ -20,7 +20,7 @@ const zipper = async (lambdaName, path, directoryName) => {
   const stagingPath = getStagingPath(path);
   let dirName = directoryName;
 
-  if (dirName === undefined) dirName = lambdaName; // may be lambdaName-temp
+  if (dirName === undefined) dirName = lambdaName;
   const dir = `${stagingPath}/${dirName}`;
 
   try {

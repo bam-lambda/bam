@@ -32,6 +32,8 @@ const {
 const stageName = 'bam';
 
 module.exports = async function redeploy(lambdaName, path, options) {
+  const region = await asyncGetRegion();
+
   const getApiId = async () => {
     const apis = await readApisLibrary(path);
     return apis[region] && apis[region][lambdaName] && apis[region][lambdaName].restApiId;
@@ -53,7 +55,6 @@ module.exports = async function redeploy(lambdaName, path, options) {
   removeMethods = removeMethods
     ? distinctElements(removeMethods.map(m => m.toUpperCase())) : [];
 
-  const region = await asyncGetRegion();
   const restApiId = await getApiId();
   const resources = (await asyncGetResources({ restApiId })).items;
   const resource = resources.find(res => res.path === '/');
@@ -66,7 +67,7 @@ module.exports = async function redeploy(lambdaName, path, options) {
     return;
   }
 
-  const deployIntegrations = async (restApiId) => {
+  const deployIntegrations = async () => {
     const rootResource = resources.find(res => res.path === '/');
     const greedyPathResource = resources.find(res => res.path === '/{proxy+}');
     const rootPath = '/';
@@ -88,16 +89,16 @@ module.exports = async function redeploy(lambdaName, path, options) {
     if (!apiExistsInLocalLibrary || !apiExistsOnAws) {
       apiData = await deployApi(lambdaName, path, addMethods, stageName);
     } else {
-      await deployIntegrations(restApiId);
+      await deployIntegrations();
     }
 
     return apiData;
   };
 
-  const updateLocalLibraries = async (newApiData) => {
-    if (newApiData) {
-      const { restApiId, endpoint } = newApiData;
-      await writeApi(endpoint, addMethods, lambdaName, restApiId, path);
+  const updateLocalLibraries = async (updatedApiData) => {
+    if (updatedApiData) {
+      const { updatedRestApiId, updatedEndpoint } = updatedApiData;
+      await writeApi(updatedEndpoint, addMethods, lambdaName, updatedRestApiId, path);
     } else {
       const apis = await readApisLibrary(path);
       const regionalApis = apis[region];
@@ -118,6 +119,6 @@ module.exports = async function redeploy(lambdaName, path, options) {
     await deleteStagingDirForLambda(lambdaName, path);
     bamLog(`Lambda "${lambdaName}" has been updated`);
   } else {
-    bamError(`Lambda "${lambdaName}" could not be updated in the cloud`);
+    bamWarn(`Lambda "${lambdaName}" could not be updated in the cloud`);
   }
 };

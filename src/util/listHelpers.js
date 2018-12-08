@@ -44,7 +44,7 @@ const formatBamFunctionsList = async (funcName, lambdas, apis, region) => {
     if (Object.keys(apis[region]).length > 0) {
       const apiObj = apis[region][funcName];
       if (apiObj) {
-        const endpointStr = `${indentFurthest}${bamText('url:')} ${apiObj.endpoint}`;
+        const endpointStr = `${indentFurthest}${bamText('endpoint:')} ${apiObj.endpoint}`;
         const methodsStr = apiObj.methods.join(', ');
         const httpMethodsStr = `${indentFurthest}${bamText('http methods:')} ${methodsStr}`;
         fields.push(endpointStr);
@@ -88,12 +88,12 @@ const formatTablesList = async (tableName, dbtables, region) => {
   const { partitionKey, sortKey } = dbtables[region][tableName];
   const tableNameStr = bamText(`${tableName}:`);
   const partitionKeyDataType = friendlyDataTypes[partitionKey.dataType];
-  const partitionKeyStr = `${indentFurthest}${bamText('Partition Key:')} ${partitionKey.name} (${partitionKeyDataType})`;
+  const partitionKeyStr = `${indentFurthest}${bamText('partition key:')} ${partitionKey.name} (${partitionKeyDataType})`;
   const fields = [tableNameStr, partitionKeyStr];
 
   if (sortKey) {
     const sortKeyDataType = friendlyDataTypes[sortKey.dataType];
-    const sortKeyStr = `${indentFurthest}${bamText('sort Key:')} ${sortKey.name} (${sortKeyDataType})`;
+    const sortKeyStr = `${indentFurthest}${bamText('sort key:')} ${sortKey.name} (${sortKeyDataType})`;
     fields.push(sortKeyStr);
   }
 

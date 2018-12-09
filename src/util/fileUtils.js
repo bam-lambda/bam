@@ -124,9 +124,11 @@ const deleteApiFromLibraries = async (resourceName, path) => {
   const lambdas = await readLambdasLibrary(path);
   const apis = await readApisLibrary(path);
 
-  // TODO: do these steps only if lambda exists
-  lambdas[region][resourceName].api = '';
-  await writeLambdasLibrary(path, lambdas);
+  const lambda = lambdas[region][resourceName];
+  if (lambda) {
+    lambda.api = '';
+    await writeLambdasLibrary(path, lambdas);
+  }
 
   delete apis[region][resourceName];
   await writeApisLibrary(path, apis);

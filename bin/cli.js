@@ -35,9 +35,9 @@ const homedir = os.homedir();
   } else if (command === 'get') {
     get(resourceName);
   } else if (command === 'delete') {
-    destroy(resourceName, homedir);
+    destroy(resourceName, homedir, options);
   } else if (command === 'dbtable') {
-    dbtable(resourceName, homedir, options);
+    dbtable(resourceName, homedir);
   } else if (command === 'list') {
     list(homedir, options);
   } else if (command === 'version' || command === '-v') {

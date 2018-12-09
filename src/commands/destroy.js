@@ -9,7 +9,6 @@ const {
   readApisLibrary,
   deleteApiFromLibraries,
   deleteLambdaFromLibrary,
-  deleteStagingDirForLambda,
 } = require('../util/fileUtils');
 
 module.exports = async function destroy(lambdaName, path) {
@@ -25,9 +24,6 @@ module.exports = async function destroy(lambdaName, path) {
   };
   await bamBam(deleteApi, optionalParamsObj);
   await deleteAwsLambda(lambdaName);
-
-  // delete from local directories
-  await deleteStagingDirForLambda(lambdaName, path);
 
   // remove from libraries
   await deleteApiFromLibraries(lambdaName, path);

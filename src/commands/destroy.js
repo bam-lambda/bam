@@ -21,6 +21,7 @@ const {
 
 module.exports = async function destroy(resourceName, path, options) {
   bamSpinner.start();
+
   const destroyDb = checkForOptionType(options, 'db');
   const destroyLambda = checkForOptionType(options, 'lambda');
   const destroyEndpoint = checkForOptionType(options, 'endpoint');
@@ -40,17 +41,19 @@ module.exports = async function destroy(resourceName, path, options) {
     if (tableExists) {
       await deleteDbTable(resourceName);
       await deleteTableFromLibrary(resourceName, path);
-      bamLog(`"${resourceName}" table has been deleted`);
     } else {
       bamWarn(`"${resourceName}" table does not exist on AWS`);
     }
   };
 
   const deleteEndpoint = async () => {
-    const endpointExists = await doesApiExist(resourceName);
+    const apis = await readApisLibrary(path);
+    let restApiId;
+    const api = apis[region][resourceName];
+    if (api) ({ restApiId } = api);
+    const endpointExists = await doesApiExist(restApiId);
+
     if (endpointExists) {
-      const apis = await readApisLibrary(path);
-      const { restApiId } = apis[region][resourceName];
       const optionalParamsObj = {
         asyncFuncParams: [resourceName, restApiId, path],
         retryError: 'TooManyRequestsException',

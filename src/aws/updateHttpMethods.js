@@ -1,7 +1,5 @@
 const createApiGatewayIntegration = require('./createApiGatewayIntegration');
 const deleteApiGatewayIntegration = require('./deleteApiGatewayIntegration');
-const { distinctElements } = require('../util/fileUtils');
-const { bamWarn } = require('../util/logger');
 
 module.exports = async function updateHttpMethods(resource, lambdaName, restApiId, addMethods, removeMethods, apiPath, path) {
   const resourceId = resource.id;

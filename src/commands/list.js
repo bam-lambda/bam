@@ -23,10 +23,10 @@ const {
 
 const logBamFunctions = (bamFunctionsList) => {
   if (bamFunctionsList.length > 0) {
-    logInColor(`${indent}Lambdas deployed from this machine using BAM:`, 'green');
+    logInColor(`${indent}Lambdas deployed from this machine using BAM!:`, 'green');
     log(`${bamFunctionsList}\n`);
   } else {
-    log(`${indent}There are no lambdas on AWS that have been deployed with BAM\n`);
+    log(`${indent}There are no lambdas on AWS that have been deployed with BAM!\n`);
   }
 };
 
@@ -39,7 +39,7 @@ const logAwsFunctions = (awsFunctionsList) => {
 
 const logBamTables = (bamTablesList) => {
   if (bamTablesList.length > 0) {
-    logInColor(`${indent}DynamoDB tables deployed from this machine using BAM:`, 'green');
+    logInColor(`${indent}DynamoDB tables deployed from this machine using BAM!:`, 'green');
     log(`${bamTablesList}\n`);
   } else {
     log(`${indent}No tables on AWS have been deployed from this machine\n`);

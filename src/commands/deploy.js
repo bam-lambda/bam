@@ -1,7 +1,7 @@
 const deployLambda = require('../aws/deployLambda');
 const deployApi = require('../aws/deployApi');
 const getUserInput = require('../util/getUserInput');
-const { bamWarn } = require('../util/logger');
+const { bamWarn, bamError } = require('../util/logger');
 const checkForOptionType = require('../util/checkForOptionType');
 
 const {
@@ -70,6 +70,6 @@ module.exports = async function deploy(lambdaName, path, options) {
     if (restApiId) await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
     await deleteStagingDirForLambda(lambdaName, path);
   } catch (err) {
-    bamWarn(err);
+    bamError(err);
   }
 };

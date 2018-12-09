@@ -17,7 +17,7 @@ const startingTemplate = regions.reduce((acc, region) => {
 }, {});
 
 module.exports = async function setupBamDirAndFiles(roleName, path) {
-  const configJSON = await configTemplate(roleName);
+  const configJSON = configTemplate(roleName);
   const bamPath = getBamPath(path);
   await createDirectory('.bam', path);
   await createDirectory('staging', bamPath);

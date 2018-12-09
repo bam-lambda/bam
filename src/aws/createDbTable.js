@@ -49,7 +49,7 @@ module.exports = async function createDbTable(tableName, partitionKey, sortKey) 
   try {
     await asyncCreateTable(tableParams);
     bamSpinner.stop();
-    bamLog(`BAM received confirmation that AWS is creating DynamoDB "${tableName}" table`);
+    bamLog(`BAM! received confirmation that AWS is creating DynamoDB "${tableName}" table`);
   } catch (err) {
     bamSpinner.stop();
     bamError(err);

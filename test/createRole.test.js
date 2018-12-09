@@ -30,7 +30,7 @@ describe('createBamRole', async () => {
   beforeEach(async () => {
     jest.setTimeout(15000);
     await createDirectory('.bam', path);
-    const config = await configTemplate(roleName);
+    const config = configTemplate(roleName);
     await createJSONFile('config', bamPath, config);
   });
 
@@ -78,7 +78,7 @@ describe('createDatabaseBamRole', () => {
   beforeEach(async () => {
     jest.setTimeout(10000);
     await createDirectory('.bam', path);
-    const config = await configTemplate(roleName);
+    const config = configTemplate(roleName);
     config.accountNumber = process.env.AWS_ID;
     await createJSONFile('config', bamPath, config);
     await writeConfig(path, config);

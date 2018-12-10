@@ -63,14 +63,6 @@ describe('bam delete lambda', () => {
     await asyncDeleteRole({ RoleName: roleName });
   });
 
-  test.only('Lambda directory does not exists within stagingPath', async () => {
-    let template = await exists(`${stagingPath}/${lambdaName}`);
-    expect(template).toBe(true);
-    await destroy(lambdaName, path);
-    template = await exists(`${stagingPath}/${lambdaName}`);
-    expect(template).toBe(false);
-  });
-
   test('Lambda metadata is removed from ./test/.bam/lambdas.json and ./test/.bam/apis.json', async () => {
     const region = await asyncGetRegion();
     let lambdas = await readLambdasLibrary(path);

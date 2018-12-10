@@ -9,6 +9,10 @@ const lambda = new AWS.Lambda({ apiVersion, region });
 const api = new AWS.APIGateway({ apiVersion, region });
 const dynamo = new AWS.DynamoDB({ apiVersion, region });
 const iam = new AWS.IAM();
+const sts = new AWS.STS();
+
+// sts
+const asyncGetCallerIdentity = promisify(sts.getCallerIdentity.bind(sts));
 
 // lambda
 const asyncAddPermission = promisify(lambda.addPermission.bind(lambda));
@@ -50,6 +54,7 @@ const asyncGetRole = promisify(iam.getRole.bind(iam));
 const asyncListAttachedRolePolicies = promisify(iam.listAttachedRolePolicies.bind(iam));
 
 module.exports = {
+  asyncGetCallerIdentity,
   asyncAddPermission,
   asyncPutMethod,
   asyncPutIntegration,

@@ -3,35 +3,90 @@ const deleteAwsLambda = require('../aws/deleteLambda');
 const bamBam = require('../util/bamBam');
 const { asyncGetRegion } = require('../util/getRegion');
 const bamSpinner = require('../util/spinner');
-const { bamLog } = require('../util/logger');
+const { bamLog, bamWarn } = require('../util/logger');
+const checkForOptionType = require('../util/checkForOptionType');
+const deleteDbTable = require('../aws/deleteDbTable');
+const {
+  doesTableExist,
+  doesLambdaExist,
+  doesApiExist,
+} = require('../aws/doesResourceExist');
 
 const {
   readApisLibrary,
   deleteApiFromLibraries,
   deleteLambdaFromLibrary,
-  deleteStagingDirForLambda,
+  deleteTableFromLibrary,
 } = require('../util/fileUtils');
 
-module.exports = async function destroy(lambdaName, path) {
+module.exports = async function destroy(resourceName, path, options) {
   bamSpinner.start();
 
+  const destroyDb = checkForOptionType(options, 'db');
+  const destroyLambda = checkForOptionType(options, 'lambda');
+  const destroyEndpoint = checkForOptionType(options, 'endpoint');
   const region = await asyncGetRegion();
-  const apis = await readApisLibrary(path);
-  const { restApiId } = apis[region][lambdaName];
-  const optionalParamsObj = {
-    asyncFuncParams: [lambdaName, restApiId, path],
-    retryError: 'TooManyRequestsException',
-    interval: 15000,
+  let deletionMsg = '';
+
+  const getDeletionMessage = (resourceType) => {
+    if (resourceType === 'both') {
+      return `Lambda and endpoint "${resourceName}" have been deleted`;
+    }
+
+    return `${resourceType}: "${resourceName}" has been deleted`;
   };
-  await bamBam(deleteApi, optionalParamsObj);
-  await deleteAwsLambda(lambdaName);
 
-  // delete from local directories
-  await deleteStagingDirForLambda(lambdaName, path);
+  const deleteTable = async () => {
+    const tableExists = await doesTableExist(resourceName);
+    if (tableExists) {
+      await deleteDbTable(resourceName);
+      await deleteTableFromLibrary(resourceName, path);
+    } else {
+      bamWarn(`"${resourceName}" table does not exist on AWS`);
+    }
+  };
 
-  // remove from libraries
-  await deleteApiFromLibraries(lambdaName, path);
-  await deleteLambdaFromLibrary(lambdaName, path);
+  const deleteEndpoint = async () => {
+    const apis = await readApisLibrary(path);
+    let restApiId;
+    const api = apis[region][resourceName];
+    if (api) ({ restApiId } = api);
+    const endpointExists = await doesApiExist(restApiId);
+
+    if (endpointExists) {
+      const optionalParamsObj = {
+        asyncFuncParams: [resourceName, restApiId, path],
+        retryError: 'TooManyRequestsException',
+        interval: 15000,
+      };
+      await bamBam(deleteApi, optionalParamsObj);
+      await deleteApiFromLibraries(resourceName, path);
+    }
+  };
+
+  const deleteLambda = async () => {
+    const lambdaExists = await doesLambdaExist(resourceName);
+    if (lambdaExists) {
+      await deleteAwsLambda(resourceName);
+      await deleteLambdaFromLibrary(resourceName, path);
+    }
+  };
+
+  if (destroyDb) {
+    await deleteTable();
+    deletionMsg = getDeletionMessage('Table');
+  } else if (destroyLambda) {
+    await deleteLambda();
+    deletionMsg = getDeletionMessage('Lambda');
+  } else if (destroyEndpoint) {
+    await deleteEndpoint();
+    deletionMsg = getDeletionMessage('Endpoint');
+  } else {
+    await deleteEndpoint();
+    await deleteLambda();
+    deletionMsg = getDeletionMessage('both');
+  }
+
   bamSpinner.stop();
-  bamLog(`Lambda "${lambdaName}" has been deleted`);
+  bamLog(deletionMsg);
 };

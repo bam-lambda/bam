@@ -43,10 +43,19 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
       const greedyPath = '/*';
 
       // root resource
-      await createApiGatewayIntegration(httpMethod, rootResourceId, restApiId, lambdaName, rootPath, path);
+      await createApiGatewayIntegration(httpMethod,
+        rootResourceId,
+        restApiId,
+        lambdaName,
+        rootPath,
+        path);
 
       // greedy path
-      await createApiGatewayIntegration(httpMethod, greedyPathResourceId, restApiId, lambdaName, greedyPath, path);
+      await createApiGatewayIntegration(httpMethod,
+        greedyPathResourceId, restApiId,
+        lambdaName,
+        greedyPath,
+        path);
     }
 
     // create deployment

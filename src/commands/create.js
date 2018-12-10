@@ -1,23 +1,25 @@
-const { writeFile, readFile } = require('../util/fileUtils');
-const { bamWarn, bamLog } = require('../util/logger');
+const { bamWarn } = require('../util/logger');
 const { validateLambdaCreation } = require('../util/validations');
-const { asyncGetRegion } = require('../util/getRegion');
-const { 
+const checkForOptionType = require('../util/checkForOptionType');
+
+const {
   createLocalLambdaFile,
   createLocalLambdaDirectory,
 } = require('../util/createLocalLambda');
 
 module.exports = async function create(lambdaName, options) {
   const invalidLambdaMsg = await validateLambdaCreation(lambdaName);
+  const createDirTemplate = checkForOptionType(options, 'dir');
+  const createIinvokerTemplate = checkForOptionType(options, 'invoke');
 
   if (invalidLambdaMsg) {
     bamWarn(invalidLambdaMsg);
     return;
   }
 
-  if (options.dir) { // TODO pick more descriptive flag
-    await createLocalLambdaDirectory(lambdaName, options);
-  } else {  
-    await createLocalLambdaFile(lambdaName, options);
+  if (createDirTemplate) { // TODO pick more descriptive flag
+    await createLocalLambdaDirectory(lambdaName, createIinvokerTemplate);
+  } else {
+    await createLocalLambdaFile(lambdaName, createIinvokerTemplate);
   }
 };

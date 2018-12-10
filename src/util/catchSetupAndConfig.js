@@ -4,6 +4,7 @@ const { log, bamLog, bamWarn } = require('./logger');
 const { getRegion } = require('./getRegion');
 const { createBamRole, createDatabaseBamRole } = require('../aws/createRoles');
 const { doesRoleExist } = require('../aws/doesResourceExist');
+const checkForOptionType = require('../util/checkForOptionType');
 
 const {
   readConfig,
@@ -30,6 +31,8 @@ const commandIsNotValid = command => !commands.includes(command);
 
 module.exports = async function catchSetupAndConfig(path, command, options) {
   if (commandIsNotValid(command) || ['help', 'version'].includes(command)) return true;
+
+  const permitDb = checkForOptionType(options, 'db');
 
   const awsConfigExistsWithRegionSet = getRegion();
   if (!awsConfigExistsWithRegionSet) {
@@ -65,7 +68,7 @@ module.exports = async function catchSetupAndConfig(path, command, options) {
       return false;
     }
   }
-  if ((command === 'deploy' || command === 'redeploy') && options.permitDb) {
+  if ((command === 'deploy' || command === 'redeploy') && permitDb) {
     await createDatabaseBamRole(databaseBamRole, path);
   }
 

@@ -1,12 +1,7 @@
 const { asyncLambdaUpdateFunctionConfiguration } = require('./awsFunctions');
-const { doesRoleExist } = require('./doesResourceExist');
 const getLambda = require('./getLambda');
 const { readConfig } = require('../util/fileUtils');
-const { bamWarn, bamError } = require('../util/logger');
-const bamSpinner = require('../util/spinner');
-const checkForOptionType = require('../util/checkForOptionType');
-
-const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
+const { bamError } = require('../util/logger');
 
 const getRole = async (lambdaName) => {
   try {
@@ -17,30 +12,13 @@ const getRole = async (lambdaName) => {
   }
 };
 
-module.exports = async function updateLambdaConfig(lambdaName, path, options) {
+module.exports = async function updateLambdaConfig(lambdaName, path, roleName) {
   const config = await readConfig(path);
-  const { accountNumber, role } = config;
-  const permitDb = checkForOptionType(options, 'permitDb');
-  const revokeDb = checkForOptionType(options, 'revokeDb');
-
-  const databaseRoleArn = `arn:aws:iam::${accountNumber}:role/${dbRole}`;
-  const defaultRoleArn = `arn:aws:iam::${accountNumber}:role/${role}`;
+  const { accountNumber } = config;
 
   let updatedRoleArn;
-  if (options.role && options.role[0]) {
-    const userRole = options.role[0];
-    const roleExists = await doesRoleExist(userRole);
-    if (!roleExists) {
-      bamSpinner.stop();
-      bamWarn(`Role "${userRole}" does not exist`);
-      bamSpinner.start();
-      return;
-    }
-    updatedRoleArn = `arn:aws:iam::${accountNumber}:role/${userRole}`;
-  } else if (revokeDb) {
-    updatedRoleArn = defaultRoleArn;
-  } else if (permitDb) {
-    updatedRoleArn = databaseRoleArn;
+  if (roleName) {
+    updatedRoleArn = `arn:aws:iam::${accountNumber}:role/${roleName}`;
   }
 
   const currentRoleArn = await getRole(lambdaName);

@@ -4,6 +4,8 @@ const { doesApiExist } = require('../aws/doesResourceExist');
 const updateHttpMethods = require('../aws/updateHttpMethods');
 const bamBam = require('../util/bamBam');
 const { asyncGetRegion } = require('../util/getRegion');
+const getOption = require('../util/getOption');
+const checkForOptionType = require('../util/checkForOptionType');
 
 const {
   asyncCreateDeployment,
@@ -13,6 +15,7 @@ const {
 const {
   validateApiMethods,
   validateLambdaReDeployment,
+  validateRoleAssumption,
 } = require('../util/validations');
 
 const {
@@ -26,10 +29,10 @@ const {
 const {
   bamLog,
   bamWarn,
-  bamError,
 } = require('../util/logger');
 
 const stageName = 'bam';
+const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
 
 module.exports = async function redeploy(lambdaName, path, options) {
   const region = await asyncGetRegion();
@@ -46,8 +49,29 @@ module.exports = async function redeploy(lambdaName, path, options) {
     return;
   }
 
-  let addMethods = options.methods || options.method;
-  let removeMethods = options.rmMethods || options.rmMethod;
+  const roleOption = getOption(options, 'role');
+  const permitDb = checkForOptionType(options, 'permitDb');
+  const revokeDb = checkForOptionType(options, 'revokeDb');
+
+  const userRole = options[roleOption] && options[roleOption][0];
+  let roleName;
+
+  if (revokeDb) roleName = '';
+  if (permitDb) roleName = dbRole;
+  if (userRole) {
+    const invalidRoleMsg = await validateRoleAssumption(userRole);
+    if (invalidRoleMsg) {
+      bamWarn(invalidRoleMsg);
+      return;
+    }
+    roleName = userRole;
+  }
+
+  const methodOption = getOption(options, 'method');
+  let addMethods = options[methodOption];
+
+  const removeOption = getOption(options, 'rmmethod');
+  let removeMethods = options[removeOption];
 
   addMethods = addMethods
     ? distinctElements(addMethods.map(m => m.toUpperCase())) : [];
@@ -111,7 +135,7 @@ module.exports = async function redeploy(lambdaName, path, options) {
   };
 
   // redeploy sequence
-  const lambdaUpdateSuccess = await updateLambda(lambdaName, path, options);
+  const lambdaUpdateSuccess = await updateLambda(lambdaName, path, roleName);
 
   if (lambdaUpdateSuccess) {
     const apiData = await updateApiGateway();

@@ -79,11 +79,11 @@ module.exports = async function destroy(resourceName, path, options) {
     await deleteLambda();
     deletionMsg = getDeletionMessage('Lambda');
   } else if (destroyEndpoint) {
-    await deleteEndpoint(resourceName);
+    await deleteEndpoint();
     deletionMsg = getDeletionMessage('Endpoint');
   } else {   
-    await deleteEndpoint(resourceName);    
-    await deleteLambda(resourceName);   
+    await deleteEndpoint();    
+    await deleteLambda();   
     deletionMsg = getDeletionMessage('both');
   }
 

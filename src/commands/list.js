@@ -23,7 +23,7 @@ const {
 
 const logBamFunctions = (bamFunctionsList) => {
   if (bamFunctionsList.length > 0) {
-    logInColor(`${indent}Lambdas deployed from this machine using BAM!:`, 'green');
+    logInColor(`${indent}Lambdas and endpoints deployed from this machine using BAM!:`, 'green');
     log(`${bamFunctionsList}\n`);
   } else {
     log(`${indent}There are no lambdas on AWS that have been deployed with BAM!\n`);

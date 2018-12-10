@@ -112,9 +112,10 @@ module.exports = async function redeploy(lambdaName, path, options) {
     const apiExistsInLocalLibrary = !!(api.restApiId);
     const apiExistsOnAws = await doesApiExist(api.restApiId);
     const userIsAddingMethods = !!(options.methods || options.method);
+    const userIsAddingApi = !!(options.addApi);
     let data;
 
-    if ((apiExistsInLocalLibrary || userIsAddingMethods) && !apiExistsOnAws) {
+    if ((apiExistsInLocalLibrary || userIsAddingMethods || userIsAddingApi) && !apiExistsOnAws) {
       data = await deployApi(lambdaName, path, api.addMethods, stageName);
     } else if (userIsAddingMethods || api.removeMethods.length > 0) {
       await deployIntegrations(api.resources, api.existingMethods);

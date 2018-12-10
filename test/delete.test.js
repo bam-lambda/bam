@@ -63,7 +63,7 @@ describe('bam delete lambda', () => {
     await asyncDeleteRole({ RoleName: roleName });
   });
 
-  test('Lambda directory does not exists within stagingPath', async () => {
+  test.only('Lambda directory does not exists within stagingPath', async () => {
     let template = await exists(`${stagingPath}/${lambdaName}`);
     expect(template).toBe(true);
     await destroy(lambdaName, path);

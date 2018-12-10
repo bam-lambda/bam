@@ -65,9 +65,9 @@ module.exports = async function destroy(resourceName, path, options) {
   };
 
   const deleteLambda = async () => {
-    const lambdaExists = await doesLambdaExist(resourceName);
+    const lambdaExists = await doesLambdaExist(resourceName);   
     if (lambdaExists) {
-      await deleteAwsLambda(resourceName);
+      await deleteAwsLambda(resourceName);    
       await deleteLambdaFromLibrary(resourceName, path);
     }
   };
@@ -81,9 +81,9 @@ module.exports = async function destroy(resourceName, path, options) {
   } else if (destroyEndpoint) {
     await deleteEndpoint(resourceName);
     deletionMsg = getDeletionMessage('Endpoint');
-  } else {
-    await deleteEndpoint(resourceName);
-    await deleteAwsLambda(resourceName);
+  } else {   
+    await deleteEndpoint(resourceName);    
+    await deleteLambda(resourceName);   
     deletionMsg = getDeletionMessage('both');
   }
 

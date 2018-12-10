@@ -83,7 +83,7 @@ module.exports = async function destroy(resourceName, path, options) {
     deletionMsg = getDeletionMessage('Endpoint');
   } else {
     await deleteEndpoint(resourceName);
-    await deleteAwsLambda(resourceName);
+    await deleteLambda();
     deletionMsg = getDeletionMessage('both');
   }
 

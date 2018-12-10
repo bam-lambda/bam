@@ -10,7 +10,7 @@ exports.handler = async (event) => {
 
   const { pathParameters, queryStringParameters, httpMethod } = event;
 
-  // pathParameters will contain a propery called "proxy" if path params were used
+  // pathParameters will contain a property called "proxy" if path params were used
   const pathParams = pathParameters ? pathParameters.proxy : '';
 
   // example use of queryStringParameters to obtain value for "name" parameter

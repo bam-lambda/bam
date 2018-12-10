@@ -4,6 +4,7 @@ const { doesApiExist } = require('../aws/doesResourceExist');
 const updateHttpMethods = require('../aws/updateHttpMethods');
 const bamBam = require('../util/bamBam');
 const { asyncGetRegion } = require('../util/getRegion');
+const checkForOptionType = require('../util/checkForOptionType');
 
 const {
   asyncCreateDeployment,
@@ -112,9 +113,10 @@ module.exports = async function redeploy(lambdaName, path, options) {
     const apiExistsInLocalLibrary = !!(api.restApiId);
     const apiExistsOnAws = await doesApiExist(api.restApiId);
     const userIsAddingMethods = !!(options.methods || options.method);
+    const userIsAddingEndpoint = checkForOptionType(options, 'endpoint');
     let data;
 
-    if ((apiExistsInLocalLibrary || userIsAddingMethods) && !apiExistsOnAws) {
+    if ((apiExistsInLocalLibrary || userIsAddingMethods || userIsAddingEndpoint) && !apiExistsOnAws) {
       data = await deployApi(lambdaName, path, api.addMethods, stageName);
     } else if (userIsAddingMethods || api.removeMethods.length > 0) {
       await deployIntegrations(api.resources, api.existingMethods);

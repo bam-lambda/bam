@@ -2,9 +2,14 @@ const { asyncLambdaUpdateFunctionConfiguration } = require('./awsFunctions');
 const { doesRoleExist } = require('./doesResourceExist');
 const getLambda = require('./getLambda');
 const { readConfig } = require('../util/fileUtils');
-const { bamWarn, bamError } = require('../util/logger');
 const bamSpinner = require('../util/spinner');
 const checkForOptionType = require('../util/checkForOptionType');
+
+const {
+  msgAfterAction,
+  bamWarn,
+  bamError,
+} = require('../util/logger');
 
 const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
 
@@ -32,7 +37,7 @@ module.exports = async function updateLambdaConfig(lambdaName, path, options) {
     const roleExists = await doesRoleExist(userRole);
     if (!roleExists) {
       bamSpinner.stop();
-      bamWarn(`Role "${userRole}" does not exist`);
+      bamWarn(msgAfterAction('role', userRole, 'exist', 'does not'));
       bamSpinner.start();
       return;
     }

@@ -1,8 +1,13 @@
 const deployLambda = require('../aws/deployLambda');
 const deployApi = require('../aws/deployApi');
 const getUserInput = require('../util/getUserInput');
-const { bamWarn, bamError } = require('../util/logger');
 const checkForOptionType = require('../util/checkForOptionType');
+
+const {
+  bamWarn,
+  bamError,
+  msgAfterAction,
+} = require('../util/logger');
 
 const {
   validateLambdaDeployment,
@@ -59,7 +64,7 @@ module.exports = async function deploy(lambdaName, path, options) {
   try {
     const input = await getUserInput([question]);
     if (input === undefined) {
-      bamWarn('Lambda deployment aborted');
+      bamWarn(msgAfterAction('lambda', lambdaName, 'aborted', 'creation has been'));
       return;
     }
     const [description] = input;

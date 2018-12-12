@@ -14,6 +14,7 @@ const {
 } = require('./awsFunctions');
 
 const {
+  msgAfterAction,
   bamLog,
   bamError,
 } = require('../util/logger');
@@ -54,7 +55,7 @@ const createRole = async (roleName) => {
   if (!doesRoleNameExist) {
     await asyncCreateRole(roleParams);
     bamSpinner.stop();
-    bamLog(`Role "${roleName}" has been created`);
+    bamLog(msgAfterAction('role', roleName, 'created'));
   }
 };
 

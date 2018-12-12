@@ -1,11 +1,16 @@
 const { asyncGetRegion } = require('./getRegion');
-const { bamLog } = require('../util/logger');
+
 const {
   readFile,
   writeFile,
   copyFile,
   mkdir,
 } = require('./fileUtils');
+
+const {
+  bamLog,
+  msgAfterAction,
+} = require('../util/logger');
 
 const createLocalLambdaFile = async (lambdaName, options) => {
   const cwd = process.cwd();
@@ -20,7 +25,7 @@ const createLocalLambdaFile = async (lambdaName, options) => {
   }
 
   await writeFile(`${cwd}/${lambdaName}.js`, lambdaTemplate);
-  bamLog(`Template file "${lambdaName}" was created.`);
+  bamLog(msgAfterAction('file', `${lambdaName}.js`, 'created'));
 };
 
 const createLocalLambdaDirectory = async (lambdaName, options) => {
@@ -40,7 +45,7 @@ const createLocalLambdaDirectory = async (lambdaName, options) => {
   }
 
   await writeFile(`${cwd}/${lambdaName}/${lambdaName}.js`, lambdaTemplate);
-  bamLog(`Template directory "${lambdaName}" was created.`);
+  bamLog(msgAfterAction('directory', `${lambdaName}`, 'created'));
 };
 
 module.exports = {

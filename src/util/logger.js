@@ -27,6 +27,11 @@ const bamWrite = text => stdout.write(bamText(text));
 const bamLog = text => log(bamText(text));
 const bamWarn = text => log(bamWarnText(text));
 const bamError = text => log(bamErrorText(text));
+const captitalize = str => `${str[0].toUpperCase}${str.slice(1)}`;
+
+const msgAfterAction = (resourceType, resourceName, action, modification = 'has been') => (
+  `${captitalize(resourceType)}: "${resourceName}" ${modification} ${action}`
+);
 
 const hideCursorAndWriteBamText = (text) => {
   const bamifiedText = bamText(text);
@@ -38,6 +43,7 @@ module.exports = {
   logInColor,
   bamWrite,
   bamLog,
+  msgAfterAction,
   bamWarn,
   bamText,
   bamError,

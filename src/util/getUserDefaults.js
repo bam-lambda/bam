@@ -20,7 +20,7 @@ module.exports = async function getUserDefaults(path) {
     };
 
     const getRole = {
-      question: 'Please provide your default role (if you do not provide a role, one will be created for you): ',
+      question: 'Please provide the name of the role BAM! should use by default (if you do not provide a role, one will be created for you): ',
       validator: validRole,
       feedback: badRole,
       defaultAnswer: defaultRole,

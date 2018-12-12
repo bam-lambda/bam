@@ -28,6 +28,7 @@ const {
 } = require('../util/fileUtils');
 
 const {
+  msgAfterAction,
   bamLog,
   bamWarn,
 } = require('../util/logger');
@@ -177,8 +178,8 @@ module.exports = async function redeploy(lambdaName, path, options) {
     const apiData = await updateApiGateway();
     await updateLocalLibraries(apiData);
     await deleteStagingDirForLambda(lambdaName, path);
-    bamLog(`Lambda "${lambdaName}" has been updated`);
+    bamLog(msgAfterAction('lambda', lambdaName, 'updated'));
   } else {
-    bamWarn(`Lambda "${lambdaName}" could not be updated in the cloud`);
+    bamWarn(msgAfterAction('lambda', lambdaName, 'updated', 'could not be'));
   }
 };

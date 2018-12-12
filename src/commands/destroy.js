@@ -27,6 +27,7 @@ module.exports = async function destroy(resourceName, path, options) {
   const destroyEndpoint = checkForOptionType(options, 'endpoint');
   const region = await asyncGetRegion();
   let deletionMsg = '';
+  let warningMsg = '';
 
   const getDeletionMessage = resourceType => (
     `${resourceType}: "${resourceName}" has been deleted. `
@@ -38,9 +39,9 @@ module.exports = async function destroy(resourceName, path, options) {
       await deleteDbTable(resourceName);
       await deleteTableFromLibrary(resourceName, path);
       deletionMsg += getDeletionMessage('Table');
-    } else {
-      bamWarn(`"${resourceName}" table does not exist on AWS`);
+      return;
     }
+    warningMsg += `"${resourceName}" table does not exist on AWS. `;
   };
 
   const deleteEndpoint = async () => {
@@ -60,7 +61,9 @@ module.exports = async function destroy(resourceName, path, options) {
       await bamBam(deleteApi, optionalParamsObj);
       await deleteApiFromLibraries(resourceName, path);
       deletionMsg += getDeletionMessage('Endpoint');
+      return;
     }
+    warningMsg += `"${resourceName}" endpoint does not exist on AWS. `;
   };
 
   const deleteLambda = async () => {
@@ -69,7 +72,9 @@ module.exports = async function destroy(resourceName, path, options) {
       await deleteAwsLambda(resourceName);
       await deleteLambdaFromLibrary(resourceName, path);
       deletionMsg += getDeletionMessage('Lambda');
+      return;
     }
+    warningMsg += `"${resourceName}" lambda does not exist on AWS. `;
   };
 
   if (destroyDb) {
@@ -84,5 +89,9 @@ module.exports = async function destroy(resourceName, path, options) {
   }
 
   bamSpinner.stop();
-  bamLog(deletionMsg);
+  if (warningMsg) {
+    bamWarn(warningMsg);
+  } else {
+    bamLog(deletionMsg);
+  }
 };

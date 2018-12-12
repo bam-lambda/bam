@@ -55,7 +55,7 @@ module.exports = async function deploy(lambdaName, path, options) {
   }
 
   const question = {
-    question: 'Please give a brief description of your lambda: ',
+    question: 'Please provide a brief description of your lambda: ',
     validator: () => (true),
     feedback: 'invalid description',
     defaultAnswer: '',

@@ -1,3 +1,5 @@
+const uuid = require('uuid');
+
 const createApiGatewayIntegration = require('./createApiGatewayIntegration');
 const bamBam = require('../util/bamBam');
 const bamSpinner = require('../util/spinner');
@@ -37,22 +39,32 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
     // create greedy path resource to allow path params
     const greedyPathResourceId = (await asyncCreateResource(createResourceParams)).id;
 
+    const methodPermissionIds = {};
     for (let i = 0; i < httpMethods.length; i += 1) {
       const httpMethod = httpMethods[i];
       const rootPath = '/';
       const greedyPath = '/*';
+      const rootPermissionId = uuid.v4();
+      const greedyPermissionId = uuid.v4();
+      methodPermissionIds[httpMethod] = {
+        rootPermissionId,
+        greedyPermissionId,
+      };
 
       // root resource
       await createApiGatewayIntegration(httpMethod,
         rootResourceId,
         restApiId,
+        rootPermissionId,
         lambdaName,
         rootPath,
         path);
 
       // greedy path
       await createApiGatewayIntegration(httpMethod,
-        greedyPathResourceId, restApiId,
+        greedyPathResourceId,
+        restApiId,
+        greedyPermissionId,
         lambdaName,
         greedyPath,
         path);
@@ -71,7 +83,12 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
     bamLog(bamAscii);
     bamLog('API Gateway endpoint has been deployed:');
     bamLog(endpoint);
-    return { restApiId, endpoint };
+
+    return {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    };
   } catch (err) {
     bamSpinner.stop();
     bamError(err);

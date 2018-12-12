@@ -28,39 +28,38 @@ module.exports = async function destroy(resourceName, path, options) {
   const region = await asyncGetRegion();
   let deletionMsg = '';
 
-  const getDeletionMessage = (resourceType) => {
-    if (resourceType === 'both') {
-      return `Lambda and endpoint "${resourceName}" have been deleted`;
-    }
-
-    return `${resourceType}: "${resourceName}" has been deleted`;
-  };
+  const getDeletionMessage = resourceType => (
+    `${resourceType}: "${resourceName}" has been deleted. `
+  );
 
   const deleteTable = async () => {
     const tableExists = await doesTableExist(resourceName);
     if (tableExists) {
       await deleteDbTable(resourceName);
       await deleteTableFromLibrary(resourceName, path);
+      deletionMsg += getDeletionMessage('Table');
     } else {
       bamWarn(`"${resourceName}" table does not exist on AWS`);
     }
   };
 
   const deleteEndpoint = async () => {
-    const apis = await readApisLibrary(path);
     let restApiId;
+    let methodPermissionIds;
+    const apis = await readApisLibrary(path);
     const api = apis[region][resourceName];
-    if (api) ({ restApiId } = api);
+    if (api) ({ restApiId, methodPermissionIds } = api);
     const endpointExists = await doesApiExist(restApiId);
 
     if (endpointExists) {
       const optionalParamsObj = {
-        asyncFuncParams: [resourceName, restApiId, path],
+        asyncFuncParams: [resourceName, restApiId, methodPermissionIds, path],
         retryError: 'TooManyRequestsException',
         interval: 15000,
       };
       await bamBam(deleteApi, optionalParamsObj);
       await deleteApiFromLibraries(resourceName, path);
+      deletionMsg += getDeletionMessage('Endpoint');
     }
   };
 
@@ -69,22 +68,19 @@ module.exports = async function destroy(resourceName, path, options) {
     if (lambdaExists) {
       await deleteAwsLambda(resourceName);
       await deleteLambdaFromLibrary(resourceName, path);
+      deletionMsg += getDeletionMessage('Lambda');
     }
   };
 
   if (destroyDb) {
     await deleteTable();
-    deletionMsg = getDeletionMessage('Table');
   } else if (destroyLambda) {
     await deleteLambda();
-    deletionMsg = getDeletionMessage('Lambda');
   } else if (destroyEndpoint) {
     await deleteEndpoint();
-    deletionMsg = getDeletionMessage('Endpoint');
   } else {
     await deleteEndpoint();
     await deleteLambda();
-    deletionMsg = getDeletionMessage('both');
   }
 
   bamSpinner.stop();

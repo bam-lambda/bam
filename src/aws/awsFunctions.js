@@ -12,6 +12,7 @@ const iam = new AWS.IAM();
 
 // lambda
 const asyncAddPermission = promisify(lambda.addPermission.bind(lambda));
+const asyncRemovePermission = promisify(lambda.removePermission.bind(lambda));
 const asyncLambdaDeleteFunction = promisify(lambda.deleteFunction.bind(lambda));
 const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
 const asyncGetFunction = promisify(lambda.getFunction.bind(lambda));
@@ -51,6 +52,7 @@ const asyncListAttachedRolePolicies = promisify(iam.listAttachedRolePolicies.bin
 
 module.exports = {
   asyncAddPermission,
+  asyncRemovePermission,
   asyncPutMethod,
   asyncPutIntegration,
   asyncPutMethodResponse,

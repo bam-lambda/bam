@@ -1,8 +1,13 @@
-const bamSpinner = require('../util/spinner');
 const { deleteApiFromLibraries } = require('../util/fileUtils');
-const { asyncDeleteRestApi } = require('./awsFunctions');
+const { asyncRemovePermission, asyncDeleteRestApi } = require('./awsFunctions');
 
-module.exports = async function deleteApi(resourceName, restApiId, path) {
+module.exports = async function deleteApi(resourceName, restApiId, methodPermissionIds, path) {
+  Object.keys(methodPermissionIds).forEach(async (method) => {
+    const { rootPermissionId, greedyPermissionId } = methodPermissionIds[method];
+    await asyncRemovePermission({ FunctionName: resourceName, StatementId: rootPermissionId });
+    await asyncRemovePermission({ FunctionName: resourceName, StatementId: greedyPermissionId });
+  });
+
   await asyncDeleteRestApi({ restApiId });
   await deleteApiFromLibraries(resourceName, path);
 };

@@ -62,12 +62,27 @@ module.exports = async function deploy(lambdaName, path, options) {
       bamWarn('Lambda deployment aborted');
       return;
     }
+
     const [description] = input;
     const lambdaData = await deployLambda(lambdaName, description, path, roleName);
     if (lambdaData) await writeLambda(lambdaData, path, description);
     if (deployLambdaOnly) return;
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stage);
-    if (restApiId) await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(lambdaName, path, httpMethods, stage);
+
+    const writeParams = [
+      endpoint,
+      methodPermissionIds,
+      lambdaName,
+      restApiId,
+      path,
+    ];
+
+    if (restApiId) await writeApi(...writeParams);
     await deleteStagingDirForLambda(lambdaName, path);
   } catch (err) {
     bamError(err);

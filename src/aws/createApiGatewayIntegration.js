@@ -1,4 +1,3 @@
-const uuid = require('uuid');
 const bamBam = require('../util/bamBam');
 const { readConfig } = require('../util/fileUtils');
 const { asyncGetRegion } = require('../util/getRegion');
@@ -10,7 +9,7 @@ const {
   asyncPutMethodResponse,
 } = require('./awsFunctions');
 
-module.exports = async function createApiGatewayIntegration(httpMethod, resourceId, restApiId, lambdaName, apiPath, path) {
+module.exports = async function createApiGatewayIntegration(httpMethod, resourceId, restApiId, statementId, lambdaName, apiPath, path) {
   const config = await readConfig(path);
   const region = await asyncGetRegion();
   const { accountNumber } = config;
@@ -19,7 +18,7 @@ module.exports = async function createApiGatewayIntegration(httpMethod, resource
   const sourceArn = `arn:aws:execute-api:${region}:${accountNumber}:${restApiId}/*/${httpMethod}${apiPath}`;
   const addPermissionParams = {
     FunctionName: lambdaName,
-    StatementId: uuid.v4(),
+    StatementId: statementId,
     Principal: 'apigateway.amazonaws.com',
     Action: 'lambda:InvokeFunction',
     SourceArn: sourceArn,

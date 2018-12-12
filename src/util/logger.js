@@ -29,9 +29,11 @@ const bamWarn = text => log(bamWarnText(text));
 const bamError = text => log(bamErrorText(text));
 const captitalize = str => `${str[0].toUpperCase()}${str.slice(1)}`;
 
-const msgAfterAction = (resourceType, resourceName, action, modification = 'has been') => (
-  `${captitalize(resourceType)}: "${resourceName}" ${modification} ${action}`
-);
+const msgAfterAction = (resourceType, resourceName, action, modification = 'has been') => {
+  let msg = action === 'created' ? '💥  ' : '';
+  msg += `${captitalize(resourceType)}: "${resourceName}" ${modification} ${action}`;
+  return msg;
+};
 
 const hideCursorAndWriteBamText = (text) => {
   const bamifiedText = bamText(text);

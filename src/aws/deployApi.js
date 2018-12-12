@@ -1,7 +1,6 @@
 const createApiGatewayIntegration = require('./createApiGatewayIntegration');
 const bamBam = require('../util/bamBam');
 const bamSpinner = require('../util/spinner');
-const { readFile } = require('../util/fileUtils');
 const { asyncGetRegion } = require('../util/getRegion');
 
 const {
@@ -67,9 +66,7 @@ module.exports = async function deployApi(resourceName, path, httpMethods, stage
 
     const endpoint = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}`;
 
-    const bamAscii = await readFile(`${__dirname}/../../ascii/bam.txt`, 'utf8');
     bamSpinner.stop();
-    bamLog(bamAscii);
     bamLog(msgAfterAction('endpoint', resourceName, 'created'));
     bamLog(endpoint);
     return { restApiId, endpoint };

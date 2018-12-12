@@ -22,7 +22,6 @@ const asyncListFunctions = promisify(lambda.listFunctions.bind(lambda));
 // api
 const asyncPutMethod = promisify(api.putMethod.bind(api));
 const asyncPutIntegration = promisify(api.putIntegration.bind(api));
-const asyncPutMethodResponse = promisify(api.putMethodResponse.bind(api));
 const asyncDeleteRestApi = promisify(api.deleteRestApi.bind(api));
 const asyncDeleteMethod = promisify(api.deleteMethod.bind(api));
 const asyncCreateApi = promisify(api.createRestApi.bind(api));
@@ -53,7 +52,6 @@ module.exports = {
   asyncAddPermission,
   asyncPutMethod,
   asyncPutIntegration,
-  asyncPutMethodResponse,
   asyncCreateTable,
   asyncCreatePolicy,
   asyncCreateResource,

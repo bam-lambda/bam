@@ -7,7 +7,6 @@ const {
   asyncAddPermission,
   asyncPutMethod,
   asyncPutIntegration,
-  asyncPutMethodResponse,
 } = require('./awsFunctions');
 
 module.exports = async function createApiGatewayIntegration(httpMethod, resourceId, restApiId, lambdaName, apiPath, path) {
@@ -45,13 +44,4 @@ module.exports = async function createApiGatewayIntegration(httpMethod, resource
     uri: `arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${region}:${accountNumber}:function:${lambdaName}/invocations`,
   };
   await asyncPutIntegration(putIntegrationParams);
-
-  // put method response
-  const putMethodResponseParams = {
-    httpMethod,
-    resourceId,
-    restApiId,
-    statusCode: '200',
-  };
-  await asyncPutMethodResponse(putMethodResponseParams);
 };

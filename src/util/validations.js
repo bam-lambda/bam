@@ -34,6 +34,7 @@ const dirOrFileExists = (files, name) => (
 
 const lambdaExistsInCwd = async (name) => {
   const files = await readdir(cwd);
+console.log(files);
   const fileOrDirExists = dirOrFileExists(files, name);
 
   if (fileOrDirExists) {

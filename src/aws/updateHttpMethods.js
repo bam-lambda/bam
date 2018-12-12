@@ -5,7 +5,15 @@ const deleteApiGatewayIntegration = require('./deleteApiGatewayIntegration');
 const { asyncGetRegion } = require('../util/getRegion');
 const { readApisLibrary } = require('../util/fileUtils');
 
-module.exports = async function updateHttpMethods(rootResource, greedyResource, lambdaName, restApiId, addMethods, removeMethods, path) {
+module.exports = async function updateHttpMethods({
+  rootResource,
+  greedyResource,
+  lambdaName,
+  restApiId,
+  addMethods,
+  removeMethods,
+  path,
+}) {
   const rootResourceId = rootResource.id;
   const rootExistingMethods = Object.keys(rootResource.resourceMethods || {});
   const greedyPathResourceId = greedyResource.id;
@@ -26,12 +34,33 @@ module.exports = async function updateHttpMethods(rootResource, greedyResource, 
       };
 
       if (!rootExistingMethods.includes(httpMethod)) {
-        await createApiGatewayIntegration(httpMethod, rootResourceId, restApiId, rootPermissionId, lambdaName, rootPath, path);
+        // root path resource
+        const rootIntegrationParams = {
+          httpMethod,
+          restApiId,
+          lambdaName,
+          path,
+          resourceId: rootResourceId,
+          statementId: rootPermissionId,
+          apiPath: rootPath,
+        };
+        await createApiGatewayIntegration(rootIntegrationParams);
         rootExistingMethods.push(httpMethod);
       }
 
+      // greedy path resource
+      const greedyIntegrationParams = {
+        httpMethod,
+        restApiId,
+        lambdaName,
+        path,
+        resourceId: greedyPathResourceId,
+        statementId: greedyPermissionId,
+        apiPath: greedyPath,
+      };
+
       if (!greedyPathExistingMethods.includes(httpMethod)) {
-        await createApiGatewayIntegration(httpMethod, greedyPathResourceId, restApiId, greedyPermissionId, lambdaName, greedyPath, path);
+        await createApiGatewayIntegration(greedyIntegrationParams);
         greedyPathExistingMethods.push(httpMethod);
       }
     }

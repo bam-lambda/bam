@@ -85,15 +85,18 @@ module.exports = async function redeploy(lambdaName, path, options) {
 
   const deployIntegrations = async () => {
     const rootResource = api.resources.find(res => res.path === '/');
-    const greedyPathResource = api.resources.find(res => res.path === '/{proxy+}');
-
-    methodPermissionIds = await updateHttpMethods(rootResource,
-      greedyPathResource,
+    const greedyResource = api.resources.find(res => res.path === '/{proxy+}');
+    const updateParams = {
+      rootResource,
+      greedyResource,
       lambdaName,
-      api.restApiId,
-      api.addMethods,
-      api.removeMethods,
-      path);
+      path,
+      restApiId: api.restApiId,
+      addMethods: api.addMethods,
+      removeMethods: api.removeMethods,
+    };
+
+    methodPermissionIds = await updateHttpMethods(updateParams);
 
     await bamBam(asyncCreateDeployment, {
       asyncFuncParams: [{ restApiId: api.restApiId, stageName }],

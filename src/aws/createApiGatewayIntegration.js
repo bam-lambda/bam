@@ -9,7 +9,15 @@ const {
   asyncPutMethodResponse,
 } = require('./awsFunctions');
 
-module.exports = async function createApiGatewayIntegration(httpMethod, resourceId, restApiId, statementId, lambdaName, apiPath, path) {
+module.exports = async function createApiGatewayIntegration({
+  httpMethod,
+  resourceId,
+  restApiId,
+  statementId,
+  lambdaName,
+  apiPath,
+  path,
+}) {
   const config = await readConfig(path);
   const region = await asyncGetRegion();
   const { accountNumber } = config;

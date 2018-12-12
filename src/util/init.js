@@ -7,7 +7,7 @@ const databaseBamRole = 'databaseBamRole';
 module.exports = async function init(roleName, path) {
   await setupBamDirAndFiles(roleName, path);
   await createBamRole(roleName);
-  const isInitialized = doesRoleExist(roleName);
+  const isInitialized = await doesRoleExist(roleName);
   await createDatabaseBamRole(databaseBamRole, path);
   return !!isInitialized;
 };

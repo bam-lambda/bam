@@ -82,9 +82,15 @@ describe('bam deploy api', () => {
   test('Response is 200 when hitting endpoint from apis.json', async () => {
     let responseStatus;
     const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(lambdaName, path, httpMethods, stageName);
+
     await writeLambda(lambdaData, path, lambdaDescription);
-    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+    await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
 
     try {
       await delay(60000);
@@ -99,9 +105,14 @@ describe('bam deploy api', () => {
 
   test('Api endpoint exists on AWS', async () => {
     const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(lambdaName, path, httpMethods, stageName);
+
     await writeLambda(lambdaData, path, lambdaDescription);
-    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+    await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
 
     const apiExists = await doesApiExist(restApiId);
     expect(apiExists).toBe(true);
@@ -111,9 +122,14 @@ describe('bam deploy api', () => {
     const testLambdaWithQueryParams = await readFile(`${path}/templates/testLambdaWithQueryParams.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithQueryParams);
     const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(lambdaName, path, httpMethods, stageName);
+
     await writeLambda(lambdaData, path, lambdaDescription);
-    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+    await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
 
     const url = `${endpoint}?name=John`;
     let responseBody;
@@ -134,9 +150,14 @@ describe('bam deploy api', () => {
     const testLambdaForPostMethod = await readFile(`${path}/templates/testLambdaForPostMethod.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaForPostMethod);
     const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, ['POST'], stageName);
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(lambdaName, path, ['POST'], stageName);
+
     await writeLambda(lambdaData, path, lambdaDescription);
-    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+    await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
 
     const urlParts = endpoint.split('//')[1].split('/');
     const options = {

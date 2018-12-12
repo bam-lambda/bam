@@ -57,9 +57,14 @@ describe('bam get', async () => {
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
     const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(lambdaName, path, httpMethods, stageName);
+
     await writeLambda(lambdaData, path, lambdaDescription);
-    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+    await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
     await unlink(`${cwd}/${lambdaName}.js`);
     await get(lambdaName, path);
     const lambdaNameDirExists = await exists(`${cwd}/${lambdaName}`);
@@ -72,9 +77,14 @@ describe('bam get', async () => {
     const testLambdaFile = await readFile('./test/templates/testLambdaGet.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
     const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(lambdaName, path, httpMethods, stageName);
+
     await writeLambda(lambdaData, path, lambdaDescription);
-    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+    await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
     await unlink(`${cwd}/${lambdaName}.js`);
     await get(lambdaName, path);
     const lambdaFile = await readFile(`${cwd}/${lambdaName}/${lambdaName}.js`, 'utf8');
@@ -89,9 +99,14 @@ describe('bam get', async () => {
     const testLambdaFile = await readFile('./test/templates/testLambdaWithDependencies.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
     const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(lambdaName, path, httpMethods, stageName);
+
     await writeLambda(lambdaData, path, lambdaDescription);
-    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+    await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
     await unlink(`${cwd}/${lambdaName}.js`);
     await get(lambdaName, path);
     const lambdaNameDirContainsNodeModules = await exists(`${cwd}/${lambdaName}/node_modules`);

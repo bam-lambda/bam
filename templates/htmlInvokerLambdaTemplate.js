@@ -1,3 +1,7 @@
+// Welcome to your BAM! lambda!
+
+// all require statements for npm packages go here
+
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const fs = require('fs');

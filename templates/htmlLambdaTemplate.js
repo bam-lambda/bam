@@ -1,3 +1,7 @@
+// Welcome to your BAM! lambda!
+
+// all require statements for npm packages go here
+
 const fs = require('fs');
 const { promisify } = require('util');
 

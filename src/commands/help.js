@@ -34,7 +34,7 @@ const commandDetails = {
     hasResource: true,
   },
   create: {
-    description: 'updates existing lambda and endpoint',
+    description: 'creates local file (or directory) based on template',
     options: [
       { name: 'html', description: 'creates local directory containing index.html, main.css, and [resourceName].js' },
       { name: 'invoker', description: 'creates local file/directory with [resourceName].js templated to invoke another lambda' },

@@ -89,7 +89,10 @@ module.exports = async function destroy(resourceName, path, options) {
   }
 
   bamSpinner.stop();
-  if (warningMsg) {
+  if (warningMsg && deletionMsg) {
+    bamLog(deletionMsg);
+    bamWarn(warningMsg);
+  } else if (warningMsg) {
     bamWarn(warningMsg);
   } else {
     bamLog(deletionMsg);

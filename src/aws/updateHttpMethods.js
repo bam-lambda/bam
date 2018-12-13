@@ -22,7 +22,6 @@ module.exports = async function updateHttpMethods({
   const greedyPath = '/*';
   const methodPermissionIds = {};
 
-  // add specified methods to API Gateway
   const addHttpMethodIntegrations = async () => {
     for (let i = 0; i < addMethods.length; i += 1) {
       const httpMethod = addMethods[i];
@@ -34,7 +33,6 @@ module.exports = async function updateHttpMethods({
       };
 
       if (!rootExistingMethods.includes(httpMethod)) {
-        // root path resource
         const rootIntegrationParams = {
           httpMethod,
           restApiId,
@@ -48,7 +46,6 @@ module.exports = async function updateHttpMethods({
         rootExistingMethods.push(httpMethod);
       }
 
-      // greedy path resource
       const greedyIntegrationParams = {
         httpMethod,
         restApiId,
@@ -66,7 +63,6 @@ module.exports = async function updateHttpMethods({
     }
   };
 
-  // remove specified methods except for GET
   const removeHttpMethodIntegrations = async () => {
     const region = await asyncGetRegion();
     const apis = await readApisLibrary(path);
@@ -75,14 +71,25 @@ module.exports = async function updateHttpMethods({
 
     for (let i = 0; i < removeMethods.length; i += 1) {
       const httpMethod = removeMethods[i];
-      const rootStatementId = existingMethodPermissionIds[httpMethod].rootPermissionId;
-      const greedyStatementId = existingMethodPermissionIds[httpMethod].greedyPermissionId;
+      let rootStatementId;
+      let greedyStatementId;
 
-      if (rootExistingMethods.includes(httpMethod)) {
+      if (Object.keys(methodPermissionIds).includes(httpMethod)) {
+        rootStatementId = methodPermissionIds[httpMethod].rootPermissionId;
+        greedyStatementId = methodPermissionIds[httpMethod].greedyPermissionId;
+        delete methodPermissionIds[httpMethod];
+      }
+
+      if (Object.keys(existingMethodPermissionIds).includes(httpMethod)) {
+        rootStatementId = existingMethodPermissionIds[httpMethod].rootPermissionId;
+        greedyStatementId = existingMethodPermissionIds[httpMethod].greedyPermissionId;
+      }
+
+      if (rootStatementId) {
         await deleteApiGatewayIntegration(lambdaName, httpMethod, rootResourceId, restApiId, rootStatementId);
       }
 
-      if (greedyPathExistingMethods.includes(httpMethod)) {
+      if (greedyStatementId) {
         await deleteApiGatewayIntegration(lambdaName, httpMethod, greedyPathResourceId, restApiId, greedyStatementId);
       }
     }

@@ -1,5 +1,6 @@
-module.exports = function configTemplate(roleName) {
+module.exports = function configTemplate(accountNumber, roleName) {
   return {
+    accountNumber,
     role: roleName,
   };
 };

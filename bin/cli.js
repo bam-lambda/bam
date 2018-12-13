@@ -43,7 +43,7 @@ const homedir = os.homedir();
   } else if (command === 'version' || command === '-v') {
     version();
   } else if (command === 'help' || command === '-h' || command === 'man') {
-    help();
+    help(options);
   } else if (command === 'config') {
     config();
   } else {

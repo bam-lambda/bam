@@ -2,7 +2,7 @@ const deleteApi = require('../aws/deleteApi');
 const deleteAwsLambda = require('../aws/deleteLambda');
 const { asyncGetRegion } = require('../util/getRegion');
 const bamSpinner = require('../util/spinner');
-const { bamLog, bamWarn } = require('../util/logger');
+const { bamLog, msgAfterAction, bamWarn } = require('../util/logger');
 const checkForOptionType = require('../util/checkForOptionType');
 const deleteDbTable = require('../aws/deleteDbTable');
 const {
@@ -28,16 +28,12 @@ module.exports = async function destroy(resourceName, path, options) {
   let deletionMsg = '';
   let warningMsg = '';
 
-  const getDeletionMessage = resourceType => (
-    `${resourceType}: "${resourceName}" has been deleted. `
-  );
-
   const deleteTable = async () => {
     const tableExists = await doesTableExist(resourceName);
     if (tableExists) {
       await deleteDbTable(resourceName);
       await deleteTableFromLibrary(resourceName, path);
-      deletionMsg += getDeletionMessage('Table');
+      deletionMsg += msgAfterAction('table', resourceName, 'deleted');
       return;
     }
     warningMsg += `"${resourceName}" table does not exist on AWS. `;
@@ -54,7 +50,7 @@ module.exports = async function destroy(resourceName, path, options) {
     if (endpointExists) {
       await deleteApi(resourceName, restApiId, methodPermissionIds, path);
       await deleteApiFromLibraries(resourceName, path);
-      deletionMsg += getDeletionMessage('Endpoint');
+      deletionMsg += msgAfterAction('endpoint', resourceName, 'deleted');
       return;
     }
     warningMsg += `"${resourceName}" endpoint does not exist on AWS. `;
@@ -65,7 +61,7 @@ module.exports = async function destroy(resourceName, path, options) {
     if (lambdaExists) {
       await deleteAwsLambda(resourceName);
       await deleteLambdaFromLibrary(resourceName, path);
-      deletionMsg += getDeletionMessage('Lambda');
+      deletionMsg += msgAfterAction('lambda', resourceName, 'deleted');
       return;
     }
     warningMsg += `"${resourceName}" lambda does not exist on AWS. `;

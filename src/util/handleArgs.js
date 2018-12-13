@@ -32,7 +32,7 @@ module.exports = function handleArgs(args, command) {
     [resourceName, ...options] = args;
     options = getOptions(options);
   } else {
-    options = getOptions([args[0]]);
+    options = getOptions(args);
   }
 
   return {

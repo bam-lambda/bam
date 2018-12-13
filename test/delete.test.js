@@ -22,8 +22,6 @@ const {
   writeApi,
   readApisLibrary,
   readLambdasLibrary,
-  getStagingPath,
-  exists,
   getBamPath,
 } = require('../src/util/fileUtils');
 
@@ -34,7 +32,6 @@ const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecut
 const otherTestPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 const path = './test';
 const bamPath = getBamPath(path);
-const stagingPath = getStagingPath(path);
 const cwd = process.cwd();
 const stageName = 'bam';
 const httpMethods = ['GET'];

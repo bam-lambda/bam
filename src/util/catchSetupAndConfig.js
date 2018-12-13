@@ -29,14 +29,7 @@ const commands = [
 const commandIsNotValid = command => !commands.includes(command);
 
 module.exports = async function catchSetupAndConfig(path, command, options) {
-  if (commandIsNotValid(command) || ['help', 'version'].includes(command)) return true;
-
-  const awsConfigExistsWithRegionSet = getRegion();
-  if (!awsConfigExistsWithRegionSet) {
-    bamWarn('You have not set up your AWS credentials.  For instructions, please visit:');
-    log('https://docs.aws.amazon.com/cli/latest/topic/config-vars.html');
-    return false;
-  }
+  if (commandIsNotValid(command) || ['help', 'version', 'create'].includes(command)) return true;
 
   const bamPath = getBamPath(path);
   const bamDirExists = await exists(bamPath);
@@ -44,6 +37,13 @@ module.exports = async function catchSetupAndConfig(path, command, options) {
     const isInitialized = await init(bamRole, path);
     // don't continue if init incomplete, don't config twice
     if (!isInitialized || command === 'config') return false;
+  }
+
+  const awsConfigExistsWithRegionSet = getRegion();
+  if (!awsConfigExistsWithRegionSet) {
+    bamWarn('You have not set up your AWS credentials.  For instructions, please visit:');
+    log('https://docs.aws.amazon.com/cli/latest/topic/config-vars.html');
+    return false;
   }
 
   const configured = await isConfigured(path);

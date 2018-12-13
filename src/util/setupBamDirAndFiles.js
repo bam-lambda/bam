@@ -1,4 +1,5 @@
 const configTemplate = require('../../templates/configTemplate');
+const { asyncGetCallerIdentity } = require('../aws/awsFunctions');
 
 const {
   createDirectory,
@@ -17,7 +18,8 @@ const startingTemplate = regions.reduce((acc, region) => {
 }, {});
 
 module.exports = async function setupBamDirAndFiles(roleName, path) {
-  const configJSON = configTemplate(roleName);
+  const accountNumber = (await asyncGetCallerIdentity()).Account;
+  const configJSON = configTemplate(accountNumber, roleName);
   const bamPath = getBamPath(path);
   await createDirectory('.bam', path);
   await createDirectory('staging', bamPath);

@@ -138,6 +138,7 @@ module.exports = function help(optionsObj) {
     log('Options:');
     log(`${optionsMsg}\n`);
   } else {
-    log('Pass in flags for any command (--commandName) to see options for that command\n');
+    log('Pass in flags for any command (--commandName) to see options for that command');
+    log('or --all to see options for all commands\n');
   }
 };

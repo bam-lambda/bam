@@ -73,14 +73,20 @@ module.exports = async function list(path, options) {
   const dbFlag = checkForOptionType(options, 'db');
   const lambdaFlag = checkForOptionType(options, 'lambda');
 
-  if (lambdaFlag) {
+  const logAll = () => {
+    logBamFunctions(bamFunctionsList);
+    logAwsFunctions(awsFunctionsList);
+    logBamTables(bamTablesList);
+  };
+
+  if (lambdaFlag && dbFlag) {
+    logAll();
+  } else if (lambdaFlag) {
     logBamFunctions(bamFunctionsList);
     logAwsFunctions(awsFunctionsList);
   } else if (dbFlag) {
     logBamTables(bamTablesList);
   } else {
-    logBamFunctions(bamFunctionsList);
-    logAwsFunctions(awsFunctionsList);
-    logBamTables(bamTablesList);
+    logAll();
   }
 };

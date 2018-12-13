@@ -58,7 +58,7 @@ const commandDetails = {
   get: {
     description: 'pulls lambda code from AWS into a local directory',
     options: [],
-    kasResource: true,
+    hasResource: true,
   },
   list: {
     description: 'lists lambdas and tables deployed with BAM!',

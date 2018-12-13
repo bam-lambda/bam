@@ -8,7 +8,7 @@ const { readApisLibrary } = require('../util/fileUtils');
 module.exports = async function updateHttpMethods({
   rootResource,
   greedyResource,
-  lambdaName,
+  resourceName,
   restApiId,
   addMethods,
   removeMethods,
@@ -45,7 +45,7 @@ module.exports = async function updateHttpMethods({
         const rootIntegrationParams = {
           httpMethod,
           restApiId,
-          lambdaName,
+          resourceName,
           path,
           resourceId: rootResourceId,
           statementId: rootPermissionId,
@@ -58,7 +58,7 @@ module.exports = async function updateHttpMethods({
       const greedyIntegrationParams = {
         httpMethod,
         restApiId,
-        lambdaName,
+        resourceName,
         path,
         resourceId: greedyPathResourceId,
         statementId: greedyPermissionId,
@@ -75,7 +75,7 @@ module.exports = async function updateHttpMethods({
   const removeHttpMethodIntegrations = async () => {
     const region = await asyncGetRegion();
     const apis = await readApisLibrary(path);
-    const regionalApi = apis[region][lambdaName];
+    const regionalApi = apis[region][resourceName];
     const existingMethodPermissionIds = regionalApi.methodPermissionIds;
 
     for (let i = 0; i < filteredRemoveMethods.length; i += 1) {
@@ -87,9 +87,9 @@ module.exports = async function updateHttpMethods({
         rootStatementId = existingMethodPermissionIds[httpMethod].rootPermissionId;
         greedyStatementId = existingMethodPermissionIds[httpMethod].greedyPermissionId;
 
-        await deleteApiGatewayIntegration(lambdaName, httpMethod, rootResourceId, restApiId, rootStatementId);
+        await deleteApiGatewayIntegration(resourceName, httpMethod, rootResourceId, restApiId, rootStatementId);
 
-        await deleteApiGatewayIntegration(lambdaName, httpMethod, greedyPathResourceId, restApiId, greedyStatementId);
+        await deleteApiGatewayIntegration(resourceName, httpMethod, greedyPathResourceId, restApiId, greedyStatementId);
       }
     }
   };

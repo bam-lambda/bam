@@ -79,13 +79,13 @@ const roleExistsOnAws = async (name) => {
   return status;
 };
 
-const methodsAreValid = ({ addMethods = [], removeMethods = [] }) => {
+const methodsAreValid = ({ addMethods = [], removeMethods = [] } = {}) => {
   const methods = addMethods.concat(removeMethods);
   const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'ANY'];
   return methods.every(method => validMethods.includes(method));
 };
 
-const removingLastMethod = ({ addMethods = [], removeMethods = [], existingMethods = [] }) => {
+const removingLastMethod = ({ addMethods = [], removeMethods = [], existingMethods = [] } = {}) => {
   const result = existingMethods.concat(addMethods).filter(m => !removeMethods.includes(m));
   return result.length === 0;
 };

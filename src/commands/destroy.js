@@ -36,7 +36,7 @@ module.exports = async function destroy(resourceName, path, options) {
       deletionMsg += msgAfterAction('table', resourceName, 'deleted');
       return;
     }
-    warningMsg += `"${resourceName}" table does not exist on AWS. `;
+    warningMsg += msgAfterAction('table', resourceName, 'exist', 'does not');
   };
 
   const deleteEndpoint = async () => {
@@ -53,7 +53,7 @@ module.exports = async function destroy(resourceName, path, options) {
       deletionMsg += msgAfterAction('endpoint', resourceName, 'deleted');
       return;
     }
-    warningMsg += `"${resourceName}" endpoint does not exist on AWS. `;
+    warningMsg += msgAfterAction('endpoint', resourceName, 'exist', 'does not');
   };
 
   const deleteLambda = async () => {
@@ -64,7 +64,7 @@ module.exports = async function destroy(resourceName, path, options) {
       deletionMsg += msgAfterAction('lambda', resourceName, 'deleted');
       return;
     }
-    warningMsg += `"${resourceName}" lambda does not exist on AWS. `;
+    warningMsg += msgAfterAction('lambda', resourceName, 'exist', 'does not');
   };
 
   if (destroyDb) {

@@ -55,7 +55,7 @@ module.exports = async function deployApi(resourceName, path, httpMethods, stage
       const rootIntegrationParams = {
         httpMethod,
         restApiId,
-        lambdaName,
+        resourceName,
         path,
         resourceId: rootResourceId,
         statementId: rootPermissionId,
@@ -67,7 +67,7 @@ module.exports = async function deployApi(resourceName, path, httpMethods, stage
       const greedyIntegrationParams = {
         httpMethod,
         restApiId,
-        lambdaName,
+        resourceName,
         path,
         resourceId: greedyPathResourceId,
         statementId: greedyPermissionId,

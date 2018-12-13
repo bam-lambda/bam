@@ -36,6 +36,7 @@ const hideCursorAndWriteBamText = (text) => {
 module.exports = {
   log,
   logInColor,
+  getStyledText,
   bamWrite,
   bamLog,
   bamWarn,

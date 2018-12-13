@@ -17,8 +17,13 @@ module.exports = function help(optionsObj) {
   const optionsCommands = getOptionsCommands(optionsObj);
   if (optionsCommands) {
     const optionsMsg = optionsCommands.map(formatCommandOptions).join(vertPadding);
-    log('Options:');
-    log(`${optionsMsg}\n`);
+
+    if (optionsCommands.length === 0) {
+      log('There are no options for this command\n');
+    } else {
+      log('Options:');
+      log(`${optionsMsg}\n`);
+    }
   } else {
     log('Pass in flags for any command (--commandName) to see options for that command');
     log('Pass in --all to see options for all commands\n');

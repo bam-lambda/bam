@@ -1,8 +1,6 @@
-const { writeFile, readFile } = require('../util/fileUtils');
-const { bamWarn, bamLog } = require('../util/logger');
+const { bamWarn } = require('../util/logger');
 const { validateLambdaCreation } = require('../util/validations');
-const { asyncGetRegion } = require('../util/getRegion');
-const { 
+const {
   createLocalLambdaFile,
   createLocalLambdaDirectory,
 } = require('../util/createLocalLambda');
@@ -15,9 +13,9 @@ module.exports = async function create(lambdaName, options) {
     return;
   }
 
-  if (options.dir) { // TODO pick more descriptive flag
+  if (options.html) { // TODO pick more descriptive flag
     await createLocalLambdaDirectory(lambdaName, options);
-  } else {  
+  } else {
     await createLocalLambdaFile(lambdaName, options);
   }
 };

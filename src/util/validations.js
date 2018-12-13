@@ -93,13 +93,13 @@ const removingLastMethod = ({ addMethods = [], removeMethods = [], existingMetho
 const removeMethodsDeployedPreviouslyWithBam = async ({
   addMethods = [],
   removeMethods = [],
-  lambdaName,
+  resourceName,
   path,
 }) => {
   const filteredRemoveMethods = removeMethods.filter(m => !addMethods.includes(m));
   const region = await asyncGetRegion();
   const apis = await readApisLibrary(path);
-  const api = apis[region][lambdaName];
+  const api = apis[region][resourceName];
   const existingBamMethods = api ? Object.keys(api.methodPermissionIds) : [];
   const result = filteredRemoveMethods.filter(m => !existingBamMethods.includes(m));
   return result.length === 0;

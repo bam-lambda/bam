@@ -24,7 +24,7 @@ const {
 const stage = 'bam';
 const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
 
-module.exports = async function deploy(lambdaName, path, options) {
+module.exports = async function deploy(resourceName, path, options) {
   const deployLambdaOnly = checkForOptionType(options, 'lambda');
   const permitDb = checkForOptionType(options, 'db');
 
@@ -40,7 +40,7 @@ module.exports = async function deploy(lambdaName, path, options) {
     roleName = userRole;
   }
 
-  const invalidLambdaMsg = await validateLambdaDeployment(lambdaName);
+  const invalidLambdaMsg = await validateLambdaDeployment(resourceName);
   if (invalidLambdaMsg) {
     bamWarn(invalidLambdaMsg);
     return;
@@ -51,7 +51,7 @@ module.exports = async function deploy(lambdaName, path, options) {
 
   const validateMethodsParams = {
     addMethods: httpMethods,
-    lambdaName,
+    resourceName,
     path,
   };
 
@@ -71,12 +71,12 @@ module.exports = async function deploy(lambdaName, path, options) {
   try {
     const input = await getUserInput([question]);
     if (input === undefined) {
-      bamWarn(msgAfterAction('lambda', lambdaName, 'aborted', 'creation has been'));
+      bamWarn(msgAfterAction('lambda', resourceName, 'aborted', 'creation has been'));
       return;
     }
 
     const [description] = input;
-    const lambdaData = await deployLambda(lambdaName, description, path, roleName);
+    const lambdaData = await deployLambda(resourceName, description, path, roleName);
     if (lambdaData) await writeLambda(lambdaData, path, description);
     if (deployLambdaOnly) return;
 
@@ -84,18 +84,18 @@ module.exports = async function deploy(lambdaName, path, options) {
       restApiId,
       endpoint,
       methodPermissionIds,
-    } = await deployApi(lambdaName, path, httpMethods, stage);
+    } = await deployApi(resourceName, path, httpMethods, stage);
 
     const writeParams = [
       endpoint,
       methodPermissionIds,
-      lambdaName,
+      resourceName,
       restApiId,
       path,
     ];
 
     if (restApiId) await writeApi(...writeParams);
-    await deleteStagingDirForLambda(lambdaName, path);
+    await deleteStagingDirForLambda(resourceName, path);
   } catch (err) {
     bamError(err);
   }

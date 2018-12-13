@@ -1,4 +1,3 @@
-const bamSpinner = require('../util/spinner');
 const { deleteApiFromLibraries } = require('../util/fileUtils');
 const { asyncDeleteRestApi } = require('./awsFunctions');
 

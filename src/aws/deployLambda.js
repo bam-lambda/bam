@@ -6,6 +6,7 @@ const bamSpinner = require('../util/spinner');
 const {
   bamLog,
   bamWarn,
+  msgAfterAction,
 } = require('../util/logger');
 const {
   createDirectory,
@@ -75,10 +76,10 @@ module.exports = async function deployLambda(lambdaName, description, path, role
 
   if (data) {
     bamSpinner.stop();
-    bamLog(`Lambda "${lambdaName}" has been created`);
+    bamLog(msgAfterAction('lambda', lambdaName, 'created'));
     return data;
   }
 
   bamSpinner.stop();
-  bamWarn(`Lambda "${lambdaName}" already exists`);
+  bamWarn(msgAfterAction('lambda', lambdaName, 'exists', 'already'));
 };

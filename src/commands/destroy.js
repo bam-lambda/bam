@@ -3,7 +3,7 @@ const deleteAwsLambda = require('../aws/deleteLambda');
 const bamBam = require('../util/bamBam');
 const { asyncGetRegion } = require('../util/getRegion');
 const bamSpinner = require('../util/spinner');
-const { bamLog, bamWarn } = require('../util/logger');
+const { bamLog, msgAfterAction, bamWarn } = require('../util/logger');
 const checkForOptionType = require('../util/checkForOptionType');
 const deleteDbTable = require('../aws/deleteDbTable');
 const {
@@ -27,14 +27,6 @@ module.exports = async function destroy(resourceName, path, options) {
   const destroyEndpoint = checkForOptionType(options, 'endpoint');
   const region = await asyncGetRegion();
   let deletionMsg = '';
-
-  const getDeletionMessage = (resourceType) => {
-    if (resourceType === 'both') {
-      return `Lambda and endpoint "${resourceName}" have been deleted`;
-    }
-
-    return `${resourceType}: "${resourceName}" has been deleted`;
-  };
 
   const deleteTable = async () => {
     const tableExists = await doesTableExist(resourceName);
@@ -74,17 +66,18 @@ module.exports = async function destroy(resourceName, path, options) {
 
   if (destroyDb) {
     await deleteTable();
-    deletionMsg = getDeletionMessage('Table');
+    deletionMsg = msgAfterAction('table', resourceName, 'deleted');
   } else if (destroyLambda) {
     await deleteLambda();
-    deletionMsg = getDeletionMessage('Lambda');
+    deletionMsg = msgAfterAction('lambda', resourceName, 'deleted');
   } else if (destroyEndpoint) {
     await deleteEndpoint();
-    deletionMsg = getDeletionMessage('Endpoint');
+    deletionMsg = msgAfterAction('endpoint', resourceName, 'deleted');
   } else {
     await deleteEndpoint();
+    deletionMsg = msgAfterAction('endpoint', resourceName, 'deleted');
     await deleteLambda();
-    deletionMsg = getDeletionMessage('both');
+    deletionMsg += `\n${msgAfterAction('lambda', resourceName, 'deleted')}`;
   }
 
   bamSpinner.stop();

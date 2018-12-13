@@ -1,7 +1,6 @@
 const createApiGatewayIntegration = require('./createApiGatewayIntegration');
 const bamBam = require('../util/bamBam');
 const bamSpinner = require('../util/spinner');
-const { readFile } = require('../util/fileUtils');
 const { asyncGetRegion } = require('../util/getRegion');
 
 const {
@@ -13,17 +12,18 @@ const {
 
 const {
   bamLog,
+  msgAfterAction,
   bamError,
 } = require('../util/logger');
 
-module.exports = async function deployApi(lambdaName, path, httpMethods, stageName) {
+module.exports = async function deployApi(resourceName, path, httpMethods, stageName) {
   const region = await asyncGetRegion();
   bamSpinner.start();
 
   // deploy sequence:
   try {
     // create rest api
-    const restApiId = (await asyncCreateApi({ name: lambdaName })).id;
+    const restApiId = (await asyncCreateApi({ name: resourceName })).id;
 
     // get root resource
     const rootResourceId = (await asyncGetResources({ restApiId })).items[0].id;
@@ -46,14 +46,14 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
       await createApiGatewayIntegration(httpMethod,
         rootResourceId,
         restApiId,
-        lambdaName,
+        resourceName,
         rootPath,
         path);
 
       // greedy path
       await createApiGatewayIntegration(httpMethod,
         greedyPathResourceId, restApiId,
-        lambdaName,
+        resourceName,
         greedyPath,
         path);
     }
@@ -66,10 +66,8 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
 
     const endpoint = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}`;
 
-    const bamAscii = await readFile(`${__dirname}/../../ascii/bam.txt`, 'utf8');
     bamSpinner.stop();
-    bamLog(bamAscii);
-    bamLog('API Gateway endpoint has been deployed:');
+    bamLog(msgAfterAction('endpoint', resourceName, 'created'));
     bamLog(endpoint);
     return { restApiId, endpoint };
   } catch (err) {

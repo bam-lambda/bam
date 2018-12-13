@@ -1,3 +1,5 @@
+const uuid = require('uuid');
+
 const createApiGatewayIntegration = require('./createApiGatewayIntegration');
 const bamBam = require('../util/bamBam');
 const bamSpinner = require('../util/spinner');
@@ -37,25 +39,41 @@ module.exports = async function deployApi(resourceName, path, httpMethods, stage
     // create greedy path resource to allow path params
     const greedyPathResourceId = (await asyncCreateResource(createResourceParams)).id;
 
+    const methodPermissionIds = {};
     for (let i = 0; i < httpMethods.length; i += 1) {
       const httpMethod = httpMethods[i];
       const rootPath = '/';
       const greedyPath = '/*';
+      const rootPermissionId = uuid.v4();
+      const greedyPermissionId = uuid.v4();
+      methodPermissionIds[httpMethod] = {
+        rootPermissionId,
+        greedyPermissionId,
+      };
 
       // root resource
-      await createApiGatewayIntegration(httpMethod,
-        rootResourceId,
+      const rootIntegrationParams = {
+        httpMethod,
         restApiId,
-        resourceName,
-        rootPath,
-        path);
+        lambdaName,
+        path,
+        resourceId: rootResourceId,
+        statementId: rootPermissionId,
+        apiPath: rootPath,
+      };
+      await createApiGatewayIntegration(rootIntegrationParams);
 
       // greedy path
-      await createApiGatewayIntegration(httpMethod,
-        greedyPathResourceId, restApiId,
-        resourceName,
-        greedyPath,
-        path);
+      const greedyIntegrationParams = {
+        httpMethod,
+        restApiId,
+        lambdaName,
+        path,
+        resourceId: greedyPathResourceId,
+        statementId: greedyPermissionId,
+        apiPath: greedyPath,
+      };
+      await createApiGatewayIntegration(greedyIntegrationParams);
     }
 
     // create deployment
@@ -69,7 +87,12 @@ module.exports = async function deployApi(resourceName, path, httpMethods, stage
     bamSpinner.stop();
     bamLog(msgAfterAction('endpoint', resourceName, 'created'));
     bamLog(endpoint);
-    return { restApiId, endpoint };
+
+    return {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    };
   } catch (err) {
     bamSpinner.stop();
     bamError(err);

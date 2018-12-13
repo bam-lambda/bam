@@ -1,3 +1,4 @@
+const { distinctElements } = require('./fileUtils');
 const { msgAfterAction } = require('./logger');
 
 const getInvalidMethods = (data) => {
@@ -20,9 +21,10 @@ const customizeLambdaWarnings = (name) => {
   return warningMessages;
 };
 
-const customizeApiWarnings = (resourceData) => {
+const customizeApiWarnings = ({ addMethods = [], removeMethods = [] }) => {
   const warningMessages = {
-    methodsAreInvalid: `Invalid http method(s): "${getInvalidMethods(resourceData).join(', ')}"`,
+    cannotRemoveMethodMadeInConsole: `One or more methods were not added with BAM! initially and cannot be removed: ${removeMethods.join(' ')}.  Consider using "bam list" to see which methods can be removed.`,
+    methodsAreInvalid: `Invalid http method(s): "${getInvalidMethods(distinctElements(addMethods.concat(removeMethods))).join(', ')}"`,
     willRemoveAllMethods: 'Cannot delete all methods connected to this endpoint.  Please consider using bam delete',
   };
   return warningMessages;

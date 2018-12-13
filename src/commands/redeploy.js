@@ -36,6 +36,7 @@ const {
 const stageName = 'bam';
 
 module.exports = async function redeploy(lambdaName, path, options) {
+  let methodPermissionIds = {};
   const region = await asyncGetRegion();
   const api = {
     restApiId: undefined,
@@ -78,7 +79,6 @@ module.exports = async function redeploy(lambdaName, path, options) {
       addMethods.push('GET');
     }
 
-
     api.addMethods = addMethods;
     api.removeMethods = removeMethods;
     api.existingMethods = existingMethods;
@@ -86,24 +86,19 @@ module.exports = async function redeploy(lambdaName, path, options) {
 
   const deployIntegrations = async () => {
     const rootResource = api.resources.find(res => res.path === '/');
-    const greedyPathResource = api.resources.find(res => res.path === '/{proxy+}');
-    const rootPath = '/';
-    const greedyPath = '/*';
+    const greedyResource = api.resources.find(res => res.path === '/{proxy+}');
+    const updateParams = {
+      rootResource,
+      greedyResource,
+      lambdaName,
+      path,
+      restApiId: api.restApiId,
+      addMethods: api.addMethods,
+      removeMethods: api.removeMethods,
+    };
 
-    await updateHttpMethods(rootResource,
-      lambdaName,
-      api.restApiId,
-      api.addMethods,
-      api.removeMethods,
-      rootPath,
-      path);
-    await updateHttpMethods(greedyPathResource,
-      lambdaName,
-      api.restApiId,
-      api.addMethods,
-      api.removeMethods,
-      greedyPath,
-      path);
+    methodPermissionIds = await updateHttpMethods(updateParams);
+
     await bamBam(asyncCreateDeployment, {
       asyncFuncParams: [{ restApiId: api.restApiId, stageName }],
       retryError: 'TooManyRequestsException',
@@ -132,35 +127,40 @@ module.exports = async function redeploy(lambdaName, path, options) {
     if (updatedApiData) {
       const { restApiId, endpoint } = updatedApiData;
 
-      await writeApi(endpoint, api.addMethods, lambdaName, restApiId, path);
+      await writeApi(endpoint, methodPermissionIds, api.addMethods, lambdaName, restApiId, path);
     } else if (apiExistsOnAws) {
       const apis = await readApisLibrary(path);
       const regionalApis = apis[region];
       const regionalApi = regionalApis[lambdaName];
-      const existingApis = regionalApi.methods;
-      regionalApi.methods = existingApis.concat(api.addMethods)
-        .filter(method => !api.removeMethods.includes(method));
+      const existingApis = regionalApi.methodPermissionIds;
+      regionalApi.methodPermissionIds = Object.assign({}, existingApis, methodPermissionIds);
+      api.removeMethods.forEach(method => delete regionalApi.methodPermissionIds[method]);
       await writeApisLibrary(path, apis);
     }
   };
 
-  // validations
+  // redployment sequence starts here:
   const invalidLambdaMsg = await validateLambdaReDeployment(lambdaName);
   if (invalidLambdaMsg) {
     bamWarn(invalidLambdaMsg);
     return;
   }
 
-  // redployment sequence starts here:
   api.restApiId = await getApiId();
   const resources = await getApiResources();
   if (resources) api.resources = resources;
 
   resolveHttpMethodsFromOptions();
 
-  const invalidHttp = await validateApiMethods(api.addMethods,
-    api.removeMethods,
-    api.existingMethods);
+  const validateMethodsParams = {
+    addMethods: api.addMethods,
+    removeMethods: api.removeMethods,
+    existingMethods: api.existingMethods,
+    lambdaName,
+    path,
+  };
+
+  const invalidHttp = await validateApiMethods(validateMethodsParams);
   if (invalidHttp) {
     bamWarn(invalidHttp);
     return;

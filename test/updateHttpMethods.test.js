@@ -83,9 +83,14 @@ describe('bam redeploy lambda', () => {
     const specifiedMethods = ['PUT', 'DELETE'];
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
     const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, specifiedMethods, stageName);
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(lambdaName, path, specifiedMethods, stageName);
+
     await writeLambda(lambdaData, path, lambdaDescription);
-    await writeApi(endpoint, specifiedMethods, lambdaName, restApiId, path);
+    await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
 
     const urlParts = endpoint.split('//')[1].split('/');
     const postOptions = {
@@ -130,9 +135,14 @@ describe('bam redeploy lambda', () => {
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
     const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(lambdaName, path, httpMethods, stageName);
+
     await writeLambda(lambdaData, path, lambdaDescription);
-    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+    await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
     const options = {
       methods: ['POST', 'POST', 'PUT', 'DELETE'],
       rmMethods: ['PUT', 'DELETE'],
@@ -182,9 +192,14 @@ describe('bam redeploy lambda', () => {
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
     const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(lambdaName, path, httpMethods, stageName);
+
     await writeLambda(lambdaData, path, lambdaDescription);
-    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+    await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
     const addAny = { methods: ['ANY'] };
     const rmAny = { rmMethods: ['ANY'] };
 

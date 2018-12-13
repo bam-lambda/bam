@@ -46,7 +46,7 @@ const formatBamFunctionsList = async (funcName, lambdas, apis, region) => {
       const apiObj = apis[region][funcName];
       if (apiObj) {
         const endpointStr = `${indentFurthest}${bamText('endpoint:')} ${apiObj.endpoint}`;
-        const methodsStr = apiObj.methods.join(', ');
+        const methodsStr = Object.keys(apiObj.methodPermissionIds).join(', ');
         const httpMethodsStr = `${indentFurthest}${bamText('http methods:')} ${methodsStr}`;
         fields.push(endpointStr);
         fields.push(httpMethodsStr);

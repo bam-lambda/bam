@@ -47,9 +47,15 @@ describe('bam delete lambda', () => {
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
     const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(lambdaName, path, httpMethods, stageName);
+
     await writeLambda(lambdaData, path, lambdaDescription);
-    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+    await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
   });
 
   afterEach(async () => {

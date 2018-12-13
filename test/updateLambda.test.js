@@ -81,9 +81,14 @@ describe('bam redeploy lambda', () => {
   test('Response still 200 from same url after changing lambda', async () => {
     let responseStatus;
     const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(lambdaName, path, httpMethods, stageName);
+
     await writeLambda(lambdaData, path, lambdaDescription);
-    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+    await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
     const testLambdaWithDependenciesFile = await readFile('./test/templates/testLambdaWithDependencies.js');
 
     try {
@@ -101,9 +106,14 @@ describe('bam redeploy lambda', () => {
   test('Response contains different body before and after redeployment', async () => {
     let responseBody;
     const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(lambdaName, path, httpMethods, stageName);
+
     await writeLambda(lambdaData, path, lambdaDescription);
-    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+    await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
 
     try {
       const preResponse = await asyncHttpsGet(endpoint);
@@ -134,9 +144,14 @@ describe('bam redeploy lambda', () => {
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
     const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(lambdaName, path, httpMethods, stageName);
+
     await writeLambda(lambdaData, path, lambdaDescription);
-    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+    await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
     await redeploy(lambdaName, path, { methods: ['POST', 'PUT', 'DELETE'] });
 
     const urlParts = endpoint.split('//')[1].split('/');
@@ -182,9 +197,14 @@ describe('bam redeploy lambda', () => {
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
     const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(lambdaName, path, httpMethods, stageName);
+
     await writeLambda(lambdaData, path, lambdaDescription);
-    await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+    await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
     await redeploy(lambdaName, path, { methods: ['ANY'] });
 
     const urlParts = endpoint.split('//')[1].split('/');

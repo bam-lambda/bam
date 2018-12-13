@@ -38,7 +38,6 @@ module.exports = async function bamBam(asyncFunc, {
     return data;
   } catch (e) {
     const errorCode = e.code;
-
     if (errorCode === retryError) {
       const data = await retry(errorCode);
       return data;

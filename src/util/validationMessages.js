@@ -1,3 +1,5 @@
+const { distinctElements } = require('./fileUtils');
+
 const customizeLambdaWarnings = (name) => {
   const warningMessages = {
     nameIsTaken: `The name "${name}" is already being used in this directory.`,
@@ -11,9 +13,10 @@ const customizeLambdaWarnings = (name) => {
   return warningMessages;
 };
 
-const customizeApiWarnings = (resourceData) => {
+const customizeApiWarnings = ({ addMethods = [], removeMethods = [] }) => {
   const warningMessages = {
-    methodsAreInvalid: `One or more of the HTTP methods are invalid: ${resourceData.addMethods.join(' ')}.`,
+    methodsAreInvalid: `One or more of the HTTP methods are invalid: ${distinctElements(addMethods.concat(removeMethods)).join(' ')}`,
+    cannotRemoveMethodMadeInConsole: `One or more methods were not added with BAM! initially and cannot be removed: ${removeMethods.join(' ')}.  Consider using "bam list" to see which methods can be removed.`,
     willRemoveAllMethods: 'Cannot delete all methods from the api',
   };
   return warningMessages;

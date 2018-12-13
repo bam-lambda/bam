@@ -1,6 +1,5 @@
 const deleteApi = require('../aws/deleteApi');
 const deleteAwsLambda = require('../aws/deleteLambda');
-const bamBam = require('../util/bamBam');
 const { asyncGetRegion } = require('../util/getRegion');
 const bamSpinner = require('../util/spinner');
 const { bamLog, bamWarn } = require('../util/logger');
@@ -53,12 +52,7 @@ module.exports = async function destroy(resourceName, path, options) {
     const endpointExists = await doesApiExist(restApiId);
 
     if (endpointExists) {
-      const optionalParamsObj = {
-        asyncFuncParams: [resourceName, restApiId, methodPermissionIds, path],
-        retryError: 'TooManyRequestsException',
-        interval: 15000,
-      };
-      await bamBam(deleteApi, optionalParamsObj);
+      await deleteApi(resourceName, restApiId, methodPermissionIds, path);
       await deleteApiFromLibraries(resourceName, path);
       deletionMsg += getDeletionMessage('Endpoint');
       return;

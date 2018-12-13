@@ -138,23 +138,28 @@ module.exports = async function redeploy(lambdaName, path, options) {
     }
   };
 
-  // validations
+  // redployment sequence starts here:
   const invalidLambdaMsg = await validateLambdaReDeployment(lambdaName);
   if (invalidLambdaMsg) {
     bamWarn(invalidLambdaMsg);
     return;
   }
 
-  // redployment sequence starts here:
   api.restApiId = await getApiId();
   const resources = await getApiResources();
   if (resources) api.resources = resources;
 
   resolveHttpMethodsFromOptions();
 
-  const invalidHttp = await validateApiMethods(api.addMethods,
-    api.removeMethods,
-    api.existingMethods);
+  const validateMethodsParams = {
+    addMethods: api.addMethods,
+    removeMethods: api.removeMethods,
+    existingMethods: api.existingMethods,
+    lambdaName,
+    path,
+  };
+
+  const invalidHttp = await validateApiMethods(validateMethodsParams);
   if (invalidHttp) {
     bamWarn(invalidHttp);
     return;

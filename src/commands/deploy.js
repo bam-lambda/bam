@@ -43,7 +43,14 @@ module.exports = async function deploy(lambdaName, path, options) {
 
   const methods = options.methods || options.method;
   const httpMethods = methods ? methods.map(m => m.toUpperCase()) : ['GET'];
-  const invalidApiMsg = await validateApiMethods(httpMethods);
+
+  const validateMethodsParams = {
+    addMethods: httpMethods,
+    lambdaName,
+    path,
+  };
+
+  const invalidApiMsg = await validateApiMethods(validateMethodsParams);
   if (invalidApiMsg) {
     bamWarn(invalidApiMsg);
     return;

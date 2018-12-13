@@ -48,7 +48,7 @@ const asyncHttpsGet = endpoint => (
 
 describe('bam deploy api', () => {
   beforeEach(async () => {
-    jest.setTimeout(60000);
+    jest.setTimeout(90000);
     await setupBamDirAndFiles(roleName, path);
     const config = await readConfig(path);
     config.accountNumber = process.env.AWS_ID;

@@ -5,13 +5,13 @@ const getInvalidMethods = (data) => {
   const { addMethods, removeMethods } = data;
   const methods = addMethods.concat(removeMethods);
   const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'ANY'];
-  return methods.filter(method => !validMethods.includes(method));
+  return distinctElements(methods.filter(method => !validMethods.includes(method)));
 };
 
 const customizeLambdaWarnings = (name) => {
   const warningMessages = {
-    nameIsTaken: `Name: "${name}" is already being used in this directory`,
-    invalidSyntax: `Name: "${name}" is invalid. Lambda names must be 1 to 64 characters in length and contain only letters, numbers, hyphens, or underscores.`,
+    nameIsTaken: msgAfterAction('name', name, 'already being used in this directory', 'is'),
+    invalidSyntax: `${msgAfterAction('name', name, 'invalid', 'is')}. Lambda names must be 1 to 64 characters in length and contain only letters, numbers, hyphens, or underscores.`,
     doesNotExistInCwd: msgAfterAction('file', name, 'exist in this directory', 'does not'),
     alreadyExistsOnAws: `${msgAfterAction('lambda', name, 'exists', 'already')}.  To overwrite this lambda, please use "bam redeploy ${name}".`,
     doesNotExistOnAws: msgAfterAction('lambda', name, 'exist', 'does not'),
@@ -21,11 +21,11 @@ const customizeLambdaWarnings = (name) => {
   return warningMessages;
 };
 
-const customizeApiWarnings = ({ addMethods = [], removeMethods = [] }) => {
+const customizeApiWarnings = ({ addMethods = [], removeMethods = [] } = {}) => {
   const warningMessages = {
     cannotRemoveMethodMadeInConsole: `One or more methods were not added with BAM! initially and cannot be removed: ${removeMethods.join(' ')}.  Consider using "bam list" to see which methods can be removed.`,
-    methodsAreInvalid: `Invalid http method(s): "${getInvalidMethods(distinctElements(addMethods.concat(removeMethods))).join(', ')}"`,
-    willRemoveAllMethods: 'Cannot delete all methods connected to this endpoint.  Please consider using bam delete',
+    methodsAreInvalid: `Invalid http method(s): "${getInvalidMethods({ addMethods, removeMethods }).join(', ')}"`,
+    willRemoveAllMethods: 'Cannot delete all methods connected to this endpoint.  Consider using bam delete',
   };
   return warningMessages;
 };

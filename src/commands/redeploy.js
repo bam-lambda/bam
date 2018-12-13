@@ -35,7 +35,7 @@ const {
 
 const stageName = 'bam';
 
-module.exports = async function redeploy(lambdaName, path, options) {
+module.exports = async function redeploy(resourceName, path, options) {
   let methodPermissionIds = {};
   const region = await asyncGetRegion();
   const api = {
@@ -48,7 +48,7 @@ module.exports = async function redeploy(lambdaName, path, options) {
 
   const getApiId = async () => {
     const apis = await readApisLibrary(path);
-    return apis[region] && apis[region][lambdaName] && apis[region][lambdaName].restApiId;
+    return apis[region] && apis[region][resourceName] && apis[region][resourceName].restApiId;
   };
 
   const getApiResources = async () => {
@@ -90,7 +90,7 @@ module.exports = async function redeploy(lambdaName, path, options) {
     const updateParams = {
       rootResource,
       greedyResource,
-      lambdaName,
+      resourceName,
       path,
       restApiId: api.restApiId,
       addMethods: api.addMethods,
@@ -113,7 +113,7 @@ module.exports = async function redeploy(lambdaName, path, options) {
     let data;
 
     if ((apiExistsInLocalLibrary || userIsAddingMethods || userIsAddingEndpoint) && !apiExistsOnAws) {
-      data = await deployApi(lambdaName, path, api.addMethods, stageName);
+      data = await deployApi(resourceName, path, api.addMethods, stageName);
     } else if (userIsAddingMethods || api.removeMethods.length > 0) {
       await deployIntegrations(api.resources, api.existingMethods);
     }
@@ -127,11 +127,11 @@ module.exports = async function redeploy(lambdaName, path, options) {
     if (updatedApiData) {
       const { restApiId, endpoint } = updatedApiData;
 
-      await writeApi(endpoint, methodPermissionIds, api.addMethods, lambdaName, restApiId, path);
+      await writeApi(endpoint, methodPermissionIds, api.addMethods, resourceName, restApiId, path);
     } else if (apiExistsOnAws) {
       const apis = await readApisLibrary(path);
       const regionalApis = apis[region];
-      const regionalApi = regionalApis[lambdaName];
+      const regionalApi = regionalApis[resourceName];
       const existingApis = regionalApi.methodPermissionIds;
       regionalApi.methodPermissionIds = Object.assign({}, existingApis, methodPermissionIds);
       api.removeMethods.forEach(method => delete regionalApi.methodPermissionIds[method]);
@@ -140,7 +140,7 @@ module.exports = async function redeploy(lambdaName, path, options) {
   };
 
   // redployment sequence starts here:
-  const invalidLambdaMsg = await validateLambdaReDeployment(lambdaName);
+  const invalidLambdaMsg = await validateLambdaReDeployment(resourceName);
   if (invalidLambdaMsg) {
     bamWarn(invalidLambdaMsg);
     return;
@@ -156,7 +156,7 @@ module.exports = async function redeploy(lambdaName, path, options) {
     addMethods: api.addMethods,
     removeMethods: api.removeMethods,
     existingMethods: api.existingMethods,
-    lambdaName,
+    resourceName,
     path,
   };
 
@@ -166,20 +166,20 @@ module.exports = async function redeploy(lambdaName, path, options) {
     return;
   }
 
-  const localLambda = (await readLambdasLibrary(path))[region][lambdaName];
+  const localLambda = (await readLambdasLibrary(path))[region][resourceName];
   if (!localLambda) {
-    const lambdaData = (await asyncGetFunction({ FunctionName: lambdaName })).Configuration;
+    const lambdaData = (await asyncGetFunction({ FunctionName: resourceName })).Configuration;
     writeLambda(lambdaData, path, lambdaData.Description);
   }
 
-  const lambdaUpdateSuccess = await updateLambda(lambdaName, path, options);
+  const lambdaUpdateSuccess = await updateLambda(resourceName, path, options);
 
   if (lambdaUpdateSuccess) {
     const apiData = await updateApiGateway();
     await updateLocalLibraries(apiData);
-    await deleteStagingDirForLambda(lambdaName, path);
-    bamLog(msgAfterAction('lambda', lambdaName, 'updated'));
+    await deleteStagingDirForLambda(resourceName, path);
+    bamLog(msgAfterAction('lambda', resourceName, 'updated'));
   } else {
-    bamWarn(msgAfterAction('lambda', lambdaName, 'updated', 'could not be'));
+    bamWarn(msgAfterAction('lambda', resourceName, 'updated', 'could not be'));
   }
 };

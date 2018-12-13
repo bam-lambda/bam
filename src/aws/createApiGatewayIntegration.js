@@ -13,7 +13,7 @@ module.exports = async function createApiGatewayIntegration({
   resourceId,
   restApiId,
   statementId,
-  lambdaName,
+  resourceName,
   apiPath,
   path,
 }) {
@@ -24,7 +24,7 @@ module.exports = async function createApiGatewayIntegration({
   // add permission to lambda
   const sourceArn = `arn:aws:execute-api:${region}:${accountNumber}:${restApiId}/*/${httpMethod}${apiPath}`;
   const addPermissionParams = {
-    FunctionName: lambdaName,
+    FunctionName: resourceName,
     StatementId: statementId,
     Principal: 'apigateway.amazonaws.com',
     Action: 'lambda:InvokeFunction',
@@ -48,7 +48,7 @@ module.exports = async function createApiGatewayIntegration({
     httpMethod,
     type: 'AWS_PROXY',
     integrationHttpMethod: 'POST',
-    uri: `arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${region}:${accountNumber}:function:${lambdaName}/invocations`,
+    uri: `arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${region}:${accountNumber}:function:${resourceName}/invocations`,
   };
   await asyncPutIntegration(putIntegrationParams);
 };

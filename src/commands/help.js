@@ -11,29 +11,29 @@ const commandDetails = {
   deploy: {
     description: 'deploys lambda + endpoint',
     options: [
-      { name: 'role', description: 'specifies a role for this deployment' },
-      { name: 'permitDb', description: 'adds a policy with scan, put, get, delete DynamoDB permissions' },
+      { name: 'role', description: 'specifies role for this deployment' },
+      { name: 'permitDb', description: 'adds policy with scan, put, get, delete DynamoDB permissions' },
       { name: 'methods', description: 'specifies HTTP method(s) for the API Gateway' },
-      { name: 'lambdaOnly', description: 'deploys the lambda without an API gateway' },
+      { name: 'lambdaOnly', description: 'deploys lambda without an API gateway' },
     ],
     hasResource: true,
   },
   redeploy: {
     description: 'updates existing lambda and endpoint',
     options: [
-      { name: 'role', description: 'specifies a role for this deployment' },
-      { name: 'permitDb', description: 'adds a policy with scan, put, get, delete DynamoDB permissions' },
+      { name: 'role', description: 'specifies role for this deployment' },
+      { name: 'permitDb', description: 'adds policy with scan, put, get, delete DynamoDB permissions' },
       { name: 'methods', description: 'specifies HTTP method(s) for the API Gateway' },
       { name: 'rmmethods', description: 'specifies HTTP method(s) to be removed from the API Gateway' },
-      { name: 'addApi', description: 'adds an API Gateway endpoint (if none exists) that is integrated with the lamdba' },
+      { name: 'addApi', description: 'adds API Gateway endpoint (if none exists) that is integrated with the lamdba' },
     ],
     hasResource: true,
   },
   create: {
     description: 'updates existing lambda and endpoint',
     options: [
-      { name: 'html', description: 'creates a local directory containing index.html, main.css, and [resourceName].js' },
-      { name: 'invoker', description: 'creates a local file/directory with [resourceName].js templated to invoke another lambda' },
+      { name: 'html', description: 'creates local directory containing index.html, main.css, and [resourceName].js' },
+      { name: 'invoker', description: 'creates local file/directory with [resourceName].js templated to invoke another lambda' },
     ],
     hasResource: true,
   },
@@ -131,6 +131,9 @@ module.exports = function help(optionsObj) {
   const optionsCommands = getOptionsCommands(optionsObj);
   if (optionsCommands) {
     const optionsMsg = optionsCommands.map(formatCommandOptions).join(vertPadding);
+    log('Options:');
     log(`${optionsMsg}\n`);
+  } else {
+    log('Pass in flags for any command (--commandName) to see options for that command\n');
   }
 };

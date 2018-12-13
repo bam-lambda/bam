@@ -7,13 +7,17 @@ const {
   vertPadding,
 } = require('../util/logger');
 
+const methodsDesc = 'specifies HTTP method(s) for the API Gateway';
+const roleDesc = '';
+const permitDbDesc = '';
+
 const commandDetails = {
   deploy: {
     description: 'deploys lambda + endpoint',
     options: [
-      { name: 'role', description: 'specifies role for this deployment' },
-      { name: 'permitDb', description: 'adds policy with scan, put, get, delete DynamoDB permissions' },
-      { name: 'methods', description: 'specifies HTTP method(s) for the API Gateway' },
+      { name: 'role', description: roleDesc },
+      { name: 'permitDb', description: permitDbDesc },
+      { name: 'methods', description: methodsDesc },
       { name: 'lambdaOnly', description: 'deploys lambda without an API gateway' },
     ],
     hasResource: true,
@@ -21,9 +25,9 @@ const commandDetails = {
   redeploy: {
     description: 'updates existing lambda and endpoint',
     options: [
-      { name: 'role', description: 'specifies role for this deployment' },
-      { name: 'permitDb', description: 'adds policy with scan, put, get, delete DynamoDB permissions' },
-      { name: 'methods', description: 'specifies HTTP method(s) for the API Gateway' },
+      { name: 'role', description: roleDesc },
+      { name: 'permitDb', description: permitDbDesc },
+      { name: 'methods', description: methodsDesc },
       { name: 'rmmethods', description: 'specifies HTTP method(s) to be removed from the API Gateway' },
       { name: 'addApi', description: 'adds API Gateway endpoint (if none exists) that is integrated with the lamdba' },
     ],

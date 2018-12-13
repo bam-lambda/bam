@@ -20,6 +20,7 @@ module.exports = {
       { name: 'permitDb', description: permitDbDesc },
       { name: 'methods', description: methodsDesc },
       { name: 'rmmethods', description: 'specifies HTTP method(s) to be removed from the API Gateway' },
+      { name: 'revokeDb', description: 'changes role associated with lambda to role specified in user config' },
       { name: 'addApi', description: 'adds API Gateway endpoint (if none exists) that is integrated with the lamdba' },
     ],
     hasResource: true,

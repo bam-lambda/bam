@@ -4,6 +4,7 @@ const { doesApiExist } = require('../aws/doesResourceExist');
 const updateHttpMethods = require('../aws/updateHttpMethods');
 const bamBam = require('../util/bamBam');
 const { asyncGetRegion } = require('../util/getRegion');
+const getOption = require('../util/getOption');
 const checkForOptionType = require('../util/checkForOptionType');
 
 const {
@@ -15,6 +16,7 @@ const {
 const {
   validateApiMethods,
   validateLambdaReDeployment,
+  validateRoleAssumption,
 } = require('../util/validations');
 
 const {
@@ -34,6 +36,7 @@ const {
 } = require('../util/logger');
 
 const stageName = 'bam';
+const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
 
 module.exports = async function redeploy(resourceName, path, options) {
   let methodPermissionIds = {};
@@ -59,9 +62,31 @@ module.exports = async function redeploy(resourceName, path, options) {
     }
   };
 
+  const roleOption = getOption(options, 'role');
+  const permitDb = checkForOptionType(options, 'permitDb');
+  const revokeDb = checkForOptionType(options, 'revokeDb');
+
+  const userRole = options[roleOption] && options[roleOption][0];
+  let roleName;
+
+  if (revokeDb) roleName = '';
+  if (permitDb) roleName = dbRole;
+  if (userRole) {
+    const invalidRoleMsg = await validateRoleAssumption(userRole);
+    if (invalidRoleMsg) {
+      bamWarn(invalidRoleMsg);
+      return;
+    }
+    roleName = userRole;
+  }
+
   const resolveHttpMethodsFromOptions = () => {
-    let addMethods = options.methods || options.method;
-    let removeMethods = options.rmMethods || options.rmMethod;
+    const methodOption = getOption(options, 'method');
+    let addMethods = options[methodOption];
+
+    const removeOption = getOption(options, 'rmmethod');
+    let removeMethods = options[removeOption];
+
     let existingMethods = [];
 
     addMethods = addMethods
@@ -108,7 +133,7 @@ module.exports = async function redeploy(resourceName, path, options) {
   const updateApiGateway = async () => {
     const apiExistsInLocalLibrary = !!(api.restApiId);
     const apiExistsOnAws = await doesApiExist(api.restApiId);
-    const userIsAddingMethods = !!(options.methods || options.method);
+    const userIsAddingMethods = api.addMethods.length > 0;
     const userIsAddingEndpoint = checkForOptionType(options, 'endpoint');
     let data;
 
@@ -172,7 +197,7 @@ module.exports = async function redeploy(resourceName, path, options) {
     writeLambda(lambdaData, path, lambdaData.Description);
   }
 
-  const lambdaUpdateSuccess = await updateLambda(resourceName, path, options);
+  const lambdaUpdateSuccess = await updateLambda(resourceName, path, roleName);
 
   if (lambdaUpdateSuccess) {
     const apiData = await updateApiGateway();

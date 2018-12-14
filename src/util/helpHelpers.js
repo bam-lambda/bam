@@ -37,7 +37,7 @@ const formatCommandOptions = (command) => {
   return `${indent}${bamText(command)}: \n${options.map(formatOption).join('\n')}`;
 };
 
-const commands = Object.keys(commandDescriptions);
+const commands = Object.keys(commandDescriptions).sort();
 
 const getOptions = (optionsArr) => {
   const commandsWithOptions = commands.filter(command => (
@@ -55,7 +55,7 @@ const getOptionsCommands = (optionsObj) => {
   const optionsArr = Object.keys(optionsObj);
   let options;
   if (optionsArr.length > 0) {
-    options = getOptions(optionsArr);
+    options = getOptions(optionsArr).sort();
   }
   return options;
 };

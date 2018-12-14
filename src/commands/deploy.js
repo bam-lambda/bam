@@ -2,6 +2,7 @@ const deployLambda = require('../aws/deployLambda');
 const deployApi = require('../aws/deployApi');
 const getUserInput = require('../util/getUserInput');
 const checkForOptionType = require('../util/checkForOptionType');
+const getOption = require('../util/getOption');
 
 const {
   bamWarn,
@@ -27,8 +28,9 @@ const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
 module.exports = async function deploy(resourceName, path, options) {
   const deployLambdaOnly = checkForOptionType(options, 'lambda');
   const permitDb = checkForOptionType(options, 'db');
+  const roleOption = getOption(options, 'role');
 
-  const userRole = options.role && options.role[0];
+  const userRole = options[roleOption] && options[roleOption][0];
   let roleName;
   if (permitDb) roleName = dbRole;
   if (userRole) {
@@ -46,7 +48,8 @@ module.exports = async function deploy(resourceName, path, options) {
     return;
   }
 
-  const methods = options.methods || options.method;
+  const methodOption = getOption(options, 'method');
+  const methods = options[methodOption];
   const httpMethods = methods ? methods.map(m => m.toUpperCase()) : ['GET'];
 
   const validateMethodsParams = {

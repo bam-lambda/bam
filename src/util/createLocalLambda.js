@@ -12,11 +12,11 @@ const {
   msgAfterAction,
 } = require('../util/logger');
 
-const createLocalLambdaFile = async (lambdaName, options) => {
+const createLocalLambdaFile = async (lambdaName, createInvokerTemplate) => {
   const cwd = process.cwd();
 
   let lambdaTemplate;
-  if (options.invoker) {
+  if (createInvokerTemplate) {
     const userRegion = await asyncGetRegion();
     lambdaTemplate = await readFile(`${__dirname}/../../templates/invokerLambdaTemplate.js`, 'utf8');
     lambdaTemplate = lambdaTemplate.replace('UserRegion', userRegion);
@@ -28,7 +28,7 @@ const createLocalLambdaFile = async (lambdaName, options) => {
   bamLog(msgAfterAction('file', `${lambdaName}.js`, 'created'));
 };
 
-const createLocalLambdaDirectory = async (lambdaName, options) => {
+const createLocalLambdaDirectory = async (lambdaName, createInvokerTemplate) => {
   const cwd = process.cwd();
 
   await mkdir(lambdaName);
@@ -36,12 +36,12 @@ const createLocalLambdaDirectory = async (lambdaName, options) => {
   await copyFile(`${__dirname}/../../templates/mainTemplate.css`, `${cwd}/${lambdaName}/main.css`);
 
   let lambdaTemplate;
-  if (options.invoker) {
+  if (createInvokerTemplate) {
     const userRegion = await asyncGetRegion();
-    lambdaTemplate = await readFile(`${__dirname}/../../templates/dirInvokerLambdaTemplate.js`, 'utf8');
+    lambdaTemplate = await readFile(`${__dirname}/../../templates/htmlInvokerLambdaTemplate.js`, 'utf8');
     lambdaTemplate = lambdaTemplate.replace('UserRegion', userRegion);
   } else {
-    lambdaTemplate = await readFile(`${__dirname}/../../templates/dirLambdaTemplate.js`, 'utf8');
+    lambdaTemplate = await readFile(`${__dirname}/../../templates/htmlLambdaTemplate.js`, 'utf8');
   }
 
   await writeFile(`${cwd}/${lambdaName}/${lambdaName}.js`, lambdaTemplate);

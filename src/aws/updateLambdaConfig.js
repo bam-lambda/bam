@@ -1,51 +1,28 @@
 const { asyncLambdaUpdateFunctionConfiguration } = require('./awsFunctions');
-const { doesRoleExist } = require('./doesResourceExist');
 const getLambda = require('./getLambda');
 const { readConfig } = require('../util/fileUtils');
-const bamSpinner = require('../util/spinner');
-const checkForOptionType = require('../util/checkForOptionType');
-
-const {
-  msgAfterAction,
-  bamWarn,
-  bamError,
-} = require('../util/logger');
-
-const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
+const { bamError } = require('../util/logger');
 
 const getRole = async (lambdaName) => {
+  let role;
+
   try {
     const data = await getLambda(lambdaName);
-    return data.Configuration.Role;
+    role = data.Configuration.Role;
   } catch (err) {
     bamError(err);
   }
+
+  return role;
 };
 
-module.exports = async function updateLambdaConfig(lambdaName, path, options) {
+module.exports = async function updateLambdaConfig(lambdaName, path, roleName) {
   const config = await readConfig(path);
-  const { accountNumber, role } = config;
-  const permitDb = checkForOptionType(options, 'permitDb');
-  const revokeDb = checkForOptionType(options, 'revokeDb');
-
-  const databaseRoleArn = `arn:aws:iam::${accountNumber}:role/${dbRole}`;
-  const defaultRoleArn = `arn:aws:iam::${accountNumber}:role/${role}`;
+  const { accountNumber } = config;
 
   let updatedRoleArn;
-  if (options.role && options.role[0]) {
-    const userRole = options.role[0];
-    const roleExists = await doesRoleExist(userRole);
-    if (!roleExists) {
-      bamSpinner.stop();
-      bamWarn(msgAfterAction('role', userRole, 'exist', 'does not'));
-      bamSpinner.start();
-      return;
-    }
-    updatedRoleArn = `arn:aws:iam::${accountNumber}:role/${userRole}`;
-  } else if (revokeDb) {
-    updatedRoleArn = defaultRoleArn;
-  } else if (permitDb) {
-    updatedRoleArn = databaseRoleArn;
+  if (roleName) {
+    updatedRoleArn = `arn:aws:iam::${accountNumber}:role/${roleName}`;
   }
 
   const currentRoleArn = await getRole(lambdaName);

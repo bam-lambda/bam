@@ -28,7 +28,7 @@ module.exports = function help(optionsObj) {
     const optionsMsg = optionsCommands.map(formatCommandOptions).join(vertPadding);
     logOptions(optionsCommands, optionsMsg);
   } else {
-    log('Pass in flags for any command (--commandName) to see options for that command');
+    log('Pass in flags for any command (--[commandName]) to see options for that command');
     log('Pass in --all to see options for all commands\n');
   }
 };

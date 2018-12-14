@@ -61,7 +61,7 @@ module.exports = {
     hasResource: false,
   },
   config: {
-    description: 'updates default user settings',
+    description: 'updates default settings',
     options: [],
     hasResource: false,
   },

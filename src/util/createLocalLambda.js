@@ -38,10 +38,10 @@ const createLocalLambdaDirectory = async (lambdaName, createInvokerTemplate) => 
   let lambdaTemplate;
   if (createInvokerTemplate) {
     const userRegion = await asyncGetRegion();
-    lambdaTemplate = await readFile(`${__dirname}/../../templates/dirInvokerLambdaTemplate.js`, 'utf8');
+    lambdaTemplate = await readFile(`${__dirname}/../../templates/htmlInvokerLambdaTemplate.js`, 'utf8');
     lambdaTemplate = lambdaTemplate.replace('UserRegion', userRegion);
   } else {
-    lambdaTemplate = await readFile(`${__dirname}/../../templates/dirLambdaTemplate.js`, 'utf8');
+    lambdaTemplate = await readFile(`${__dirname}/../../templates/htmlLambdaTemplate.js`, 'utf8');
   }
 
   await writeFile(`${cwd}/${lambdaName}/${lambdaName}.js`, lambdaTemplate);

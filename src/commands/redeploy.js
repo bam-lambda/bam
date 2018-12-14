@@ -10,6 +10,7 @@ const checkForOptionType = require('../util/checkForOptionType');
 const {
   asyncCreateDeployment,
   asyncGetResources,
+  asyncGetFunction,
 } = require('../aws/awsFunctions');
 
 const {
@@ -19,6 +20,8 @@ const {
 } = require('../util/validations');
 
 const {
+  readLambdasLibrary,
+  writeLambda,
   writeApi,
   writeApisLibrary,
   readApisLibrary,
@@ -27,6 +30,7 @@ const {
 } = require('../util/fileUtils');
 
 const {
+  msgAfterAction,
   bamLog,
   bamWarn,
 } = require('../util/logger');
@@ -34,20 +38,29 @@ const {
 const stageName = 'bam';
 const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
 
-module.exports = async function redeploy(lambdaName, path, options) {
+module.exports = async function redeploy(resourceName, path, options) {
+  let methodPermissionIds = {};
   const region = await asyncGetRegion();
+  const api = {
+    restApiId: undefined,
+    resources: [],
+    addMethods: [],
+    removeMethods: [],
+    existingMethods: [],
+  };
 
   const getApiId = async () => {
     const apis = await readApisLibrary(path);
-    return apis[region] && apis[region][lambdaName] && apis[region][lambdaName].restApiId;
+    return apis[region] && apis[region][resourceName] && apis[region][resourceName].restApiId;
   };
 
-  // validations
-  const invalidLambdaMsg = await validateLambdaReDeployment(lambdaName);
-  if (invalidLambdaMsg) {
-    bamWarn(invalidLambdaMsg);
-    return;
-  }
+  const getApiResources = async () => {
+    const { restApiId } = api;
+    const apiExistsOnAws = await doesApiExist(api.restApiId);
+    if (restApiId && apiExistsOnAws) {
+      api.resources = (await asyncGetResources({ restApiId })).items;
+    }
+  };
 
   const roleOption = getOption(options, 'role');
   const permitDb = checkForOptionType(options, 'permitDb');
@@ -67,82 +80,131 @@ module.exports = async function redeploy(lambdaName, path, options) {
     roleName = userRole;
   }
 
-  const methodOption = getOption(options, 'method');
-  let addMethods = options[methodOption];
+  const resolveHttpMethodsFromOptions = () => {
+    const methodOption = getOption(options, 'method');
+    let addMethods = options[methodOption];
 
-  const removeOption = getOption(options, 'rmmethod');
-  let removeMethods = options[removeOption];
+    const removeOption = getOption(options, 'rmmethod');
+    let removeMethods = options[removeOption];
 
-  addMethods = addMethods
-    ? distinctElements(addMethods.map(m => m.toUpperCase())) : [];
+    let existingMethods = [];
 
-  removeMethods = removeMethods
-    ? distinctElements(removeMethods.map(m => m.toUpperCase())) : [];
+    addMethods = addMethods
+      ? distinctElements(addMethods.map(m => m.toUpperCase())) : [];
 
-  const restApiId = await getApiId();
-  const resources = (await asyncGetResources({ restApiId })).items;
-  const resource = resources.find(res => res.path === '/');
-  const existingMethods = Object.keys(resource.resourceMethods || {});
+    removeMethods = removeMethods
+      ? distinctElements(removeMethods.map(m => m.toUpperCase())) : [];
 
-  const invalidHttp = await validateApiMethods(addMethods, removeMethods, existingMethods);
+    if (api.resources.length > 0) {
+      const resource = api.resources.find(res => res.path === '/');
+      existingMethods = Object.keys(resource.resourceMethods || {});
+    }
 
-  if (invalidHttp) {
-    bamWarn(invalidHttp);
-    return;
-  }
+    if (existingMethods.length === 0 && addMethods.length === 0) {
+      addMethods.push('GET');
+    }
+
+    api.addMethods = addMethods;
+    api.removeMethods = removeMethods;
+    api.existingMethods = existingMethods;
+  };
 
   const deployIntegrations = async () => {
-    const rootResource = resources.find(res => res.path === '/');
-    const greedyPathResource = resources.find(res => res.path === '/{proxy+}');
-    const rootPath = '/';
-    const greedyPath = '/*';
+    const rootResource = api.resources.find(res => res.path === '/');
+    const greedyResource = api.resources.find(res => res.path === '/{proxy+}');
+    const updateParams = {
+      rootResource,
+      greedyResource,
+      resourceName,
+      path,
+      restApiId: api.restApiId,
+      addMethods: api.addMethods,
+      removeMethods: api.removeMethods,
+    };
 
-    await updateHttpMethods(rootResource, lambdaName, restApiId, addMethods, removeMethods, rootPath, path);
-    await updateHttpMethods(greedyPathResource, lambdaName, restApiId, addMethods, removeMethods, greedyPath, path);
+    methodPermissionIds = await updateHttpMethods(updateParams);
+
     await bamBam(asyncCreateDeployment, {
-      asyncFuncParams: [{ restApiId, stageName }],
+      asyncFuncParams: [{ restApiId: api.restApiId, stageName }],
       retryError: 'TooManyRequestsException',
     });
   };
 
   const updateApiGateway = async () => {
-    const apiExistsInLocalLibrary = !!restApiId;
-    const apiExistsOnAws = await doesApiExist(restApiId);
-    let apiData;
+    const apiExistsInLocalLibrary = !!(api.restApiId);
+    const apiExistsOnAws = await doesApiExist(api.restApiId);
+    const userIsAddingMethods = api.addMethods.length > 0;
+    const userIsAddingEndpoint = checkForOptionType(options, 'endpoint');
+    let data;
 
-    if (!apiExistsInLocalLibrary || !apiExistsOnAws) {
-      apiData = await deployApi(lambdaName, path, addMethods, stageName);
-    } else {
-      await deployIntegrations();
+    if ((apiExistsInLocalLibrary || userIsAddingMethods || userIsAddingEndpoint) && !apiExistsOnAws) {
+      data = await deployApi(resourceName, path, api.addMethods, stageName);
+    } else if (userIsAddingMethods || api.removeMethods.length > 0) {
+      await deployIntegrations(api.resources, api.existingMethods);
     }
 
-    return apiData;
+    return data;
   };
 
   const updateLocalLibraries = async (updatedApiData) => {
+    const apiExistsOnAws = await doesApiExist(api.restApiId);
+
     if (updatedApiData) {
-      const { updatedRestApiId, updatedEndpoint } = updatedApiData;
-      await writeApi(updatedEndpoint, addMethods, lambdaName, updatedRestApiId, path);
-    } else {
+      const { restApiId, endpoint } = updatedApiData;
+
+      await writeApi(endpoint, methodPermissionIds, api.addMethods, resourceName, restApiId, path);
+    } else if (apiExistsOnAws) {
       const apis = await readApisLibrary(path);
       const regionalApis = apis[region];
-      const api = regionalApis[lambdaName];
-      const existingApis = api.methods;
-      api.methods = existingApis.concat(addMethods)
-        .filter(method => !removeMethods.includes(method));
+      const regionalApi = regionalApis[resourceName];
+      const existingApis = regionalApi.methodPermissionIds;
+      regionalApi.methodPermissionIds = Object.assign({}, existingApis, methodPermissionIds);
+      api.removeMethods.forEach(method => delete regionalApi.methodPermissionIds[method]);
       await writeApisLibrary(path, apis);
     }
   };
 
-  // redeploy sequence
-  const lambdaUpdateSuccess = await updateLambda(lambdaName, path, roleName);
+  // redployment sequence starts here:
+  const invalidLambdaMsg = await validateLambdaReDeployment(resourceName);
+  if (invalidLambdaMsg) {
+    bamWarn(invalidLambdaMsg);
+    return;
+  }
+
+  api.restApiId = await getApiId();
+  const resources = await getApiResources();
+  if (resources) api.resources = resources;
+
+  resolveHttpMethodsFromOptions();
+
+  const validateMethodsParams = {
+    addMethods: api.addMethods,
+    removeMethods: api.removeMethods,
+    existingMethods: api.existingMethods,
+    resourceName,
+    path,
+  };
+
+  const invalidHttp = await validateApiMethods(validateMethodsParams);
+  if (invalidHttp) {
+    bamWarn(invalidHttp);
+    return;
+  }
+
+  const localLambda = (await readLambdasLibrary(path))[region][resourceName];
+  if (!localLambda) {
+    const lambdaData = (await asyncGetFunction({ FunctionName: resourceName })).Configuration;
+    writeLambda(lambdaData, path, lambdaData.Description);
+  }
+
+  const lambdaUpdateSuccess = await updateLambda(resourceName, path, roleName);
 
   if (lambdaUpdateSuccess) {
     const apiData = await updateApiGateway();
     await updateLocalLibraries(apiData);
-    await deleteStagingDirForLambda(lambdaName, path);
-    bamLog(`Lambda "${lambdaName}" has been updated`);
+    await deleteStagingDirForLambda(resourceName, path);
+    bamLog(msgAfterAction('lambda', resourceName, 'updated'));
   } else {
-    bamWarn(`Lambda "${lambdaName}" could not be updated in the cloud`);
+    bamWarn(msgAfterAction('lambda', resourceName, 'updated', 'could not be'));
   }
 };

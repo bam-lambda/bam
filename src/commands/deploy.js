@@ -1,9 +1,14 @@
 const deployLambda = require('../aws/deployLambda');
 const deployApi = require('../aws/deployApi');
 const getUserInput = require('../util/getUserInput');
-const { bamWarn, bamError } = require('../util/logger');
 const checkForOptionType = require('../util/checkForOptionType');
 const getOption = require('../util/getOption');
+
+const {
+  bamWarn,
+  bamError,
+  msgAfterAction,
+} = require('../util/logger');
 
 const {
   validateLambdaDeployment,
@@ -20,7 +25,7 @@ const {
 const stage = 'bam';
 const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
 
-module.exports = async function deploy(lambdaName, path, options) {
+module.exports = async function deploy(resourceName, path, options) {
   const deployLambdaOnly = checkForOptionType(options, 'lambda');
   const permitDb = checkForOptionType(options, 'db');
   const roleOption = getOption(options, 'role');
@@ -37,7 +42,7 @@ module.exports = async function deploy(lambdaName, path, options) {
     roleName = userRole;
   }
 
-  const invalidLambdaMsg = await validateLambdaDeployment(lambdaName);
+  const invalidLambdaMsg = await validateLambdaDeployment(resourceName);
   if (invalidLambdaMsg) {
     bamWarn(invalidLambdaMsg);
     return;
@@ -47,14 +52,20 @@ module.exports = async function deploy(lambdaName, path, options) {
   const methods = options[methodOption];
   const httpMethods = methods ? methods.map(m => m.toUpperCase()) : ['GET'];
 
-  const invalidApiMsg = await validateApiMethods(httpMethods);
+  const validateMethodsParams = {
+    addMethods: httpMethods,
+    resourceName,
+    path,
+  };
+
+  const invalidApiMsg = await validateApiMethods(validateMethodsParams);
   if (invalidApiMsg) {
     bamWarn(invalidApiMsg);
     return;
   }
 
   const question = {
-    question: 'Please give a brief description of your lambda: ',
+    question: 'Please provide a brief description of your lambda: ',
     validator: () => (true),
     feedback: 'invalid description',
     defaultAnswer: '',
@@ -63,16 +74,31 @@ module.exports = async function deploy(lambdaName, path, options) {
   try {
     const input = await getUserInput([question]);
     if (input === undefined) {
-      bamWarn('Lambda deployment aborted');
+      bamWarn(msgAfterAction('lambda', resourceName, 'aborted', 'creation has been'));
       return;
     }
+
     const [description] = input;
-    const lambdaData = await deployLambda(lambdaName, description, path, roleName);
+    const lambdaData = await deployLambda(resourceName, description, path, roleName);
     if (lambdaData) await writeLambda(lambdaData, path, description);
     if (deployLambdaOnly) return;
-    const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stage);
-    if (restApiId) await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
-    await deleteStagingDirForLambda(lambdaName, path);
+
+    const {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    } = await deployApi(resourceName, path, httpMethods, stage);
+
+    const writeParams = [
+      endpoint,
+      methodPermissionIds,
+      resourceName,
+      restApiId,
+      path,
+    ];
+
+    if (restApiId) await writeApi(...writeParams);
+    await deleteStagingDirForLambda(resourceName, path);
   } catch (err) {
     bamError(err);
   }

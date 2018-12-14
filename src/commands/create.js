@@ -9,17 +9,17 @@ const {
 
 module.exports = async function create(lambdaName, options) {
   const invalidLambdaMsg = await validateLambdaCreation(lambdaName);
-  const createDirTemplate = checkForOptionType(options, 'dir');
-  const createIinvokerTemplate = checkForOptionType(options, 'invoke');
+  const createHtmlTemplate = checkForOptionType(options, 'html');
+  const createInvokerTemplate = checkForOptionType(options, 'invoke');
 
   if (invalidLambdaMsg) {
     bamWarn(invalidLambdaMsg);
     return;
   }
 
-  if (createDirTemplate) { // TODO pick more descriptive flag
-    await createLocalLambdaDirectory(lambdaName, createIinvokerTemplate);
+  if (createHtmlTemplate) {
+    await createLocalLambdaDirectory(lambdaName, createInvokerTemplate);
   } else {
-    await createLocalLambdaFile(lambdaName, createIinvokerTemplate);
+    await createLocalLambdaFile(lambdaName, createInvokerTemplate);
   }
 };

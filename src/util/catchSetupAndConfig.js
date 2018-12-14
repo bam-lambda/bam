@@ -1,10 +1,16 @@
 const getUserDefaults = require('./getUserDefaults');
 const init = require('./init');
-const { log, bamLog, bamWarn } = require('./logger');
 const { getRegion } = require('./getRegion');
 const { createBamRole, createDatabaseBamRole } = require('../aws/createRoles');
 const { doesRoleExist } = require('../aws/doesResourceExist');
 const checkForOptionType = require('../util/checkForOptionType');
+
+const {
+  msgAfterAction,
+  log,
+  bamLog,
+  bamWarn,
+} = require('./logger');
 
 const {
   readConfig,
@@ -30,16 +36,9 @@ const commands = [
 const commandIsNotValid = command => !commands.includes(command);
 
 module.exports = async function catchSetupAndConfig(path, command, options) {
-  if (commandIsNotValid(command) || ['help', 'version'].includes(command)) return true;
-
   const permitDb = checkForOptionType(options, 'db');
 
-  const awsConfigExistsWithRegionSet = getRegion();
-  if (!awsConfigExistsWithRegionSet) {
-    bamWarn('You have not set up your AWS credentials.  For instructions, please visit:');
-    log('https://docs.aws.amazon.com/cli/latest/topic/config-vars.html');
-    return false;
-  }
+  if (commandIsNotValid(command) || ['help', 'version', 'create'].includes(command)) return true;
 
   const bamPath = getBamPath(path);
   const bamDirExists = await exists(bamPath);
@@ -49,13 +48,20 @@ module.exports = async function catchSetupAndConfig(path, command, options) {
     if (!isInitialized || command === 'config') return false;
   }
 
+  const awsConfigExistsWithRegionSet = getRegion();
+  if (!awsConfigExistsWithRegionSet) {
+    bamWarn('AWS credentials have not been set up.  For instructions, please visit:');
+    log('https://docs.aws.amazon.com/cli/latest/topic/config-vars.html');
+    return false;
+  }
+
   const configured = await isConfigured(path);
   // don't continue if configuration incomplete
   if (!configured) {
-    bamWarn('Your configuration setup is incomplete');
+    bamWarn('BAM! configuration setup is incomplete');
     const nowConfigured = await getUserDefaults(path);
     if (!nowConfigured) return false;
-    bamLog('Configuration completed successfully!');
+    bamLog('BAM! configuration completed successfully');
   }
 
   const config = await readConfig(path);
@@ -64,7 +70,7 @@ module.exports = async function catchSetupAndConfig(path, command, options) {
   } else {
     const doesConfigRoleExists = await doesRoleExist(config.role);
     if (!doesConfigRoleExists) {
-      bamWarn(`${config.role} does not exist.`);
+      bamWarn(msgAfterAction('role', config.role, 'exist', 'does not'));
       return false;
     }
   }

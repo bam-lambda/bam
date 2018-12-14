@@ -48,7 +48,7 @@ const asyncHttpsGet = endpoint => (
 
 describe('bam deploy api', () => {
   beforeEach(async () => {
-    jest.setTimeout(60000);
+    jest.setTimeout(90000);
     await setupBamDirAndFiles(roleName, path);
     const config = await readConfig(path);
     config.accountNumber = process.env.AWS_ID;
@@ -71,9 +71,14 @@ describe('bam deploy api', () => {
       const testLambdaWithDependencies = await readFile(`${path}/templates/testLambdaWithDependencies.js`);
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependencies);
       const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-      const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+      const {
+        restApiId,
+        endpoint,
+        methodPermissionIds,
+      } = await deployApi(lambdaName, path, httpMethods, stageName);
+
       await writeLambda(lambdaData, path, lambdaDescription);
-      await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+      await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
     });
 
     test('Response contains output from dependencies in body', async () => {
@@ -126,9 +131,14 @@ describe('bam deploy api', () => {
       const testLambdaWithIncorrectDependencies = await readFile('./test/templates/testLambdaWithIncorrectDependencies.js');
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithIncorrectDependencies);
       const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
-      const { restApiId, endpoint } = await deployApi(lambdaName, path, httpMethods, stageName);
+      const {
+        restApiId,
+        endpoint,
+        methodPermissionIds,
+      } = await deployApi(lambdaName, path, httpMethods, stageName);
+
       await writeLambda(lambdaData, path, lambdaDescription);
-      await writeApi(endpoint, httpMethods, lambdaName, restApiId, path);
+      await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
     });
 
     test('node modules directory does not contain modules listed after exports.handler', async () => {

@@ -36,16 +36,17 @@ const formatBamFunctionsList = async (funcName, lambdas, apis, region) => {
 
   if (Object.keys(lambdas[region]).length > 0) {
     const funcObj = lambdas[region][funcName];
-    const funcNameStr = bamText(`${funcName}:`);
+    const funcNameStr = bamText(`${funcName}`);
+    const hasDescription = funcObj.description.trim() !== '';
     const descriptionStr = `${indentFurthest}${bamText('description:')} ${funcObj.description}`;
     fields.push(funcNameStr);
-    fields.push(descriptionStr);
+    if (hasDescription) fields.push(descriptionStr);
 
     if (Object.keys(apis[region]).length > 0) {
       const apiObj = apis[region][funcName];
       if (apiObj) {
         const endpointStr = `${indentFurthest}${bamText('endpoint:')} ${apiObj.endpoint}`;
-        const methodsStr = apiObj.methods.join(', ');
+        const methodsStr = Object.keys(apiObj.methodPermissionIds).join(', ');
         const httpMethodsStr = `${indentFurthest}${bamText('http methods:')} ${methodsStr}`;
         fields.push(endpointStr);
         fields.push(httpMethodsStr);
@@ -86,7 +87,7 @@ const getAwsFunctionsList = async (path, lambdas, region) => {
 
 const formatTablesList = async (tableName, dbtables, region) => {
   const { partitionKey, sortKey } = dbtables[region][tableName];
-  const tableNameStr = bamText(`${tableName}:`);
+  const tableNameStr = bamText(`${tableName}`);
   const partitionKeyDataType = friendlyDataTypes[partitionKey.dataType];
   const partitionKeyStr = `${indentFurthest}${bamText('partition key:')} ${partitionKey.name} (${partitionKeyDataType})`;
   const fields = [tableNameStr, partitionKeyStr];

@@ -89,7 +89,7 @@ const writeLambda = async (data, path, description = '') => {
   await writeLambdasLibrary(path, lambdas);
 };
 
-const writeApi = async (endpoint, methods, resourceName, restApiId, path) => {
+const writeApi = async (endpoint, methodPermissionIds, resourceName, restApiId, path) => {
   const region = await asyncGetRegion();
   const lambdas = await readLambdasLibrary(path);
   const apis = await readApisLibrary(path);
@@ -98,7 +98,7 @@ const writeApi = async (endpoint, methods, resourceName, restApiId, path) => {
   apis[region][resourceName] = {
     restApiId,
     endpoint,
-    methods,
+    methodPermissionIds,
   };
 
   await writeLambdasLibrary(path, lambdas);
@@ -124,9 +124,11 @@ const deleteApiFromLibraries = async (resourceName, path) => {
   const lambdas = await readLambdasLibrary(path);
   const apis = await readApisLibrary(path);
 
-  // TODO: do these steps only if lambda exists
-  lambdas[region][resourceName].api = '';
-  await writeLambdasLibrary(path, lambdas);
+  const lambda = lambdas[region][resourceName];
+  if (lambda) {
+    lambda.api = '';
+    await writeLambdasLibrary(path, lambdas);
+  }
 
   delete apis[region][resourceName];
   await writeApisLibrary(path, apis);

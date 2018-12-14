@@ -4,12 +4,16 @@ const { readConfig } = require('../util/fileUtils');
 const { bamError } = require('../util/logger');
 
 const getRole = async (lambdaName) => {
+  let role;
+
   try {
     const data = await getLambda(lambdaName);
-    return data.Configuration.Role;
+    role = data.Configuration.Role;
   } catch (err) {
     bamError(err);
   }
+
+  return role;
 };
 
 module.exports = async function updateLambdaConfig(lambdaName, path, roleName) {

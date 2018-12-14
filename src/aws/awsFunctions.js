@@ -9,9 +9,14 @@ const lambda = new AWS.Lambda({ apiVersion, region });
 const api = new AWS.APIGateway({ apiVersion, region });
 const dynamo = new AWS.DynamoDB({ apiVersion, region });
 const iam = new AWS.IAM();
+const sts = new AWS.STS();
+
+// sts
+const asyncGetCallerIdentity = promisify(sts.getCallerIdentity.bind(sts));
 
 // lambda
 const asyncAddPermission = promisify(lambda.addPermission.bind(lambda));
+const asyncRemovePermission = promisify(lambda.removePermission.bind(lambda));
 const asyncLambdaDeleteFunction = promisify(lambda.deleteFunction.bind(lambda));
 const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
 const asyncGetFunction = promisify(lambda.getFunction.bind(lambda));
@@ -22,7 +27,6 @@ const asyncListFunctions = promisify(lambda.listFunctions.bind(lambda));
 // api
 const asyncPutMethod = promisify(api.putMethod.bind(api));
 const asyncPutIntegration = promisify(api.putIntegration.bind(api));
-const asyncPutMethodResponse = promisify(api.putMethodResponse.bind(api));
 const asyncDeleteRestApi = promisify(api.deleteRestApi.bind(api));
 const asyncDeleteMethod = promisify(api.deleteMethod.bind(api));
 const asyncCreateApi = promisify(api.createRestApi.bind(api));
@@ -50,10 +54,11 @@ const asyncGetRole = promisify(iam.getRole.bind(iam));
 const asyncListAttachedRolePolicies = promisify(iam.listAttachedRolePolicies.bind(iam));
 
 module.exports = {
+  asyncGetCallerIdentity,
   asyncAddPermission,
+  asyncRemovePermission,
   asyncPutMethod,
   asyncPutIntegration,
-  asyncPutMethodResponse,
   asyncCreateTable,
   asyncCreatePolicy,
   asyncCreateResource,

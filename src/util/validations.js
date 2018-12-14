@@ -1,3 +1,5 @@
+const { asyncGetRegion } = require('./getRegion');
+
 const {
   doesLambdaExist,
   doesTableExist,
@@ -8,6 +10,7 @@ const {
   readdir,
   exists,
   readFile,
+  readApisLibrary,
 } = require('../util/fileUtils');
 
 const {
@@ -76,26 +79,39 @@ const roleExistsOnAws = async (name) => {
   return status;
 };
 
-const methodsAreValid = (resourceData) => {
-  const { addMethods, removeMethods } = resourceData;
+const methodsAreValid = ({ addMethods = [], removeMethods = [] } = {}) => {
   const methods = addMethods.concat(removeMethods);
   const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'ANY'];
   return methods.every(method => validMethods.includes(method));
 };
 
-const removingLastMethod = (resourceData) => {
-  const { addMethods, removeMethods, existingMethods } = resourceData;
+const removingLastMethod = ({ addMethods = [], removeMethods = [], existingMethods = [] } = {}) => {
   const result = existingMethods.concat(addMethods).filter(m => !removeMethods.includes(m));
   return result.length === 0;
 };
 
-const validateResource = async (name, validations, customWarnings) => {
-  const warnings = customWarnings(name);
+const removeMethodsDeployedPreviouslyWithBam = async ({
+  addMethods = [],
+  removeMethods = [],
+  resourceName,
+  path,
+}) => {
+  const filteredRemoveMethods = removeMethods.filter(m => !addMethods.includes(m));
+  const region = await asyncGetRegion();
+  const apis = await readApisLibrary(path);
+  const api = apis[region][resourceName];
+  const existingBamMethods = api ? Object.keys(api.methodPermissionIds) : [];
+  const result = filteredRemoveMethods.filter(m => !existingBamMethods.includes(m));
+  return result.length === 0;
+};
+
+const validateResource = async (resourceData, validations, customWarnings) => {
+  const warnings = customWarnings(resourceData);
   let msg;
 
   for (let i = 0; i < validations.length; i += 1) {
     const { validation, feedbackType, affirmative } = validations[i];
-    const isValid = await validation(name);
+    const isValid = await validation(resourceData);
     const check = affirmative ? isValid : !isValid;
 
     if (check) {
@@ -219,11 +235,16 @@ const validateRoleAssumption = async (name) => {
   return status;
 };
 
-const validateApiMethods = async (addMethods = [], removeMethods = [], existingMethods = []) => {
+const validateApiMethods = async (resourceData) => {
   const validations = [
     {
       validation: methodsAreValid,
       feedbackType: 'methodsAreInvalid',
+      affirmative: false,
+    },
+    {
+      validation: removeMethodsDeployedPreviouslyWithBam,
+      feedbackType: 'cannotRemoveMethodMadeInConsole',
       affirmative: false,
     },
     {
@@ -233,7 +254,6 @@ const validateApiMethods = async (addMethods = [], removeMethods = [], existingM
     },
   ];
 
-  const resourceData = { existingMethods, addMethods, removeMethods };
   const status = await validateResource(resourceData, validations, customizeApiWarnings);
   return status;
 };

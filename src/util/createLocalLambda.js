@@ -1,5 +1,5 @@
 const { asyncGetRegion } = require('./getRegion');
-const { bamLog } = require('../util/logger');
+
 const {
   readFile,
   writeFile,
@@ -7,11 +7,16 @@ const {
   mkdir,
 } = require('./fileUtils');
 
-const createLocalLambdaFile = async (lambdaName, createIinvokerTemplate) => {
+const {
+  bamLog,
+  msgAfterAction,
+} = require('../util/logger');
+
+const createLocalLambdaFile = async (lambdaName, createInvokerTemplate) => {
   const cwd = process.cwd();
 
   let lambdaTemplate;
-  if (createIinvokerTemplate) {
+  if (createInvokerTemplate) {
     const userRegion = await asyncGetRegion();
     lambdaTemplate = await readFile(`${__dirname}/../../templates/invokerLambdaTemplate.js`, 'utf8');
     lambdaTemplate = lambdaTemplate.replace('UserRegion', userRegion);
@@ -20,10 +25,10 @@ const createLocalLambdaFile = async (lambdaName, createIinvokerTemplate) => {
   }
 
   await writeFile(`${cwd}/${lambdaName}.js`, lambdaTemplate);
-  bamLog(`Template file "${lambdaName}" was created.`);
+  bamLog(msgAfterAction('file', `${lambdaName}.js`, 'created'));
 };
 
-const createLocalLambdaDirectory = async (lambdaName, createIinvokerTemplate) => {
+const createLocalLambdaDirectory = async (lambdaName, createInvokerTemplate) => {
   const cwd = process.cwd();
 
   await mkdir(lambdaName);
@@ -31,7 +36,7 @@ const createLocalLambdaDirectory = async (lambdaName, createIinvokerTemplate) =>
   await copyFile(`${__dirname}/../../templates/mainTemplate.css`, `${cwd}/${lambdaName}/main.css`);
 
   let lambdaTemplate;
-  if (createIinvokerTemplate) {
+  if (createInvokerTemplate) {
     const userRegion = await asyncGetRegion();
     lambdaTemplate = await readFile(`${__dirname}/../../templates/dirInvokerLambdaTemplate.js`, 'utf8');
     lambdaTemplate = lambdaTemplate.replace('UserRegion', userRegion);
@@ -40,7 +45,7 @@ const createLocalLambdaDirectory = async (lambdaName, createIinvokerTemplate) =>
   }
 
   await writeFile(`${cwd}/${lambdaName}/${lambdaName}.js`, lambdaTemplate);
-  bamLog(`Template directory "${lambdaName}" was created.`);
+  bamLog(msgAfterAction('directory', `${lambdaName}`, 'created'));
 };
 
 module.exports = {

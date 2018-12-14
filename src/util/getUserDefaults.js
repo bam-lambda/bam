@@ -3,7 +3,7 @@ const getUserInput = require('./getUserInput');
 const { doesRoleExist } = require('../aws/doesResourceExist');
 
 const badNum = 'Account number must have 12 numerical digits';
-const badRole = 'The role name you supplied is not registered to the account provided';
+const badRole = 'Role does not exist';
 const validNum = r => /^[0-9]{12}$/.test(r);
 
 module.exports = async function getUserDefaults(path) {
@@ -20,7 +20,7 @@ module.exports = async function getUserDefaults(path) {
     };
 
     const getRole = {
-      question: 'Please provide your default role (if you do not provide a role, one will be created for you): ',
+      question: 'Please provide the name of the role BAM! should use by default (if you do not provide a role, one will be created for you): ',
       validator: validRole,
       feedback: badRole,
       defaultAnswer: defaultRole,

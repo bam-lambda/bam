@@ -23,7 +23,7 @@ const {
 
 const logBamFunctions = (bamFunctionsList) => {
   if (bamFunctionsList.length > 0) {
-    logInColor(`${indent}Lambdas deployed from this machine using BAM!:`, 'green');
+    logInColor(`${indent}Lambdas and endpoints deployed from this machine using BAM!:`, 'green');
     log(`${bamFunctionsList}\n`);
   } else {
     log(`${indent}There are no lambdas on AWS that have been deployed with BAM!\n`);
@@ -73,14 +73,20 @@ module.exports = async function list(path, options) {
   const dbFlag = checkForOptionType(options, 'db');
   const lambdaFlag = checkForOptionType(options, 'lambda');
 
-  if (lambdaFlag) {
+  const logAll = () => {
+    logBamFunctions(bamFunctionsList);
+    logAwsFunctions(awsFunctionsList);
+    logBamTables(bamTablesList);
+  };
+
+  if (lambdaFlag && dbFlag) {
+    logAll();
+  } else if (lambdaFlag) {
     logBamFunctions(bamFunctionsList);
     logAwsFunctions(awsFunctionsList);
   } else if (dbFlag) {
     logBamTables(bamTablesList);
   } else {
-    logBamFunctions(bamFunctionsList);
-    logAwsFunctions(awsFunctionsList);
-    logBamTables(bamTablesList);
+    logAll();
   }
 };

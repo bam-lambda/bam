@@ -6,6 +6,7 @@ const { unzipper } = require('../util/zipper');
 const { validateLambdaRetrieval } = require('../util/validations');
 
 const {
+  msgAfterAction,
   bamLog,
   bamWarn,
   bamError,
@@ -54,7 +55,7 @@ module.exports = async function get(lambdaName) {
     const { Location } = func.Code;
     await addLambdaFolderToCwd(lambdaName, Location);
     bamSpinner.stop();
-    bamLog(`Folder: "${lambdaName}" is now in your current directory`);
+    bamLog(msgAfterAction('folder', lambdaName, 'created'));
   } catch (err) {
     bamSpinner.stop();
     bamError(err);

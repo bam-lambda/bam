@@ -14,7 +14,7 @@ const awsDataTypes = {
 
 module.exports = async function getDbConfigFromUser(tableName) {
   const getPartitionKeyName = {
-    question: `Please provide a partition key for "${tableName}" table: `,
+    question: `Please provide a partition key for "${tableName}": `,
     validator: validPrimaryKeyName,
     feedback: badPrimaryKeyName,
     defaultAnswer: 'id',
@@ -28,7 +28,7 @@ module.exports = async function getDbConfigFromUser(tableName) {
   };
 
   const getSortKeyName = {
-    question: `Please provide a sort key for "${tableName}" table: `,
+    question: `Please provide a sort key for "${tableName}": `,
     validator: validPrimaryKeyName,
     feedback: badPrimaryKeyName,
     defaultAnswer: 'none',

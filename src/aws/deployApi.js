@@ -1,7 +1,8 @@
+const uuid = require('uuid');
+
 const createApiGatewayIntegration = require('./createApiGatewayIntegration');
 const bamBam = require('../util/bamBam');
 const bamSpinner = require('../util/spinner');
-const { readFile } = require('../util/fileUtils');
 const { asyncGetRegion } = require('../util/getRegion');
 
 const {
@@ -13,17 +14,18 @@ const {
 
 const {
   bamLog,
+  msgAfterAction,
   bamError,
 } = require('../util/logger');
 
-module.exports = async function deployApi(lambdaName, path, httpMethods, stageName) {
+module.exports = async function deployApi(resourceName, path, httpMethods, stageName) {
   const region = await asyncGetRegion();
   bamSpinner.start();
 
   // deploy sequence:
   try {
     // create rest api
-    const restApiId = (await asyncCreateApi({ name: lambdaName })).id;
+    const restApiId = (await asyncCreateApi({ name: resourceName })).id;
 
     // get root resource
     const rootResourceId = (await asyncGetResources({ restApiId })).items[0].id;
@@ -37,16 +39,41 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
     // create greedy path resource to allow path params
     const greedyPathResourceId = (await asyncCreateResource(createResourceParams)).id;
 
+    const methodPermissionIds = {};
     for (let i = 0; i < httpMethods.length; i += 1) {
       const httpMethod = httpMethods[i];
       const rootPath = '/';
       const greedyPath = '/*';
+      const rootPermissionId = uuid.v4();
+      const greedyPermissionId = uuid.v4();
+      methodPermissionIds[httpMethod] = {
+        rootPermissionId,
+        greedyPermissionId,
+      };
 
       // root resource
-      await createApiGatewayIntegration(httpMethod, rootResourceId, restApiId, lambdaName, rootPath, path);
+      const rootIntegrationParams = {
+        httpMethod,
+        restApiId,
+        resourceName,
+        path,
+        resourceId: rootResourceId,
+        statementId: rootPermissionId,
+        apiPath: rootPath,
+      };
+      await createApiGatewayIntegration(rootIntegrationParams);
 
       // greedy path
-      await createApiGatewayIntegration(httpMethod, greedyPathResourceId, restApiId, lambdaName, greedyPath, path);
+      const greedyIntegrationParams = {
+        httpMethod,
+        restApiId,
+        resourceName,
+        path,
+        resourceId: greedyPathResourceId,
+        statementId: greedyPermissionId,
+        apiPath: greedyPath,
+      };
+      await createApiGatewayIntegration(greedyIntegrationParams);
     }
 
     // create deployment
@@ -57,12 +84,15 @@ module.exports = async function deployApi(lambdaName, path, httpMethods, stageNa
 
     const endpoint = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}`;
 
-    const bamAscii = await readFile(`${__dirname}/../../ascii/bam.txt`, 'utf8');
     bamSpinner.stop();
-    bamLog(bamAscii);
-    bamLog('API Gateway endpoint has been deployed:');
+    bamLog(msgAfterAction('endpoint', resourceName, 'created'));
     bamLog(endpoint);
-    return { restApiId, endpoint };
+
+    return {
+      restApiId,
+      endpoint,
+      methodPermissionIds,
+    };
   } catch (err) {
     bamSpinner.stop();
     bamError(err);

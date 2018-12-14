@@ -1,6 +1,11 @@
-const { bamError, bamLog } = require('../util/logger');
 const bamSpinner = require('../util/spinner');
 const { asyncCreateTable } = require('./awsFunctions');
+
+const {
+  bamError,
+  bamLog,
+  msgAfterAction,
+} = require('../util/logger');
 
 module.exports = async function createDbTable(tableName, partitionKey, sortKey) {
   bamSpinner.start();
@@ -49,7 +54,7 @@ module.exports = async function createDbTable(tableName, partitionKey, sortKey) 
   try {
     await asyncCreateTable(tableParams);
     bamSpinner.stop();
-    bamLog(`BAM! received confirmation that AWS is creating DynamoDB "${tableName}" table`);
+    bamLog(msgAfterAction('table', tableName, 'created', 'is being'));
   } catch (err) {
     bamSpinner.stop();
     bamError(err);

@@ -36,8 +36,6 @@ const commands = [
 const commandIsNotValid = command => !commands.includes(command);
 
 module.exports = async function catchSetupAndConfig(path, command, options) {
-  const permitDb = checkForOptionType(options, 'db');
-
   if (commandIsNotValid(command) || ['help', 'version', 'create'].includes(command)) return true;
 
   const bamPath = getBamPath(path);
@@ -74,7 +72,7 @@ module.exports = async function catchSetupAndConfig(path, command, options) {
       return false;
     }
   }
-  if ((command === 'deploy' || command === 'redeploy') && permitDb) {
+  if ((command === 'deploy' || command === 'redeploy') && options.permitDb) {
     await createDatabaseBamRole(databaseBamRole, path);
   }
 

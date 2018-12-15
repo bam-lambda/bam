@@ -194,7 +194,7 @@ module.exports = async function redeploy(resourceName, path, options) {
   const localLambda = (await readLambdasLibrary(path))[region][resourceName];
   if (!localLambda) {
     const lambdaData = (await asyncGetFunction({ FunctionName: resourceName })).Configuration;
-    writeLambda(lambdaData, path, lambdaData.Description);
+    writeLambda(lambdaData, path);
   }
 
   const lambdaUpdateSuccess = await updateLambda(resourceName, path, roleName);

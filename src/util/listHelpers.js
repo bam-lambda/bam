@@ -37,10 +37,7 @@ const formatBamFunctionsList = async (funcName, lambdas, apis, region) => {
   if (Object.keys(lambdas[region]).length > 0) {
     const funcObj = lambdas[region][funcName];
     const funcNameStr = bamText(`${funcName}`);
-    const hasDescription = funcObj.description.trim() !== '';
-    const descriptionStr = `${indentFurthest}${bamText('description:')} ${funcObj.description}`;
     fields.push(funcNameStr);
-    if (hasDescription) fields.push(descriptionStr);
 
     if (Object.keys(apis[region]).length > 0) {
       const apiObj = apis[region][funcName];

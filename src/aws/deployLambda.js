@@ -21,7 +21,7 @@ const {
 
 const cwd = process.cwd();
 
-module.exports = async function deployLambda(lambdaName, description, path, roleName) {
+module.exports = async function deployLambda(lambdaName, path, roleName) {
   const stagingPath = getStagingPath(path);
   const config = await readConfig(path);
   const { accountNumber } = config;
@@ -62,7 +62,6 @@ module.exports = async function deployLambda(lambdaName, description, path, role
       Handler: 'index.handler',
       Role: `arn:aws:iam::${accountNumber}:role/${role}`,
       Runtime: 'nodejs8.10',
-      Description: description,
     };
 
     const data = await bamBam(asyncLambdaCreateFunction, {

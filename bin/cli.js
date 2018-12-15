@@ -17,6 +17,10 @@ const catchSetupAndConfig = require('../src/util/catchSetupAndConfig');
 
 const [,, command, ...args] = process.argv;
 const homedir = os.homedir();
+const commandIsBlank = cmd => cmd === undefined || cmd === '';
+const commandIsHelp = cmd => (
+  cmd === 'help' || cmd === '-h' || cmd === 'man'
+);
 
 (async () => {
   let resourceName;
@@ -42,7 +46,7 @@ const homedir = os.homedir();
     list(homedir, options);
   } else if (command === 'version' || command === '-v') {
     version();
-  } else if (command === 'help' || command === '-h' || command === 'man') {
+  } else if (commandIsHelp(command) || commandIsBlank(command)) {
     help(options);
   } else if (command === 'config') {
     config();

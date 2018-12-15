@@ -33,9 +33,13 @@ module.exports = async function destroy(resourceName, path, options) {
     if (tableExists) {
       await deleteDbTable(resourceName);
       await deleteTableFromLibrary(resourceName, path);
+
+      if (deletionMsg) deletionMsg += '\n';
       deletionMsg += msgAfterAction('table', resourceName, 'deleted');
       return;
     }
+
+    if (warningMsg) warningMsg += '\n';
     warningMsg += msgAfterAction('table', resourceName, 'exist', 'does not');
   };
 
@@ -50,9 +54,13 @@ module.exports = async function destroy(resourceName, path, options) {
     if (endpointExists) {
       await deleteApi(resourceName, restApiId, methodPermissionIds, path);
       await deleteApiFromLibraries(resourceName, path);
+
+      if (deletionMsg) deletionMsg += '\n';
       deletionMsg += msgAfterAction('endpoint', resourceName, 'deleted');
       return;
     }
+
+    if (warningMsg) warningMsg += '\n';
     warningMsg += msgAfterAction('endpoint', resourceName, 'exist', 'does not');
   };
 
@@ -61,9 +69,13 @@ module.exports = async function destroy(resourceName, path, options) {
     if (lambdaExists) {
       await deleteAwsLambda(resourceName);
       await deleteLambdaFromLibrary(resourceName, path);
+
+      if (deletionMsg) deletionMsg += '\n';
       deletionMsg += msgAfterAction('lambda', resourceName, 'deleted');
       return;
     }
+
+    if (warningMsg) warningMsg += '\n';
     warningMsg += msgAfterAction('lambda', resourceName, 'exist', 'does not');
   };
 

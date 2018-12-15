@@ -43,6 +43,12 @@ module.exports = async function deployLambda(lambdaName, description, path, role
       await createDeploymentPackageFromDir();
     } else {
       await createDirectory(lambdaName, stagingPath);
+
+      const packageJSONExists = await exists(`${cwd}/package.json`);
+      if (packageJSONExists) {
+        await copyFile(`${cwd}/package.json`, `${stagingPath}/${lambdaName}/package.json`);
+      }
+
       await copyFile(`${cwd}/${lambdaName}.js`, `${stagingPath}/${lambdaName}/index.js`);
     }
   };

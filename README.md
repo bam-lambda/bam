@@ -1,6 +1,6 @@
-[![npm](https://img.shields.io/npm/v/bam-lambda.svg?maxAge=2592000?style=plastic)](https://www.npmjs.com/package/bam-lambda)
-
 ![BAM! header](https://i.imgur.com/LVkFZHW.png)
+[![npm](https://img.shields.io/npm/v/bam-lambda.svg?maxAge=2592000?style=plastic)](https://www.npmjs.com/package/bam-lambda)
+[![license](https://img.shields.io/npm/l/bam-lambda.svg)](https://www.npmjs.com/package/bam-lambda)
 
 **BAM!** makes it quick (hence, the name) and easy to get small applications up & running using Node.js and AWS.  It is optimized for deployment of AWS Lambda functions integrated with API Gateway endpoints but also allows for the creation of DynamoDB tables (which can help persist data between lambda invocations). 
 

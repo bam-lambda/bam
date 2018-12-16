@@ -11,6 +11,8 @@ Assuming you've written a JavaScript file according to the [AWS Lambda programmi
 
 ![bam deploy](https://i.imgur.com/UUFNrXT.gif | width=400)
 
+<img src="https://i.imgur.com/UUFNrXT.gif" data-canonical-src="https://i.imgur.com/UUFNrXT.gif" width="400" alt="bam deploy" />
+
 
 If you're new to AWS Lambda, we've included templates for common scenarios (see documentation for `bam create` in the command section below). These will help you handle requests made using a variety of HTTP methods and expose query/path parameters.
 

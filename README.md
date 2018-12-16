@@ -1,4 +1,5 @@
 ![BAM! header](https://i.imgur.com/LVkFZHW.png)
+[![bam 💥](https://img.shields.io/badge/bam-💥-green.svg)](https://bam-lambda.com)
 [![npm](https://img.shields.io/npm/v/bam-lambda.svg?maxAge=2592000?style=plastic)](https://www.npmjs.com/package/bam-lambda)
 [![license](https://img.shields.io/npm/l/bam-lambda.svg)](https://www.npmjs.com/package/bam-lambda)
 

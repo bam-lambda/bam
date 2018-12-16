@@ -19,7 +19,7 @@ For those more familiar with AWS, we did our best to make BAM! backwards-compati
 Thanks for trying out BAM!  We hope you'll like it! 💥
 
 ## The Team
-**Takayoshi Sampson** *Software Engineer* New York City, NY
+**Takayoshi Sampson** *Software Engineer* New York, NY
 
 **[Jocie Moore](http://www.jociemoore.com)** *Software Engineer* San Francisco, CA
 

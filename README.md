@@ -9,10 +9,7 @@ As long as you meet the prerequisites (see below), there is no need to perform a
 
 Assuming you've written a JavaScript file according to the [AWS Lambda programming pattern for Node.js](https://docs.aws.amazon.com/lambda/latest/dg/programming-model.html), only one command is needed to push it to AWS and integrate it with an API Gateway endpoint.
 
-![bam deploy](https://i.imgur.com/UUFNrXT.gif | width=400)
-
 <img src="https://i.imgur.com/UUFNrXT.gif" data-canonical-src="https://i.imgur.com/UUFNrXT.gif" width="400" alt="bam deploy" />
-
 
 If you're new to AWS Lambda, we've included templates for common scenarios (see documentation for `bam create` in the command section below). These will help you handle requests made using a variety of HTTP methods and expose query/path parameters.
 
@@ -23,6 +20,7 @@ Thanks for trying out BAM!  We hope you'll like it! 💥
 ## The Team
 **Takayoshi Sampson** *Software Engineer* New York, NY
 
+<a href="http://www.jociemoore.com" target="_blank">Jocie Moore</a>
 **[Jocie Moore](http://www.jociemoore.com)** *Software Engineer* San Francisco, CA
 
 **[Jason Overby](http://jasonoverby.com)** *Software Engineer* Portland, OR

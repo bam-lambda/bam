@@ -20,7 +20,7 @@ Thanks for trying out BAM!  We hope you'll like it! 💥
 ## The Team
 **Takayoshi Sampson** *Software Engineer* New York, NY
 
-**<a href="http://www.jociemoore.com" target="_blank">Jocie Moore</a>** *Software Engineer* San Francisco, CA
+**[Jocie Moore](http://www.jociemoore.com)** *Software Engineer* San Francisco, CA
 
 **[Jason Overby](http://jasonoverby.com)** *Software Engineer* Portland, OR
 

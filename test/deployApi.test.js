@@ -28,7 +28,6 @@ const {
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
-const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const otherTestPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 const path = './test';
@@ -81,7 +80,7 @@ describe('bam deploy api', () => {
 
   test('Response is 200 when hitting endpoint from apis.json', async () => {
     let responseStatus;
-    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const lambdaData = await deployLambda(lambdaName, path, roleName);
 
     const {
       restApiId,
@@ -89,7 +88,7 @@ describe('bam deploy api', () => {
       methodPermissionIds,
     } = await deployApi(lambdaName, path, httpMethods, stageName);
 
-    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
 
     try {
@@ -104,14 +103,14 @@ describe('bam deploy api', () => {
   });
 
   test('Api endpoint exists on AWS', async () => {
-    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const lambdaData = await deployLambda(lambdaName, path, roleName);
     const {
       restApiId,
       endpoint,
       methodPermissionIds,
     } = await deployApi(lambdaName, path, httpMethods, stageName);
 
-    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
 
     const apiExists = await doesApiExist(restApiId);
@@ -121,14 +120,14 @@ describe('bam deploy api', () => {
   test('Response contains query param in body', async () => {
     const testLambdaWithQueryParams = await readFile(`${path}/templates/testLambdaWithQueryParams.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithQueryParams);
-    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const lambdaData = await deployLambda(lambdaName, path, roleName);
     const {
       restApiId,
       endpoint,
       methodPermissionIds,
     } = await deployApi(lambdaName, path, httpMethods, stageName);
 
-    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
 
     const url = `${endpoint}?name=John`;
@@ -149,14 +148,14 @@ describe('bam deploy api', () => {
   test('POST request returns 201 status code', async () => {
     const testLambdaForPostMethod = await readFile(`${path}/templates/testLambdaForPostMethod.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaForPostMethod);
-    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const lambdaData = await deployLambda(lambdaName, path, roleName);
     const {
       restApiId,
       endpoint,
       methodPermissionIds,
     } = await deployApi(lambdaName, path, ['POST'], stageName);
 
-    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
 
     const urlParts = endpoint.split('//')[1].split('/');

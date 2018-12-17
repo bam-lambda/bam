@@ -17,7 +17,7 @@ const getDescriptionFromLambdaFile = async (lambdaFile) => {
   const descriptionArr = lambdaFileAboveExport.match(descriptionRegEx) || [];
 
   if (descriptionArr.length) {
-    return descriptionArr[0].split(descriptionStr).join('').trim();
+    return descriptionArr[0].split(descriptionStr).join('').trim().slice(0, 255);
   }
 
   return '';

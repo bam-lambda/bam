@@ -13,7 +13,7 @@ Assuming you've written a JavaScript file according to the [AWS Lambda programmi
 
 If you're new to AWS Lambda, we've included templates for common scenarios (see documentation for `bam create` in the command section below). These will help you handle requests made using a variety of HTTP methods and expose query/path parameters.
 
-For those more familiar with AWS, we did our best to make BAM! backwards-compatible to allow you to work with existing lambdas & make changes to resources using the AWS console (or other frameworks).
+For those more familiar with AWS, we did our best to structure BAM! to allow you to work with existing lambdas & make changes to resources using the AWS console (or other frameworks).
 
 Thanks for trying out BAM!  We hope you'll like it! 💥
 

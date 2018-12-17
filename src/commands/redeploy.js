@@ -104,6 +104,7 @@ module.exports = async function redeploy(resourceName, path, options) {
       addMethods.push('GET');
     }
 
+    addMethods = addMethods.filter(m => !existingMethods.includes(m));
     api.addMethods = addMethods;
     api.removeMethods = removeMethods;
     api.existingMethods = existingMethods;
@@ -134,12 +135,13 @@ module.exports = async function redeploy(resourceName, path, options) {
     const apiExistsInLocalLibrary = !!(api.restApiId);
     const apiExistsOnAws = await doesApiExist(api.restApiId);
     const userIsAddingMethods = api.addMethods.length > 0;
+    const userIsRemovingMethods = api.removeMethods.length > 0;
     const userIsAddingEndpoint = checkForOptionType(options, 'endpoint');
     let data;
 
     if ((apiExistsInLocalLibrary || userIsAddingMethods || userIsAddingEndpoint) && !apiExistsOnAws) {
       data = await deployApi(resourceName, path, api.addMethods, stageName);
-    } else if (userIsAddingMethods || api.removeMethods.length > 0) {
+    } else if (userIsAddingMethods || userIsRemovingMethods) {
       await deployIntegrations(api.resources, api.existingMethods);
     }
 

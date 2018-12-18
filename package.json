@@ -4,7 +4,7 @@
   "main": "index.js",
   "repository": "https://github.com/bam-lambda/bam.git",
   "author": "bam-lambda",
-  "description": "Deployment Tool for AWS Lambda and API Gateway",
+  "description": "Serverless framework for AWS Lambda and API Gateway",
   "keywords": [
     "lambda",
     "aws",

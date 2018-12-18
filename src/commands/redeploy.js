@@ -21,6 +21,7 @@ const {
 } = require('../util/validations');
 
 const {
+  readConfig,
   readLambdasLibrary,
   writeLambda,
   writeApi,
@@ -77,7 +78,10 @@ module.exports = async function redeploy(resourceName, path, options) {
   const userRole = options[roleOption] && options[roleOption][0];
   let roleName;
 
-  if (revokeDb) roleName = '';
+  if (revokeDb) {
+    const configJson = await readConfig(path);
+    roleName = configJson.role;
+  }
   if (permitDb) roleName = dbRole;
   if (userRole) {
     const invalidRoleMsg = await validateRoleAssumption(userRole);

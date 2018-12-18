@@ -74,8 +74,7 @@ module.exports = async function deploy(resourceName, path, options) {
   try {
     const lambdaData = await deployLambda(resourceName, path, roleName, deployDir);
     if (lambdaData) await writeLambda(lambdaData, path);
-    if (deployLambdaOnly) {
-console.log('adfa')      
+    if (deployLambdaOnly) {    
       await deleteStagingDirForLambda(resourceName, path);
       return;
     }

@@ -7,9 +7,6 @@ const {
 const getUserInput = require('./getUserInput');
 
 module.exports = async function deploymentType (resourceName, invalidLambdaMsg, invalidDirMsg) {
-  // check for lambda as file and in dir --> if both exist and are valid, ask which user wants
-  // if both exist, one valid but not other, warn user and ask if they want to proceed with valid one
-  // if both exist but neither valid, warn user and return 
   const fileExists = await lambdaExistsInCwd(resourceName);
   const dirExists = await lambdaFileExistsWithinDir(resourceName);
   const bothExist = fileExists && dirExists;
@@ -21,8 +18,7 @@ module.exports = async function deploymentType (resourceName, invalidLambdaMsg, 
   let deployDir = false;
   let aborted = false;
 
-  if (bothExist) {
-console.log('both exist')    
+  if (bothExist) {   
     if (invalidLambdaMsg && invalidDirMsg) {
       invalidMsg = invalidLambdaMsg;
     } else if (invalidLambdaMsg || invalidDirMsg) {      
@@ -54,25 +50,19 @@ console.log('both exist')
       }
       deployDir = /^(dir)$/i.test(userResponse);
     }
-  } else if (fileExists) {
-console.log('file only')    
+  } else if (fileExists) {  
     if (invalidLambdaMsg) {
       invalidMsg = invalidLambdaMsg;
     }
     deployDir = false;
-  } else if (dirExists) {
-console.log('dir only')    
+  } else if (dirExists) {   
     if (invalidDirMsg) {
-      bamWarn(invalidDirMsg);
-      return;
+      invalidMsg = invalidDirMsg;
     }
     deployDir = true;
-  } else {
-console.log('neither')    
+  } else {    
     invalidMsg = invalidLambdaMsg;
   }
 
   return { deployDir, invalidMsg, aborted };
 }
-
-

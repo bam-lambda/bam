@@ -16,6 +16,7 @@ const {
 const {
   validateApiMethods,
   validateLambdaReDeployment,
+  validateLambdaDirReDeployment,
   validateRoleAssumption,
 } = require('../util/validations');
 
@@ -35,8 +36,10 @@ const {
   bamWarn,
 } = require('../util/logger');
 
+const deploymentType = require('../util/deploymentType');
+
 const stageName = 'bam';
-const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
+const dbRole = 'databaseBamRole';
 
 module.exports = async function redeploy(resourceName, path, options) {
   let methodPermissionIds = {};
@@ -166,8 +169,14 @@ module.exports = async function redeploy(resourceName, path, options) {
 
   // redployment sequence starts here:
   const invalidLambdaMsg = await validateLambdaReDeployment(resourceName);
-  if (invalidLambdaMsg) {
-    bamWarn(invalidLambdaMsg);
+  const invalidDirMsg = await validateLambdaDirReDeployment(resourceName);
+  const { deployDir, invalidMsg, aborted } = await deploymentType(resourceName, invalidLambdaMsg, invalidDirMsg);
+  if (aborted) {
+    bamWarn(msgAfterAction('lambda', resourceName, 'aborted', 'update has been'));
+    return;
+  }
+  if (invalidMsg) {
+    bamWarn(invalidMsg);
     return;
   }
 
@@ -197,7 +206,7 @@ module.exports = async function redeploy(resourceName, path, options) {
     writeLambda(lambdaData, path, lambdaData.Description);
   }
 
-  const lambdaUpdateSuccess = await updateLambda(resourceName, path, roleName);
+  const lambdaUpdateSuccess = await updateLambda(resourceName, path, roleName, deployDir);
 
   if (lambdaUpdateSuccess) {
     const apiData = await updateApiGateway();

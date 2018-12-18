@@ -26,7 +26,7 @@ const {
 const deploymentType = require('../util/deploymentType');
 
 const stage = 'bam';
-const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
+const dbRole = 'databaseBamRole';
 
 module.exports = async function deploy(resourceName, path, options) {
   const deployLambdaOnly = checkForOptionType(options, 'lambda');
@@ -45,8 +45,6 @@ module.exports = async function deploy(resourceName, path, options) {
     roleName = userRole;
   }
 
-
-
   const invalidLambdaMsg = await validateLambdaDeployment(resourceName);
   const invalidDirMsg = await validateLambdaDirDeployment(resourceName);
   const { deployDir, invalidMsg, aborted } = await deploymentType(resourceName, invalidLambdaMsg, invalidDirMsg);
@@ -58,7 +56,6 @@ module.exports = async function deploy(resourceName, path, options) {
     bamWarn(invalidMsg);
     return;
   }
-console.log(deployDir, invalidMsg, aborted)
 
   const methodOption = getOption(options, 'method');
   const methods = options[methodOption];

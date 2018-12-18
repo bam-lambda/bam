@@ -44,7 +44,7 @@ module.exports = async function deploymentType(resourceName, invalidLambdaMsg, i
   };
 
   if (bothExist) {
-    handleBothExist();
+    await handleBothExist();
   } else if (fileExists) {
     if (invalidLambdaMsg) invalidMsg = invalidLambdaMsg;
     deployDir = false;

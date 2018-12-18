@@ -1,11 +1,39 @@
-const { distinctElements } = require('./fileUtils');
 const { msgAfterAction } = require('./logger');
+const { distinctElements } = require('./fileUtils');
+
+const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'ANY'];
+const validMethodsStr = `${validMethods.slice(0, -2).join(', ')}, and ${validMethods.slice(-1)}`;
+const pluralizeMethodsMsg = msg => msg.replace('Method', 'Methods')
+  .replace('was', 'were')
+  .replace(/\bis\b/, 'are')
+  .replace('does', 'do');
 
 const getInvalidMethods = (data) => {
   const { addMethods, removeMethods } = data;
   const methods = addMethods.concat(removeMethods);
-  const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'ANY'];
   return distinctElements(methods.filter(method => !validMethods.includes(method)));
+};
+
+const getInvalidMethodsMsg = (data) => {
+  const invalidMethods = getInvalidMethods(data);
+
+  let msg = `${msgAfterAction('Http Method', invalidMethods.join(', '), 'invalid', 'is')}`;
+  if (invalidMethods.length > 1) msg = pluralizeMethodsMsg(msg);
+
+  return `${msg}.\nValid Http methods for use with BAM! are ${validMethodsStr}.`;
+};
+
+const getCannotRemoveMethodMadeInConsoleMsg = (removeMethods, existingMethods) => {
+  const nonexistentMethods = removeMethods.filter(methodBeingRemoved => (
+    !existingMethods.includes(methodBeingRemoved)
+  ));
+
+  const notAddedOrDoesntExistStr = 'does not exist for this endpoint (or was not added using BAM!)';
+
+  let msg = `${msgAfterAction('Http Method', nonexistentMethods.join(', '), 'and cannot be removed', notAddedOrDoesntExistStr)}`;
+  if (nonexistentMethods.length > 1) msg = pluralizeMethodsMsg(msg);
+
+  return `${msg}.\nConsider using "bam list" to see which methods can be removed.`;
 };
 
 const customizeLambdaWarnings = (name) => {
@@ -21,11 +49,18 @@ const customizeLambdaWarnings = (name) => {
   return warningMessages;
 };
 
-const customizeApiWarnings = ({ addMethods = [], removeMethods = [] } = {}) => {
+const customizeApiWarnings = ({
+  addMethods = [],
+  removeMethods = [],
+  existingMethods = [],
+} = {}) => {
   const warningMessages = {
-    cannotRemoveMethodMadeInConsole: `One or more methods were not added with BAM! initially and cannot be removed: ${removeMethods.join(' ')}.  Consider using "bam list" to see which methods can be removed.`,
-    methodsAreInvalid: `Invalid http method(s): "${getInvalidMethods({ addMethods, removeMethods }).join(', ')}"`,
-    willRemoveAllMethods: 'Cannot delete all methods connected to this endpoint.  Consider using bam delete',
+    cannotRemoveMethodMadeInConsole: getCannotRemoveMethodMadeInConsoleMsg(
+      removeMethods,
+      existingMethods,
+    ),
+    methodsAreInvalid: getInvalidMethodsMsg({ addMethods, removeMethods }),
+    willRemoveAllMethods: 'Cannot delete all methods connected to this endpoint.  Consider using "bam delete"',
   };
   return warningMessages;
 };

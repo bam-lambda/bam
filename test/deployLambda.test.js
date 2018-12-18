@@ -24,7 +24,6 @@ const {
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
-const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const otherTestPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 const path = './test';
@@ -53,7 +52,7 @@ describe('bam deploy lambda', () => {
   test(`Zip file exists within ${stagingPath}/${lambdaName}`, async () => {
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
-    await deployLambda(lambdaName, lambdaDescription, path);
+    await deployLambda(lambdaName, path);
     const zipFile = await exists(`${stagingPath}/${lambdaName}/${lambdaName}.zip`);
     await unlink(`${cwd}/${lambdaName}.js`);
     expect(zipFile).toBe(true);
@@ -62,7 +61,7 @@ describe('bam deploy lambda', () => {
   test('Lambda exists on AWS', async () => {
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
-    await deployLambda(lambdaName, lambdaDescription, path);
+    await deployLambda(lambdaName, path);
     const lambda = await doesLambdaExist(lambdaName);
     await unlink(`${cwd}/${lambdaName}.js`);
     expect(lambda).toBe(true);
@@ -72,7 +71,7 @@ describe('bam deploy lambda', () => {
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await createDirectory(lambdaName, cwd);
     await writeFile(`${cwd}/${lambdaName}/${lambdaName}.js`, testLambdaFile);
-    await deployLambda(lambdaName, lambdaDescription, path, roleName, true);
+    await deployLambda(lambdaName, path, roleName, true);
     const lambda = await doesLambdaExist(lambdaName);
     await promisifiedRimraf(`${cwd}/${lambdaName}`);
     expect(lambda).toBe(true);

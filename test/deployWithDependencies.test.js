@@ -30,7 +30,6 @@ const {
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
-const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const otherTestPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 const path = './test';
@@ -70,14 +69,14 @@ describe('bam deploy api', () => {
     beforeEach(async () => {
       const testLambdaWithDependencies = await readFile(`${path}/templates/testLambdaWithDependencies.js`);
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependencies);
-      const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+      const lambdaData = await deployLambda(lambdaName, path, roleName);
       const {
         restApiId,
         endpoint,
         methodPermissionIds,
       } = await deployApi(lambdaName, path, httpMethods, stageName);
 
-      await writeLambda(lambdaData, path, lambdaDescription);
+      await writeLambda(lambdaData, path);
       await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
     });
 
@@ -130,14 +129,14 @@ describe('bam deploy api', () => {
     beforeEach(async () => {
       const testLambdaWithIncorrectDependencies = await readFile('./test/templates/testLambdaWithIncorrectDependencies.js');
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithIncorrectDependencies);
-      const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+      const lambdaData = await deployLambda(lambdaName, path, roleName);
       const {
         restApiId,
         endpoint,
         methodPermissionIds,
       } = await deployApi(lambdaName, path, httpMethods, stageName);
 
-      await writeLambda(lambdaData, path, lambdaDescription);
+      await writeLambda(lambdaData, path);
       await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
     });
 

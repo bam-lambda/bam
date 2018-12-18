@@ -1,6 +1,9 @@
 // Welcome to your BAM! lambda!
 
-// all require statements for npm packages go here
+// all require statements for npm packages go here above this line
+
+// TODO: describe your lambda below:
+// description:
 
 // handler is the name of the function being exported; it's best to leave as the default
 exports.handler = async (event) => {

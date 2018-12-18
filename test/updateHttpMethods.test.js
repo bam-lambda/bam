@@ -28,7 +28,6 @@ const {
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
-const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const otherTestPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 const path = './test';
@@ -82,14 +81,14 @@ describe('bam redeploy lambda', () => {
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
     const specifiedMethods = ['PUT', 'DELETE'];
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
-    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const lambdaData = await deployLambda(lambdaName, path, roleName);
     const {
       restApiId,
       endpoint,
       methodPermissionIds,
     } = await deployApi(lambdaName, path, specifiedMethods, stageName);
 
-    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
 
     const urlParts = endpoint.split('//')[1].split('/');
@@ -134,14 +133,14 @@ describe('bam redeploy lambda', () => {
   test('httpMethods update upon redeploy', async () => {
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
-    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const lambdaData = await deployLambda(lambdaName, path, roleName);
     const {
       restApiId,
       endpoint,
       methodPermissionIds,
     } = await deployApi(lambdaName, path, httpMethods, stageName);
 
-    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
     const options = {
       methods: ['POST', 'POST', 'PUT', 'DELETE'],
@@ -191,14 +190,14 @@ describe('bam redeploy lambda', () => {
   test('method "ANY" accepts all methods', async () => {
     const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
-    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const lambdaData = await deployLambda(lambdaName, path, roleName);
     const {
       restApiId,
       endpoint,
       methodPermissionIds,
     } = await deployApi(lambdaName, path, httpMethods, stageName);
 
-    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
     const addAny = { methods: ['ANY'] };
     const rmAny = { rmMethods: ['ANY'] };

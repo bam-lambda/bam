@@ -1,9 +1,22 @@
 {
   "name": "bam-lambda",
-  "version": "1.0.3",
+  "version": "1.0.12",
   "main": "index.js",
   "repository": "https://github.com/bam-lambda/bam.git",
   "author": "bam-lambda",
+  "description": "Deployment Tool for AWS Lambda and API Gateway",
+  "keywords": [
+    "lambda",
+    "aws",
+    "amazon web services",
+    "api",
+    "apigateway",
+    "intranet",
+    "serverless",
+    "serverless framework",
+    "faas",
+    "bam"
+  ],
   "contributors": [
     {
       "name": "Jocie Moore",
@@ -24,6 +37,8 @@
   },
   "dependencies": {
     "aws-sdk": "^2.348.0",
+    "restore-cursor": "^2.0.0",
+    "rimraf": "^2.6.2",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
@@ -35,5 +50,9 @@
   },
   "scripts": {
     "test": "jest"
+  },
+  "preferGlobal": true,
+  "engines": {
+    "node": ">=8"
   }
 }

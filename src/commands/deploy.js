@@ -6,6 +6,7 @@ const getOption = require('../util/getOption');
 const {
   bamWarn,
   bamError,
+  msgAfterAction,
 } = require('../util/logger');
 
 const {

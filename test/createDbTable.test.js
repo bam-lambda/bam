@@ -16,7 +16,7 @@ const sortKey = {
 
 describe('bam dbtable', async () => {
   beforeEach(() => {
-    jest.setTimeout(300000);
+    jest.setTimeout(400000);
   });
 
   afterEach(async () => {

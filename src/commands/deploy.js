@@ -74,7 +74,10 @@ module.exports = async function deploy(resourceName, path, options) {
   try {
     const lambdaData = await deployLambda(resourceName, path, roleName, deployDir);
     if (lambdaData) await writeLambda(lambdaData, path);
-    if (deployLambdaOnly) return;
+    if (deployLambdaOnly) {    
+      await deleteStagingDirForLambda(resourceName, path);
+      return;
+    }
 
     const {
       restApiId,

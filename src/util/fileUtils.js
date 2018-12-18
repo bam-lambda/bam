@@ -78,10 +78,11 @@ const writeDbtablesLibrary = async (path, dbtables) => {
   await writeFile(`${bamPath}/dbtables.json`, json);
 };
 
-const writeLambda = async (data, path, description = '') => {
+const writeLambda = async (data, path) => {
   const region = await asyncGetRegion();
   const name = data.FunctionName;
   const arn = data.FunctionArn;
+  const description = data.Description;
   const api = '';
 
   const lambdas = await readLambdasLibrary(path);

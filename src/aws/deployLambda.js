@@ -3,6 +3,8 @@ const { zipper } = require('../util/zipper');
 const installLambdaDependencies = require('../util/installLambdaDependencies');
 const bamBam = require('../util/bamBam');
 const bamSpinner = require('../util/spinner');
+const getDescription = require('../util/getDescription');
+
 const {
   bamLog,
   bamWarn,
@@ -21,7 +23,7 @@ const {
 
 const cwd = process.cwd();
 
-module.exports = async function deployLambda(lambdaName, description, path, roleName) {
+module.exports = async function deployLambda(lambdaName, path, roleName) {
   const stagingPath = getStagingPath(path);
   const config = await readConfig(path);
   const { accountNumber } = config;
@@ -50,6 +52,7 @@ module.exports = async function deployLambda(lambdaName, description, path, role
   bamSpinner.start();
   await createDeploymentPackage();
   await installLambdaDependencies(lambdaName, path);
+  const description = await getDescription(lambdaName, path);
   const zippedFileName = await zipper(lambdaName, path);
   const zipContents = await readFile(zippedFileName);
 

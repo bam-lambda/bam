@@ -27,7 +27,6 @@ const {
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
-const lambdaDescription = 'test description';
 const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const otherTestPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 const path = './test';
@@ -46,7 +45,7 @@ describe('bam delete lambda', () => {
     await createBamRole(roleName);
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
-    const lambdaData = await deployLambda(lambdaName, lambdaDescription, path);
+    const lambdaData = await deployLambda(lambdaName, path, roleName);
 
     const {
       restApiId,
@@ -54,7 +53,7 @@ describe('bam delete lambda', () => {
       methodPermissionIds,
     } = await deployApi(lambdaName, path, httpMethods, stageName);
 
-    await writeLambda(lambdaData, path, lambdaDescription);
+    await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
   });
 

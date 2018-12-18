@@ -108,6 +108,7 @@ module.exports = async function redeploy(resourceName, path, options) {
       addMethods.push('GET');
     }
 
+    addMethods = addMethods.filter(m => !existingMethods.includes(m));
     api.addMethods = addMethods;
     api.removeMethods = removeMethods;
     api.existingMethods = existingMethods;
@@ -136,11 +137,12 @@ module.exports = async function redeploy(resourceName, path, options) {
 
   const updateApiGateway = async () => {
     const apiExistsInLocalLibrary = !!(api.restApiId);
+    const userIsRemovingMethods = api.removeMethods.length > 0;
     let data;
 
     if ((apiExistsInLocalLibrary || userIsAddingMethods || userIsAddingEndpoint) && !apiExistsOnAws) {
       data = await deployApi(resourceName, path, api.addMethods, stageName);
-    } else if (userIsAddingMethods || api.removeMethods.length > 0) {
+    } else if (userIsAddingMethods || userIsRemovingMethods) {
       await deployIntegrations(api.resources, api.existingMethods);
     }
 
@@ -149,9 +151,8 @@ module.exports = async function redeploy(resourceName, path, options) {
 
   const updateLocalLibraries = async (updatedApiData) => {
     if (updatedApiData) {
-      const { restApiId, endpoint } = updatedApiData;
-
-      await writeApi(endpoint, methodPermissionIds, api.addMethods, resourceName, restApiId, path);
+      const { restApiId, endpoint, methodPermissionIds } = updatedApiData;
+      await writeApi(endpoint, methodPermissionIds, resourceName, restApiId, path);
     } else if (apiExistsOnAws) {
       const apis = await readApisLibrary(path);
       const regionalApis = apis[region];
@@ -192,7 +193,7 @@ module.exports = async function redeploy(resourceName, path, options) {
   const localLambda = (await readLambdasLibrary(path))[region][resourceName];
   if (!localLambda) {
     const lambdaData = (await asyncGetFunction({ FunctionName: resourceName })).Configuration;
-    writeLambda(lambdaData, path, lambdaData.Description);
+    writeLambda(lambdaData, path);
   }
 
   const lambdaUpdateSuccess = await updateLambda(resourceName, path, roleName);

@@ -1,13 +1,11 @@
 const deployLambda = require('../aws/deployLambda');
 const deployApi = require('../aws/deployApi');
-const getUserInput = require('../util/getUserInput');
 const checkForOptionType = require('../util/checkForOptionType');
 const getOption = require('../util/getOption');
 
 const {
   bamWarn,
   bamError,
-  msgAfterAction,
 } = require('../util/logger');
 
 const {
@@ -64,23 +62,9 @@ module.exports = async function deploy(resourceName, path, options) {
     return;
   }
 
-  const question = {
-    question: 'Please provide a brief description of your lambda: ',
-    validator: () => (true),
-    feedback: 'invalid description',
-    defaultAnswer: '',
-  };
-
   try {
-    const input = await getUserInput([question]);
-    if (input === undefined) {
-      bamWarn(msgAfterAction('lambda', resourceName, 'aborted', 'creation has been'));
-      return;
-    }
-
-    const [description] = input;
-    const lambdaData = await deployLambda(resourceName, description, path, roleName);
-    if (lambdaData) await writeLambda(lambdaData, path, description);
+    const lambdaData = await deployLambda(resourceName, path, roleName);
+    if (lambdaData) await writeLambda(lambdaData, path);
     if (deployLambdaOnly) return;
 
     const {

@@ -3,7 +3,6 @@ const init = require('./init');
 const { getRegion } = require('./getRegion');
 const { createBamRole, createDatabaseBamRole } = require('../aws/createRoles');
 const { doesRoleExist } = require('../aws/doesResourceExist');
-const checkForOptionType = require('../util/checkForOptionType');
 
 const {
   msgAfterAction,

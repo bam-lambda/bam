@@ -1,10 +1,10 @@
 {
   "name": "bam-lambda",
-  "version": "1.0.12",
+  "version": "2.0.0",
   "main": "index.js",
   "repository": "https://github.com/bam-lambda/bam.git",
   "author": "bam-lambda",
-  "description": "Deployment Tool for AWS Lambda and API Gateway",
+  "description": "Serverless framework for AWS Lambda and API Gateway",
   "keywords": [
     "lambda",
     "aws",

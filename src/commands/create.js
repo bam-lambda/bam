@@ -11,6 +11,7 @@ module.exports = async function create(lambdaName, options) {
   const invalidLambdaMsg = await validateLambdaCreation(lambdaName);
   const createHtmlTemplate = checkForOptionType(options, 'html');
   const createInvokerTemplate = checkForOptionType(options, 'invoke');
+  const includeComments = checkForOptionType(options, 'verbose');
 
   if (invalidLambdaMsg) {
     bamWarn(invalidLambdaMsg);
@@ -18,8 +19,8 @@ module.exports = async function create(lambdaName, options) {
   }
 
   if (createHtmlTemplate) {
-    await createLocalLambdaDirectory(lambdaName, createInvokerTemplate);
+    await createLocalLambdaDirectory(lambdaName, createInvokerTemplate, includeComments);
   } else {
-    await createLocalLambdaFile(lambdaName, createInvokerTemplate);
+    await createLocalLambdaFile(lambdaName, createInvokerTemplate, includeComments);
   }
 };

@@ -54,18 +54,23 @@ module.exports = async function redeploy(resourceName, path, options) {
     return apis[region] && apis[region][resourceName] && apis[region][resourceName].restApiId;
   };
 
+  api.restApiId = await getApiId();
+  const apiExistsOnAws = await doesApiExist(api.restApiId);
+
   const getApiResources = async () => {
     const { restApiId } = api;
-    const apiExistsOnAws = await doesApiExist(api.restApiId);
     if (restApiId && apiExistsOnAws) {
       api.resources = (await asyncGetResources({ restApiId })).items;
     }
   };
 
+  const userIsAddingEndpoint = checkForOptionType(options, 'endpoint');
+  const methodOption = getOption(options, 'method');
+  const userIsAddingMethods = options[methodOption];
+
   const roleOption = getOption(options, 'role');
   const permitDb = checkForOptionType(options, 'permitDb');
   const revokeDb = checkForOptionType(options, 'revokeDb');
-
   const userRole = options[roleOption] && options[roleOption][0];
   let roleName;
 
@@ -81,7 +86,6 @@ module.exports = async function redeploy(resourceName, path, options) {
   }
 
   const resolveHttpMethodsFromOptions = () => {
-    const methodOption = getOption(options, 'method');
     let addMethods = options[methodOption];
 
     const removeOption = getOption(options, 'rmmethod');
@@ -132,9 +136,6 @@ module.exports = async function redeploy(resourceName, path, options) {
 
   const updateApiGateway = async () => {
     const apiExistsInLocalLibrary = !!(api.restApiId);
-    const apiExistsOnAws = await doesApiExist(api.restApiId);
-    const userIsAddingMethods = api.addMethods.length > 0;
-    const userIsAddingEndpoint = checkForOptionType(options, 'endpoint');
     let data;
 
     if ((apiExistsInLocalLibrary || userIsAddingMethods || userIsAddingEndpoint) && !apiExistsOnAws) {
@@ -147,8 +148,6 @@ module.exports = async function redeploy(resourceName, path, options) {
   };
 
   const updateLocalLibraries = async (updatedApiData) => {
-    const apiExistsOnAws = await doesApiExist(api.restApiId);
-
     if (updatedApiData) {
       const { restApiId, endpoint } = updatedApiData;
 
@@ -171,24 +170,23 @@ module.exports = async function redeploy(resourceName, path, options) {
     return;
   }
 
-  api.restApiId = await getApiId();
-  const resources = await getApiResources();
-  if (resources) api.resources = resources;
+  if (apiExistsOnAws || userIsAddingEndpoint || userIsAddingMethods) {
+    await getApiResources();
+    resolveHttpMethodsFromOptions();
 
-  resolveHttpMethodsFromOptions();
+    const validateMethodsParams = {
+      addMethods: api.addMethods,
+      removeMethods: api.removeMethods,
+      existingMethods: api.existingMethods,
+      resourceName,
+      path,
+    };
 
-  const validateMethodsParams = {
-    addMethods: api.addMethods,
-    removeMethods: api.removeMethods,
-    existingMethods: api.existingMethods,
-    resourceName,
-    path,
-  };
-
-  const invalidHttp = await validateApiMethods(validateMethodsParams);
-  if (invalidHttp) {
-    bamWarn(invalidHttp);
-    return;
+    const invalidHttp = await validateApiMethods(validateMethodsParams);
+    if (invalidHttp) {
+      bamWarn(invalidHttp);
+      return;
+    }
   }
 
   const localLambda = (await readLambdasLibrary(path))[region][resourceName];

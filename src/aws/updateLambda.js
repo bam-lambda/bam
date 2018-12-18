@@ -16,7 +16,7 @@ const {
 
 const cwd = process.cwd();
 
-module.exports = async function updateLambda(lambdaName, path, roleName) {
+module.exports = async function updateLambda(lambdaName, path, roleName, dir) {
   const stagingPath = getStagingPath(path);
   const lambdaNameDirExists = await exists(`${cwd}/${lambdaName}`);
   const renameLambdaFileToIndexJs = async () => {
@@ -31,7 +31,7 @@ module.exports = async function updateLambda(lambdaName, path, roleName) {
   };
 
   const createDeployPkg = async () => {
-    if (lambdaNameDirExists) {
+    if (dir) {
       await createDeploymentPackageFromDir();
     } else {
       await createDirectory(`${lambdaName}`, stagingPath);

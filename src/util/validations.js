@@ -23,28 +23,14 @@ const {
 const cwd = process.cwd();
 
 // helper methods
-const lambdaFileExistsWithinDir = async (name) => {
+const lambdaFileExistsWithinDir = async (name) => { 
   const lambdaFileExists = await exists(`${cwd}/${name}/${name}.js`);
   return lambdaFileExists;
 };
 
-const dirOrFileExists = (files, name) => (
-  files.some((file) => {
-    const [fileWithoutExtension] = file.split('.');
-    return fileWithoutExtension === name;
-  })
-);
-
 const lambdaExistsInCwd = async (name) => {
-  const files = await readdir(cwd);
-  const fileOrDirExists = dirOrFileExists(files, name);
-
-  if (fileOrDirExists) {
-    const dirExists = files.includes(name);
-    return (dirExists ? lambdaFileExistsWithinDir(name) : true);
-  }
-
-  return false;
+  const lambdaFileExists = await exists(`${cwd}/${name}.js`);
+  return lambdaFileExists;
 };
 
 const lambdaHasValidName = (name) => {
@@ -54,7 +40,14 @@ const lambdaHasValidName = (name) => {
 
 const lambdaIsValidLambda = async (name) => {
   const lambdaIsInDir = await lambdaFileExistsWithinDir(name);
-  const path = lambdaIsInDir ? `${cwd}/${name}/${name}.js` : `${cwd}/${name}.js`;
+  const path = `${cwd}/${name}.js`;
+  const lambdaFile = await readFile(path, 'utf8');
+  return /exports\.handler/.test(lambdaFile);
+};
+
+const dirIsValidLambda = async (name) => {
+  const lambdaIsInDir = await lambdaFileExistsWithinDir(name);
+  const path = `${cwd}/${name}/${name}.js`;
   const lambdaFile = await readFile(path, 'utf8');
   return /exports\.handler/.test(lambdaFile);
 };
@@ -147,6 +140,30 @@ const validateLambdaDeployment = async (name) => {
   return status;
 };
 
+const validateLambdaDirDeployment = async (name) => {
+  const validations = [
+    {
+      validation: lambdaHasValidName,
+      feedbackType: 'invalidSyntax',
+      affirmative: false,
+    }, {
+      validation: lambdaFileExistsWithinDir,
+      feedbackType: 'doesNotExistInCwd',
+      affirmative: false,
+    }, {
+      validation: lambdaExistsOnAws,
+      feedbackType: 'alreadyExistsOnAws',
+      affirmative: true,
+    }, {
+      validation: dirIsValidLambda,
+      feedbackType: 'invalidLambda',
+      affirmative: false,
+    },
+  ];
+  const status = await validateResource(name, validations, customizeLambdaWarnings);
+  return status;
+};
+
 const validateLambdaReDeployment = async (name) => {
   const validations = [
     {
@@ -163,6 +180,30 @@ const validateLambdaReDeployment = async (name) => {
       affirmative: false,
     }, {
       validation: lambdaIsValidLambda,
+      feedbackType: 'invalidLambda',
+      affirmative: false,
+    },
+  ];
+  const status = await validateResource(name, validations, customizeLambdaWarnings);
+  return status;
+};
+
+const validateLambdaDirReDeployment = async (name) => {
+  const validations = [
+    {
+      validation: lambdaHasValidName,
+      feedbackType: 'invalidSyntax',
+      affirmative: false,
+    }, {
+      validation: lambdaFileExistsWithinDir,
+      feedbackType: 'doesNotExistInCwd',
+      affirmative: false,
+    }, {
+      validation: lambdaExistsOnAws,
+      feedbackType: 'useDeployInstead',
+      affirmative: false,
+    }, {
+      validation: dirIsValidLambda,
       feedbackType: 'invalidLambda',
       affirmative: false,
     },
@@ -259,9 +300,13 @@ const validateApiMethods = async (resourceData) => {
 };
 
 module.exports = {
+  lambdaExistsInCwd,
+  lambdaFileExistsWithinDir,
   validateLambdaRetrieval,
   validateLambdaDeployment,
+  validateLambdaDirDeployment,
   validateLambdaReDeployment,
+  validateLambdaDirReDeployment,
   validateLambdaCreation,
   validateApiMethods,
   validateTableCreation,

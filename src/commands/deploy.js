@@ -10,6 +10,7 @@ const {
 
 const {
   validateLambdaDeployment,
+  validateLambdaDirDeployment,
   validateApiMethods,
   validateRoleAssumption,
 } = require('../util/validations');
@@ -20,8 +21,10 @@ const {
   deleteStagingDirForLambda,
 } = require('../util/fileUtils');
 
+const deploymentType = require('../util/deploymentType');
+
 const stage = 'bam';
-const dbRole = 'databaseBamRole'; // TODO -- refactor for testing
+const dbRole = 'databaseBamRole';
 
 module.exports = async function deploy(resourceName, path, options) {
   const deployLambdaOnly = checkForOptionType(options, 'lambda');
@@ -41,8 +44,14 @@ module.exports = async function deploy(resourceName, path, options) {
   }
 
   const invalidLambdaMsg = await validateLambdaDeployment(resourceName);
-  if (invalidLambdaMsg) {
-    bamWarn(invalidLambdaMsg);
+  const invalidDirMsg = await validateLambdaDirDeployment(resourceName);
+  const { deployDir, invalidMsg, aborted } = await deploymentType(resourceName, invalidLambdaMsg, invalidDirMsg);
+  if (aborted) {
+    bamWarn(msgAfterAction('lambda', resourceName, 'aborted', 'creation has been'));
+    return;
+  }
+  if (invalidMsg) {
+    bamWarn(invalidMsg);
     return;
   }
 
@@ -63,7 +72,7 @@ module.exports = async function deploy(resourceName, path, options) {
   }
 
   try {
-    const lambdaData = await deployLambda(resourceName, path, roleName);
+    const lambdaData = await deployLambda(resourceName, path, roleName, deployDir);
     if (lambdaData) await writeLambda(lambdaData, path);
     if (deployLambdaOnly) return;
 

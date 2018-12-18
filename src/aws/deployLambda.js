@@ -23,12 +23,13 @@ const {
 
 const cwd = process.cwd();
 
-module.exports = async function deployLambda(lambdaName, path, roleName) {
+
+module.exports = async function deployLambda(lambdaName, path, roleName, dir) {
   const stagingPath = getStagingPath(path);
   const config = await readConfig(path);
   const { accountNumber } = config;
   const role = roleName || config.role;
-  const lambdaNameDirExists = await exists(`${cwd}/${lambdaName}`);
+
   const renameLambdaFileToIndexJs = async () => {
     await rename(`${stagingPath}/${lambdaName}/${lambdaName}.js`,
       `${stagingPath}/${lambdaName}/index.js`);
@@ -41,7 +42,7 @@ module.exports = async function deployLambda(lambdaName, path, roleName) {
   };
 
   const createDeploymentPackage = async () => {
-    if (lambdaNameDirExists) {
+    if (dir) {
       await createDeploymentPackageFromDir();
     } else {
       await createDirectory(lambdaName, stagingPath);

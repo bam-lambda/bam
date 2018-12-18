@@ -3,7 +3,6 @@ const {
   getStagingPath,
 } = require('./fileUtils');
 
-
 const getLambdaFileAboveExport = (lambdaFile) => {
   const lambdaFileParts = lambdaFile.split('exports');
   return lambdaFileParts.length > 1 ? lambdaFileParts[0] : '';

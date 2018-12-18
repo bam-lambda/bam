@@ -154,7 +154,8 @@ module.exports = async function redeploy(resourceName, path, options) {
 
   const updateLocalLibraries = async (updatedApiData) => {
     if (updatedApiData) {
-      const { restApiId, endpoint, methodPermissionIds } = updatedApiData;
+      const { restApiId, endpoint } = updatedApiData;
+      ({ methodPermissionIds } = updatedApiData);
       await writeApi(endpoint, methodPermissionIds, resourceName, restApiId, path);
     } else if (apiExistsOnAws) {
       const apis = await readApisLibrary(path);

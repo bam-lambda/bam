@@ -30,6 +30,7 @@ module.exports = {
     options: [
       { name: 'html', description: 'creates local directory containing index.html, main.css, and [resourceName].js' },
       { name: 'invoker', description: 'creates local file/directory templated to invoke another lambda' },
+      { name: 'verbose', description: 'creates template with instructional comments' },
     ],
     hasResource: true,
   },

@@ -72,7 +72,7 @@ describe('bam deploy lambda', () => {
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await createDirectory(lambdaName, cwd);
     await writeFile(`${cwd}/${lambdaName}/${lambdaName}.js`, testLambdaFile);
-    await deployLambda(lambdaName, lambdaDescription, path);
+    await deployLambda(lambdaName, lambdaDescription, path, roleName, true);
     const lambda = await doesLambdaExist(lambdaName);
     await promisifiedRimraf(`${cwd}/${lambdaName}`);
     expect(lambda).toBe(true);

@@ -17,7 +17,16 @@ exports.handler = async (event) => {
     Limit: 100,
   };
 
-  const data = JSON.stringify(await asyncScan(scanParameters));
+  const paragraphize = arr => (
+    arr.reduce((itemsArr, item) => {
+      const keys = Object.keys(item);
+      const paragraphs = keys.map(key => `<p>${key}: ${item[key]}</p>`).join('\n');
+      return itemsArr.concat([paragraphs]);
+    }, []).join('\n')
+  );
+
+  const data = await asyncScan(scanParameters);
+  const items = paragraphize(data.Items);
   const response = {};
 
   if (httpMethod === 'GET') {
@@ -39,7 +48,7 @@ exports.handler = async (event) => {
     };
 
     replacePlaceHolder('<style></style>', `<style>${css}</style>`);
-    replacePlaceHolder('Placeholder', data);
+    replacePlaceHolder('Placeholder', items);
 
     response.body = html;
   } else if (httpMethod === 'POST') {

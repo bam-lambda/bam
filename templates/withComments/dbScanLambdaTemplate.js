@@ -31,9 +31,18 @@ exports.handler = async (event) => {
     Limit: 100,
   };
 
-  // the data returned from a successful SCAN operation
-  const data = JSON.stringify(await asyncScan(scanParameters));
+  const paragraphize = arr => (
+    arr.reduce((itemsArr, item) => {
+      const keys = Object.keys(item);
+      const paragraphs = keys.map(key => `<p>${key}: ${item[key]}</p>`).join('\n');
+      return itemsArr.concat([paragraphs]);
+    }, []).join('\n')
+  );
 
+  // the data returned from a successful SCAN operation
+  const data = await asyncScan(scanParameters);
+  // convert returned data into paragraph elements
+  const items = paragraphize(data.Items);
   const response = {};
 
   // it's only necessary to handle the methods you have created
@@ -46,7 +55,7 @@ exports.handler = async (event) => {
     // content-type headers should be set to text/html
     response.headers = { 'content-type': 'text/html' };
     // what the page will show
-    const html = data;
+    const html = items;
     response.body = html;
   } else if (httpMethod === 'POST') {
     response.statusCode = 201;

@@ -30,9 +30,18 @@ exports.handler = async (event) => {
     Limit: 100,
   };
 
-  // the data returned from a successful SCAN operation
-  const data = JSON.stringify(await asyncScan(scanParameters));
+  const paragraphize = arr => (
+    arr.reduce((itemsArr, item) => {
+      const keys = Object.keys(item);
+      const paragraphs = keys.map(key => `<p>${key}: ${item[key]}</p>`).join('\n');
+      return itemsArr.concat([paragraphs]);
+    }, []).join('\n')
+  );
 
+  // the data returned from a successful SCAN operation
+  const data = await asyncScan(scanParameters);
+  // convert returned data into paragraph elements
+  const items = paragraphize(data.Items);
   const response = {};
 
   // it's only necessary to handle the methods you have created
@@ -67,7 +76,7 @@ exports.handler = async (event) => {
     // since there is no DOM, there should be an empty style tag in your
     // html file that you fill with the contents of your css file
     replacePlaceHolder('<style></style>', `<style>${css}</style>`);
-    replacePlaceHolder('Placeholder', data);
+    replacePlaceHolder('Placeholder', items);
 
     // what the page will show
     response.body = html;

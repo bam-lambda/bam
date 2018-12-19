@@ -210,7 +210,8 @@ module.exports = async function redeploy(resourceName, path, options) {
     writeLambda(lambdaData, path);
   }
 
-  const lambdaUpdateSuccess = await updateLambda(resourceName, path, roleName, deployDir);
+  const asyncFuncParams = [resourceName, path, roleName, deployDir];
+  const lambdaUpdateSuccess = await bamBam(updateLambda, { asyncFuncParams });
 
   if (lambdaUpdateSuccess) {
     const apiData = await updateApiGateway();

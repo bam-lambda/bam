@@ -75,7 +75,8 @@ module.exports = async function deploy(resourceName, path, options) {
 
   try {
     const asyncFuncParams = [resourceName, path, roleName, deployDir];
-    const lambdaData = await bamBam(deployLambda, { asyncFuncParams });    
+    const lambdaData = await bamBam(deployLambda, { asyncFuncParams });
+    
     if (lambdaData) await writeLambda(lambdaData, path);
     if (deployLambdaOnly) {    
       await deleteStagingDirForLambda(resourceName, path);

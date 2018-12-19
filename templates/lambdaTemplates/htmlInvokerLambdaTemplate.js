@@ -1,13 +1,12 @@
 // Welcome to your BAM! lambda!
 
-// all require statements for npm packages go here above this line
-
 // TODO: describe your lambda below:
 // description:
 
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const fs = require('fs');
+// all require statements for npm packages should be above this line
 
 // handler is the name of the function being exported; it's best to leave as the default
 exports.handler = async (event) => {

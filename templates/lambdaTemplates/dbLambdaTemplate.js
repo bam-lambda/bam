@@ -4,12 +4,12 @@
 // if you aren't using a custom role, be sure to deploy this lambda
 // using the --permitDb flag to ensure it has appropriate permissions
 
-const { promisify } = require('util');
-const AWS = require('aws-sdk');
-// all require statements for npm packages go here above this line
-
 // TODO: describe your lambda below:
 // description:
+
+const { promisify } = require('util');
+const AWS = require('aws-sdk');
+// all require statements for npm packages should be above this line
 
 // handler is the name of the function being exported; it's best to leave as the default
 exports.handler = async (event) => {
@@ -19,7 +19,6 @@ exports.handler = async (event) => {
   const asyncScan = promisify(docClient.scan.bind(docClient));
   const asyncPut = promisify(docClient.put.bind(docClient));
   const asyncGet = promisify(docClient.get.bind(docClient));
-
 
   const { pathParameters, queryStringParameters, httpMethod } = event;
 
@@ -37,43 +36,32 @@ exports.handler = async (event) => {
     }, []).join('\n')
   );
 
-
   const deleteParams = {
-    // TODO: change the name of your table
+    // TODO: replace "myTable" with the name of your table
     TableName: 'myTable',
     Key: {
-      // TODO: change "attributeName" to the name of the partition key
-      // and change "value" to the value of the partition key you are getting
+      // TODO: replace "attributeName" with the name of the table's partition key
+      // and replace "value" with the value of the partition key
       attributeName: 'value',
     },
   };
 
-  // DELETE record
-  await asyncDelete(deleteParams);
-
   const scanParameters = {
-    // TODO: change the name of your table
+    // TODO: replace "myTable" with the name of your table
     TableName: 'myTable',
     // the maximum number of records to return
     Limit: 100,
   };
 
-  // the data returned from a successful SCAN operation
-  const data = await asyncScan(scanParameters);
-  // convert returned data into paragraph elements
-  const items = paragraphize(data.Items);
-
   const getParams = {
-    // TODO: change the name of your table
+    // TODO: replace "myTable" with the name of your table
     TableName: 'myTable',
     Key: {
-      // TODO: change "attributeName" to the name of the partition key
-      // and change "value" to the value of the partition key you are getting
+      // TODO: replace "attributeName" with the name of the table's partition key
+      // and replace "value" with the value of the partition key
       attributeName: 'value',
     },
   };
-
-  const item = await asyncGet(getParams);
 
   const putParams = {
     Item: {
@@ -90,11 +78,22 @@ exports.handler = async (event) => {
       // replace "attribute3" with the name of the key you are adding
       attribute3: true,
     },
-    // TODO: change the name of your table
+    // TODO: replace "myTable" with the name of your table
     TableName: 'myTable',
   };
 
+  // PUT record
   await asyncPut(putParams);
+  // GET record
+  const getData = await asyncGet(getParams);
+  // convert returned data into a paragraph element
+  const item = paragraphize([getData.Item]);
+  // the data returned from a successful SCAN operation
+  const scanData = await asyncScan(scanParameters);
+  // convert returned data into paragraph elements
+  const items = paragraphize(scanData.Items);
+  // DELETE record
+  await asyncDelete(deleteParams);
 
   const response = {};
 

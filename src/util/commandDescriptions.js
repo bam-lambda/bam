@@ -43,7 +43,7 @@ module.exports = {
     description: 'deletes existing lambda + endpoint',
     options: [
       { name: 'dbtable', description: 'deletes DynamoDB table' },
-      { name: 'endpoint', description: 'deletes endpoint only' },
+      { name: 'endpointOnly', description: 'deletes endpoint only' },
     ],
     hasResource: true,
   },

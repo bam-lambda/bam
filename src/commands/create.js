@@ -21,7 +21,12 @@ module.exports = async function create(lambdaName, options) {
   }
 
   if (createHtmlTemplate) {
-    await createLocalLambdaDirectory(lambdaName, createInvokerTemplate, includeComments);
+    await createLocalLambdaDirectory(
+      lambdaName,
+      createInvokerTemplate,
+      createDbScanTemplate,
+      includeComments,
+    );
   } else {
     await createLocalLambdaFile(
       lambdaName,

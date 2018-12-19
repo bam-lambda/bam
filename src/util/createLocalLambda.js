@@ -50,7 +50,12 @@ const createLocalLambdaFile = async (
   bamLog(msgAfterAction('file', `${lambdaName}.js`, 'created'));
 };
 
-const createLocalLambdaDirectory = async (lambdaName, createInvokerTemplate, includeComments) => {
+const createLocalLambdaDirectory = async (
+  lambdaName,
+  createInvokerTemplate,
+  createDbScanTemplate,
+  includeComments,
+) => {
   const cwd = process.cwd();
 
   await mkdir(lambdaName);
@@ -62,6 +67,8 @@ const createLocalLambdaDirectory = async (lambdaName, createInvokerTemplate, inc
 
   if (createInvokerTemplate) {
     templateType = 'htmlInvokerLambda';
+  } else if (createDbScanTemplate) {
+    templateType = 'htmlDbScanLambda';
   } else {
     templateType = 'htmlLambda';
   }

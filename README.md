@@ -78,7 +78,7 @@ npm install -g bam-lambda
 * *`--methods`*: specifies HTTP method(s) for the endpoint
 * *`--rmMethods`*: specifies a HTTP method or methods to remove from endpoint
 * *`--addEndpoint`*: connects endpoint to lambda
-* * `--revokeDb`*: changes role associated with lambda to role specified in user config
+* *`--revokeDb`*: changes role associated with lambda to role specified in user config
 
 ---
 

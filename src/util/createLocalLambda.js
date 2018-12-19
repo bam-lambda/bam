@@ -35,55 +35,33 @@ const writeTemplateLocally = async (lambdaName, template, withinDir) => {
   await writeFile(`${cwd}/${withinDir ? `${lambdaName}/` : ''}${lambdaName}.js`, template);
 };
 
-const createLocalLambdaFile = async (
+module.exports = async function createLocalLambda(
   lambdaName,
   createInvokerTemplate,
   createDbTemplate,
   includeComments,
-) => {
-  let templateType;
-
-  if (createInvokerTemplate) {
-    templateType = 'invokerLambda';
-  } else if (createDbTemplate) {
-    templateType = 'dbLambda';
-  } else {
-    templateType = 'lambda';
-  }
-
-  const template = await getTemplate(templateType, includeComments);
-  await writeTemplateLocally(lambdaName, template, false);
-  bamLog(msgAfterAction('file', `${lambdaName}.js`, 'created'));
-};
-
-const createLocalLambdaDirectory = async (
-  lambdaName,
-  createInvokerTemplate,
-  createDbTemplate,
-  includeComments,
-) => {
+  createHtmlTemplate,
+) {
   const cwd = process.cwd();
-
-  await mkdir(lambdaName);
-  await copyFile(`${__dirname}/../../templates/indexTemplate.html`, `${cwd}/${lambdaName}/index.html`);
-  await copyFile(`${__dirname}/../../templates/mainTemplate.css`, `${cwd}/${lambdaName}/main.css`);
-
   let templateType;
 
   if (createInvokerTemplate) {
-    templateType = 'htmlInvokerLambda';
+    templateType = createHtmlTemplate ? 'htmlInvokerLambda' : 'invokerLambda';
   } else if (createDbTemplate) {
-    templateType = 'htmlDbLambda';
+    templateType = createHtmlTemplate ? 'htmlDbLambda' : 'dbLambda';
   } else {
-    templateType = 'htmlLambda';
+    templateType = createHtmlTemplate ? 'htmlLambda' : 'lambda';
+  }
+
+  if (createHtmlTemplate) {
+    await mkdir(lambdaName);
+    await copyFile(`${__dirname}/../../templates/indexTemplate.html`, `${cwd}/${lambdaName}/index.html`);
+    await copyFile(`${__dirname}/../../templates/mainTemplate.css`, `${cwd}/${lambdaName}/main.css`);
   }
 
   const template = await getTemplate(templateType, includeComments);
-  await writeTemplateLocally(lambdaName, template, true);
-  bamLog(msgAfterAction('directory', `${lambdaName}`, 'created'));
-};
-
-module.exports = {
-  createLocalLambdaFile,
-  createLocalLambdaDirectory,
+  await writeTemplateLocally(lambdaName, template, createHtmlTemplate);
+  const resource = createHtmlTemplate ? 'directory' : 'file';
+  const name = createHtmlTemplate ? lambdaName : `${lambdaName}.js`;
+  bamLog(msgAfterAction(resource, name, 'created'));
 };

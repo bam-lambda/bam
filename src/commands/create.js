@@ -1,11 +1,7 @@
 const { bamWarn } = require('../util/logger');
 const { validateLambdaCreation } = require('../util/validations');
 const checkForOptionType = require('../util/checkForOptionType');
-
-const {
-  createLocalLambdaFile,
-  createLocalLambdaDirectory,
-} = require('../util/createLocalLambda');
+const createLocalLambda = require('../util/createLocalLambda');
 
 module.exports = async function create(lambdaName, options) {
   const invalidLambdaMsg = await validateLambdaCreation(lambdaName);
@@ -19,19 +15,11 @@ module.exports = async function create(lambdaName, options) {
     return;
   }
 
-  if (createHtmlTemplate) {
-    await createLocalLambdaDirectory(
-      lambdaName,
-      createInvokerTemplate,
-      createDbTemplate,
-      includeComments,
-    );
-  } else {
-    await createLocalLambdaFile(
-      lambdaName,
-      createInvokerTemplate,
-      createDbTemplate,
-      includeComments,
-    );
-  }
+  await createLocalLambda(
+    lambdaName,
+    createInvokerTemplate,
+    createDbTemplate,
+    includeComments,
+    createHtmlTemplate,
+  );
 };

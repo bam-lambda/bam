@@ -38,24 +38,15 @@ const writeTemplateLocally = async (lambdaName, template, withinDir) => {
 const createLocalLambdaFile = async (
   lambdaName,
   createInvokerTemplate,
-  createDbScanTemplate,
-  createDbPutTemplate,
-  createDbGetTemplate,
-  createDbDeleteTemplate,
+  createDbTemplate,
   includeComments,
 ) => {
   let templateType;
 
   if (createInvokerTemplate) {
     templateType = 'invokerLambda';
-  } else if (createDbScanTemplate) {
-    templateType = 'dbScanLambda';
-  } else if (createDbGetTemplate) {
-    templateType = 'dbGetLambda';
-  } else if (createDbDeleteTemplate) {
-    templateType = 'dbDeleteLambda';
-  } else if (createDbPutTemplate) {
-    templateType = 'dbPutLambda';
+  } else if (createDbTemplate) {
+    templateType = 'dbLambda';
   } else {
     templateType = 'lambda';
   }
@@ -68,7 +59,7 @@ const createLocalLambdaFile = async (
 const createLocalLambdaDirectory = async (
   lambdaName,
   createInvokerTemplate,
-  createDbScanTemplate,
+  createDbTemplate,
   includeComments,
 ) => {
   const cwd = process.cwd();
@@ -81,8 +72,8 @@ const createLocalLambdaDirectory = async (
 
   if (createInvokerTemplate) {
     templateType = 'htmlInvokerLambda';
-  } else if (createDbScanTemplate) {
-    templateType = 'htmlDbScanLambda';
+  } else if (createDbTemplate) {
+    templateType = 'htmlDbLambda';
   } else {
     templateType = 'htmlLambda';
   }

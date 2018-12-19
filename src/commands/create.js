@@ -11,10 +11,7 @@ module.exports = async function create(lambdaName, options) {
   const invalidLambdaMsg = await validateLambdaCreation(lambdaName);
   const createHtmlTemplate = checkForOptionType(options, 'html');
   const createInvokerTemplate = checkForOptionType(options, 'invoke');
-  const createDbPutTemplate = checkForOptionType(options, 'dbput');
-  const createDbScanTemplate = checkForOptionType(options, 'dbscan');
-  const createDbGetTemplate = checkForOptionType(options, 'dbget');
-  const createDbDeleteTemplate = checkForOptionType(options, 'dbdelete');
+  const createDbTemplate = checkForOptionType(options, 'db');
   const includeComments = checkForOptionType(options, 'verbose');
 
   if (invalidLambdaMsg) {
@@ -26,17 +23,14 @@ module.exports = async function create(lambdaName, options) {
     await createLocalLambdaDirectory(
       lambdaName,
       createInvokerTemplate,
-      createDbScanTemplate,
+      createDbTemplate,
       includeComments,
     );
   } else {
     await createLocalLambdaFile(
       lambdaName,
       createInvokerTemplate,
-      createDbScanTemplate,
-      createDbPutTemplate,
-      createDbGetTemplate,
-      createDbDeleteTemplate,
+      createDbTemplate,
       includeComments,
     );
   }

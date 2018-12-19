@@ -18,7 +18,6 @@ const cwd = process.cwd();
 
 module.exports = async function updateLambda(lambdaName, path, roleName, dir) {
   const stagingPath = getStagingPath(path);
-  const lambdaNameDirExists = await exists(`${cwd}/${lambdaName}`);
   const renameLambdaFileToIndexJs = async () => {
     await rename(`${stagingPath}/${lambdaName}/${lambdaName}.js`,
       `${stagingPath}/${lambdaName}/index.js`);

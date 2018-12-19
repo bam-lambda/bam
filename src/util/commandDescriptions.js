@@ -30,6 +30,7 @@ module.exports = {
     options: [
       { name: 'html', description: 'creates local directory containing index.html, main.css, and [resourceName].js' },
       { name: 'invoker', description: 'creates local file/directory templated to invoke another lambda' },
+      { name: 'db', description: 'creates local file/directory templated to work with a DynamoDB table' },
       { name: 'verbose', description: 'creates template with instructional comments' },
     ],
     hasResource: true,
@@ -44,7 +45,6 @@ module.exports = {
     options: [
       { name: 'dbtable', description: 'deletes DynamoDB table' },
       { name: 'endpointOnly', description: 'deletes endpoint only' },
-      { name: 'lambdaOnly', description: 'deletes lambda only' },
     ],
     hasResource: true,
   },

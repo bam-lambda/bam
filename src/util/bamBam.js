@@ -1,5 +1,5 @@
 const delay = require('./delay');
-const { bamError, bamLog, resetCursorPosition } = require('./logger');
+const { bamLog, resetCursorPosition } = require('./logger');
 
 const firstTooManyRequestsException = (errorCode, retryCounter) => (
   errorCode === 'TooManyRequestsException' && retryCounter === 0
@@ -42,6 +42,6 @@ module.exports = async function bamBam(asyncFunc, {
       const data = await retry(errorCode);
       return data;
     }
-    bamError(e);
+    throw(e);
   }
 };

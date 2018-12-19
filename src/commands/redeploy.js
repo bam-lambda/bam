@@ -21,6 +21,7 @@ const {
 } = require('../util/validations');
 
 const {
+  readConfig,
   readLambdasLibrary,
   writeLambda,
   writeApi,
@@ -77,7 +78,10 @@ module.exports = async function redeploy(resourceName, path, options) {
   const userRole = options[roleOption] && options[roleOption][0];
   let roleName;
 
-  if (revokeDb) roleName = '';
+  if (revokeDb) {
+    const configJson = await readConfig(path);
+    roleName = configJson.role;
+  }
   if (permitDb) roleName = dbRole;
   if (userRole) {
     const invalidRoleMsg = await validateRoleAssumption(userRole);
@@ -154,7 +158,8 @@ module.exports = async function redeploy(resourceName, path, options) {
 
   const updateLocalLibraries = async (updatedApiData) => {
     if (updatedApiData) {
-      const { restApiId, endpoint, methodPermissionIds } = updatedApiData;
+      const { restApiId, endpoint } = updatedApiData;
+      ({ methodPermissionIds } = updatedApiData);
       await writeApi(endpoint, methodPermissionIds, resourceName, restApiId, path);
     } else if (apiExistsOnAws) {
       const apis = await readApisLibrary(path);
@@ -205,7 +210,8 @@ module.exports = async function redeploy(resourceName, path, options) {
     writeLambda(lambdaData, path);
   }
 
-  const lambdaUpdateSuccess = await updateLambda(resourceName, path, roleName, deployDir);
+  const asyncFuncParams = [resourceName, path, roleName, deployDir];
+  const lambdaUpdateSuccess = await bamBam(updateLambda, { asyncFuncParams });
 
   if (lambdaUpdateSuccess) {
     const apiData = await updateApiGateway();

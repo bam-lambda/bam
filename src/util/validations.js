@@ -7,7 +7,6 @@ const {
 } = require('../aws/doesResourceExist');
 
 const {
-  readdir,
   exists,
   readFile,
   readApisLibrary,
@@ -23,7 +22,7 @@ const {
 const cwd = process.cwd();
 
 // helper methods
-const lambdaFileExistsWithinDir = async (name) => { 
+const lambdaFileExistsWithinDir = async (name) => {
   const lambdaFileExists = await exists(`${cwd}/${name}/${name}.js`);
   return lambdaFileExists;
 };
@@ -39,14 +38,12 @@ const lambdaHasValidName = (name) => {
 };
 
 const lambdaIsValidLambda = async (name) => {
-  const lambdaIsInDir = await lambdaFileExistsWithinDir(name);
   const path = `${cwd}/${name}.js`;
   const lambdaFile = await readFile(path, 'utf8');
   return /exports\.handler/.test(lambdaFile);
 };
 
 const dirIsValidLambda = async (name) => {
-  const lambdaIsInDir = await lambdaFileExistsWithinDir(name);
   const path = `${cwd}/${name}/${name}.js`;
   const lambdaFile = await readFile(path, 'utf8');
   return /exports\.handler/.test(lambdaFile);

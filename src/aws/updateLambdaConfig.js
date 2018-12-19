@@ -1,7 +1,14 @@
 const { asyncLambdaUpdateFunctionConfiguration } = require('./awsFunctions');
 const getLambda = require('./getLambda');
-const { readConfig } = require('../util/fileUtils');
 const { bamError } = require('../util/logger');
+const { asyncGetRegion } = require('../util/getRegion');
+const getDescription = require('../util/getDescription');
+
+const {
+  readConfig,
+  readLambdasLibrary,
+  writeLambda,
+} = require('../util/fileUtils');
 
 const getRole = async (lambdaName) => {
   let role;
@@ -19,6 +26,15 @@ const getRole = async (lambdaName) => {
 module.exports = async function updateLambdaConfig(lambdaName, path, roleName) {
   const config = await readConfig(path);
   const { accountNumber } = config;
+  const region = await asyncGetRegion();
+  const description = await getDescription(lambdaName, path);
+
+  const lambdas = await readLambdasLibrary(path);
+  const lambda = lambdas[region][lambdaName];
+
+  let currentDescription;
+  if (lambda) currentDescription = lambda.description;
+  const descriptionIsBeingUpdated = currentDescription !== description;
 
   let updatedRoleArn;
   if (roleName) {
@@ -26,12 +42,16 @@ module.exports = async function updateLambdaConfig(lambdaName, path, roleName) {
   }
 
   const currentRoleArn = await getRole(lambdaName);
-  if (updatedRoleArn && currentRoleArn !== updatedRoleArn) {
+  const roleIsBeingUpdated = updatedRoleArn && currentRoleArn !== updatedRoleArn;
+  if (roleIsBeingUpdated || descriptionIsBeingUpdated) {
     const configParams = {
       FunctionName: lambdaName,
-      Role: updatedRoleArn,
+      Description: description,
     };
 
-    await asyncLambdaUpdateFunctionConfiguration(configParams);
+    if (roleIsBeingUpdated) configParams.Role = updatedRoleArn;
+
+    const lambdaData = await asyncLambdaUpdateFunctionConfiguration(configParams);
+    if (descriptionIsBeingUpdated) await writeLambda(lambdaData, path);
   }
 };

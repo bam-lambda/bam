@@ -20,10 +20,11 @@ const getTemplate = async (withOrWithout, templateType) => {
   return lambdaTemplateWithRegion;
 };
 
-const writeTemplateLocally = async (lambdaName, withOrWithout, templateType) => {
+const writeTemplateLocally = async (lambdaName, withOrWithout, templateType, withinDir) => {
   const cwd = process.cwd();
   const template = await getTemplate(withOrWithout, templateType);
-  await writeFile(`${cwd}/${lambdaName}.js`, template);
+
+  await writeFile(`${cwd}/${withinDir ? `${lambdaName}/` : ''}${lambdaName}.js`, template);
 };
 
 const createLocalLambdaFile = async (
@@ -46,7 +47,7 @@ const createLocalLambdaFile = async (
     templateType = 'lambda';
   }
 
-  await writeTemplateLocally(lambdaName, withOrWithout, templateType);
+  await writeTemplateLocally(lambdaName, withOrWithout, templateType, false);
   bamLog(msgAfterAction('file', `${lambdaName}.js`, 'created'));
 };
 
@@ -73,7 +74,7 @@ const createLocalLambdaDirectory = async (
     templateType = 'htmlLambda';
   }
 
-  await writeTemplateLocally(lambdaName, withOrWithout, templateType);
+  await writeTemplateLocally(lambdaName, withOrWithout, templateType, true);
   bamLog(msgAfterAction('directory', `${lambdaName}`, 'created'));
 };
 

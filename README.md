@@ -85,7 +85,7 @@ npm install -g bam-lambda
 *deletes existing lambda + endpoint*
 ##### Flags
 * *`--dbtable`*: deletes DynamoDB table
-* *`--endpoint`*: deletes endpoint only
+* *`--endpointOnly`*: deletes endpoint only
 
 ---
 

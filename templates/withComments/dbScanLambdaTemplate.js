@@ -26,6 +26,7 @@ exports.handler = async (event) => {
   // const name = queryStringParameters ? queryStringParameters.name : 'no name'
 
   const scanParameters = {
+    // TODO: change the name of your table
     TableName: 'myTable',
     // the maximum number of records to return
     Limit: 100,

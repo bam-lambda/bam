@@ -15,9 +15,9 @@ const {
 const getTemplate = async (withOrWithoutComments, templateType) => {
   const userRegion = await asyncGetRegion();
   const lambdaTemplateLocation = `${__dirname}/../../templates/${withOrWithoutComments}/${templateType}Template.js`;
-  const lambdaTemplate = await readFile(lambdaTemplateLocation, 'utf8')
-    .replace('userRegion', userRegion);
-  return lambdaTemplate;
+  const lambdaTemplate = await readFile(lambdaTemplateLocation, 'utf8');
+  const lambdaTemplateWithRegion = lambdaTemplate.replace('userRegion', userRegion);
+  return lambdaTemplateWithRegion;
 };
 
 const writeTemplateLocally = async (lambdaName, withOrWithoutComments, templateType) => {

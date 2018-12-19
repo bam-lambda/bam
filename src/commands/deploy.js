@@ -2,6 +2,7 @@ const deployLambda = require('../aws/deployLambda');
 const deployApi = require('../aws/deployApi');
 const checkForOptionType = require('../util/checkForOptionType');
 const getOption = require('../util/getOption');
+const bamBam = require('../util/bamBam');
 
 const {
   bamWarn,
@@ -73,7 +74,9 @@ module.exports = async function deploy(resourceName, path, options) {
   }
 
   try {
-    const lambdaData = await deployLambda(resourceName, path, roleName, deployDir);
+    const asyncFuncParams = [resourceName, path, roleName, deployDir];
+    const lambdaData = await bamBam(deployLambda, { asyncFuncParams });
+    
     if (lambdaData) await writeLambda(lambdaData, path);
     if (deployLambdaOnly) {    
       await deleteStagingDirForLambda(resourceName, path);

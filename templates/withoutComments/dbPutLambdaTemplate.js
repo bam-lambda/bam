@@ -1,33 +1,33 @@
+const { promisify } = require('util');
+const AWS = require('aws-sdk');
+
 // description:
 
-const AWS = require('aws-sdk');
-const { promisify } = require('util');
-
 exports.handler = async (event) => {
-  const apiVersion = 'latest';
   const region = 'userRegion';
-  const lambda = new AWS.Lambda({ apiVersion, region });
-  const asyncInvokeLambda = promisify(lambda.invoke.bind(lambda));
+  const docClient = new AWS.DynamoDB.DocumentClient({ region });
+  const asyncPut = promisify(docClient.scan.bind(docClient));
 
   const { pathParameters, queryStringParameters, httpMethod } = event;
   const pathParams = pathParameters ? pathParameters.proxy : '';
 
-  const params = {
-    FunctionName: '',
-    InvocationType: 'RequestResponse',
-    LogType: 'Tail',
-    Payload: '{}',
+  const putParams = {
+    Item: {
+      id: 1,
+      attribute2: 'a string',
+      attribute3: true,
+    },
+    TableName: 'myTable',
   };
 
-  const data = await asyncInvokeLambda(params);
-  const payloadFromInvokedLambda = JSON.parse(data.Payload);
-  const html = payloadFromInvokedLambda;
+  await asyncPut(putParams);
 
   const response = {};
 
   if (httpMethod === 'GET') {
     response.statusCode = 200;
     response.headers = { 'content-type': 'text/html' };
+    const html = '<p>Text that will be displayed on the page when endpoint is visited</p>';
     response.body = html;
   } else if (httpMethod === 'POST') {
     response.statusCode = 201;

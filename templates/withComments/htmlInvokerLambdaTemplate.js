@@ -11,9 +11,9 @@ const fs = require('fs');
 
 // handler is the name of the function being exported; it's best to leave as the default
 exports.handler = async (event) => {
-  // TODO: replace 'user-region' with your AWS region
-  AWS.config.region = 'user-region';
-  const lambda = new AWS.Lambda();
+  const apiVersion = 'latest';
+  const region = 'userRegion';
+  const lambda = new AWS.Lambda({ apiVersion, region });
   const asyncInvokeLambda = promisify(lambda.invoke.bind(lambda));
 
   const { pathParameters, queryStringParameters, httpMethod } = event;

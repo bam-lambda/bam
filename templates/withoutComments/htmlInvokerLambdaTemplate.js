@@ -5,9 +5,9 @@ const { promisify } = require('util');
 const fs = require('fs');
 
 exports.handler = async (event) => {
-  // TODO: replace 'user-region' with your AWS region
-  AWS.config.region = 'user-region';
-  const lambda = new AWS.Lambda();
+  const apiVersion = 'latest';
+  const region = 'userRegion';
+  const lambda = new AWS.Lambda({ apiVersion, region });
   const asyncInvokeLambda = promisify(lambda.invoke.bind(lambda));
 
   const { pathParameters, queryStringParameters, httpMethod } = event;

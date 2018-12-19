@@ -12,49 +12,61 @@ const {
   msgAfterAction,
 } = require('../util/logger');
 
-const createLocalLambdaFile = async (lambdaName, createInvokerTemplate, includeComments) => {
-  const cwd = process.cwd();
+const getTemplate = async (withOrWithoutComments, templateType) => {
   const userRegion = await asyncGetRegion();
+  const lambdaTemplateLocation = `${__dirname}/../../templates/${withOrWithoutComments}/${templateType}Template.js`;
+  const lambdaTemplate = await readFile(lambdaTemplateLocation, 'utf8')
+    .replace('userRegion', userRegion);
+  return lambdaTemplate;
+};
 
-  let lambdaTemplate;
-  if (createInvokerTemplate && includeComments) {
-    lambdaTemplate = await readFile(`${__dirname}/../../templates/withComments/invokerLambdaTemplate.js`, 'utf8');
-    lambdaTemplate = lambdaTemplate.replace('UserRegion', userRegion);
-  } else if (createInvokerTemplate) {
-    lambdaTemplate = await readFile(`${__dirname}/../../templates/withoutComments/invokerLambdaTemplate.js`, 'utf8');
-    lambdaTemplate = lambdaTemplate.replace('UserRegion', userRegion);
-  } else if (includeComments) {
-    lambdaTemplate = await readFile(`${__dirname}/../../templates/withComments/lambdaTemplate.js`, 'utf8');
+const writeTemplateLocally = async (lambdaName, withOrWithoutComments, templateType) => {
+  const cwd = process.cwd();
+  const template = await getTemplate(withOrWithoutComments, templateType);
+  await writeFile(`${cwd}/${lambdaName}.js`, template);
+};
+
+const createLocalLambdaFile = async (
+  lambdaName,
+  createInvokerTemplate,
+  createDbScanTemplate,
+  createDbPutTemplate,
+  includeComments,
+) => {
+  let templateType;
+  const withOrWithoutComments = includeComments ? 'With' : 'Without';
+
+  if (createInvokerTemplate) {
+    templateType = 'invokerLambda';
+  } else if (createDbScanTemplate) {
+    templateType = 'dbScanLambda';
+  } else if (createDbPutTemplate) {
+    templateType = 'dbPutLambda';
   } else {
-    lambdaTemplate = await readFile(`${__dirname}/../../templates/withoutComments/lambdaTemplate.js`, 'utf8');
+    templateType = 'lambda';
   }
 
-  await writeFile(`${cwd}/${lambdaName}.js`, lambdaTemplate);
+  await writeTemplateLocally(lambdaName, withOrWithoutComments, templateType);
   bamLog(msgAfterAction('file', `${lambdaName}.js`, 'created'));
 };
 
 const createLocalLambdaDirectory = async (lambdaName, createInvokerTemplate, includeComments) => {
   const cwd = process.cwd();
-  const userRegion = await asyncGetRegion();
 
   await mkdir(lambdaName);
   await copyFile(`${__dirname}/../../templates/indexTemplate.html`, `${cwd}/${lambdaName}/index.html`);
   await copyFile(`${__dirname}/../../templates/mainTemplate.css`, `${cwd}/${lambdaName}/main.css`);
 
-  let lambdaTemplate;
-  if (createInvokerTemplate && includeComments) {
-    lambdaTemplate = await readFile(`${__dirname}/../../templates/withComments/htmlInvokerLambdaTemplate.js`, 'utf8');
-    lambdaTemplate = lambdaTemplate.replace('UserRegion', userRegion);
-  } else if (createInvokerTemplate) {
-    lambdaTemplate = await readFile(`${__dirname}/../../templates/withoutComments/htmlInvokerLambdaTemplate.js`, 'utf8');
-    lambdaTemplate = lambdaTemplate.replace('UserRegion', userRegion);
-  } else if (includeComments) {
-    lambdaTemplate = await readFile(`${__dirname}/../../templates/withComments/htmlLambdaTemplate.js`, 'utf8');
+  let templateType;
+  const withOrWithoutComments = includeComments ? 'With' : 'Without';
+
+  if (createInvokerTemplate) {
+    templateType = 'htmlInvokerLambda';
   } else {
-    lambdaTemplate = await readFile(`${__dirname}/../../templates/withoutComments/htmlLambdaTemplate.js`, 'utf8');
+    templateType = 'htmlLambda';
   }
 
-  await writeFile(`${cwd}/${lambdaName}/${lambdaName}.js`, lambdaTemplate);
+  await writeTemplateLocally(lambdaName, withOrWithoutComments, templateType);
   bamLog(msgAfterAction('directory', `${lambdaName}`, 'created'));
 };
 

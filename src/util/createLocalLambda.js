@@ -12,17 +12,17 @@ const {
   msgAfterAction,
 } = require('../util/logger');
 
-const getTemplate = async (withOrWithoutComments, templateType) => {
+const getTemplate = async (withOrWithout, templateType) => {
   const userRegion = await asyncGetRegion();
-  const lambdaTemplateLocation = `${__dirname}/../../templates/${withOrWithoutComments}/${templateType}Template.js`;
+  const lambdaTemplateLocation = `${__dirname}/../../templates/${withOrWithout}Comments/${templateType}Template.js`;
   const lambdaTemplate = await readFile(lambdaTemplateLocation, 'utf8');
   const lambdaTemplateWithRegion = lambdaTemplate.replace('userRegion', userRegion);
   return lambdaTemplateWithRegion;
 };
 
-const writeTemplateLocally = async (lambdaName, withOrWithoutComments, templateType) => {
+const writeTemplateLocally = async (lambdaName, withOrWithout, templateType) => {
   const cwd = process.cwd();
-  const template = await getTemplate(withOrWithoutComments, templateType);
+  const template = await getTemplate(withOrWithout, templateType);
   await writeFile(`${cwd}/${lambdaName}.js`, template);
 };
 
@@ -34,7 +34,7 @@ const createLocalLambdaFile = async (
   includeComments,
 ) => {
   let templateType;
-  const withOrWithoutComments = includeComments ? 'With' : 'Without';
+  const withOrWithout = includeComments ? 'With' : 'Without';
 
   if (createInvokerTemplate) {
     templateType = 'invokerLambda';
@@ -46,7 +46,7 @@ const createLocalLambdaFile = async (
     templateType = 'lambda';
   }
 
-  await writeTemplateLocally(lambdaName, withOrWithoutComments, templateType);
+  await writeTemplateLocally(lambdaName, withOrWithout, templateType);
   bamLog(msgAfterAction('file', `${lambdaName}.js`, 'created'));
 };
 
@@ -58,7 +58,7 @@ const createLocalLambdaDirectory = async (lambdaName, createInvokerTemplate, inc
   await copyFile(`${__dirname}/../../templates/mainTemplate.css`, `${cwd}/${lambdaName}/main.css`);
 
   let templateType;
-  const withOrWithoutComments = includeComments ? 'With' : 'Without';
+  const withOrWithout = includeComments ? 'With' : 'Without';
 
   if (createInvokerTemplate) {
     templateType = 'htmlInvokerLambda';
@@ -66,7 +66,7 @@ const createLocalLambdaDirectory = async (lambdaName, createInvokerTemplate, inc
     templateType = 'htmlLambda';
   }
 
-  await writeTemplateLocally(lambdaName, withOrWithoutComments, templateType);
+  await writeTemplateLocally(lambdaName, withOrWithout, templateType);
   bamLog(msgAfterAction('directory', `${lambdaName}`, 'created'));
 };
 

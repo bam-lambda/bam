@@ -22,7 +22,6 @@ module.exports = async function destroy(resourceName, path, options) {
   bamSpinner.start();
 
   const destroyDb = checkForOptionType(options, 'db');
-  const destroyLambda = checkForOptionType(options, 'lambda');
   const destroyEndpoint = checkForOptionType(options, 'endpoint');
   const region = await asyncGetRegion();
   let deletionMsg = '';
@@ -81,8 +80,6 @@ module.exports = async function destroy(resourceName, path, options) {
 
   if (destroyDb) {
     await deleteTable();
-  } else if (destroyLambda) {
-    await deleteLambda();
   } else if (destroyEndpoint) {
     await deleteEndpoint();
   } else {

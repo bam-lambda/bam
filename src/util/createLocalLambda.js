@@ -23,7 +23,7 @@ const stripComments = template => (
 
 const getTemplate = async (templateType, includeComments) => {
   const userRegion = await asyncGetRegion();
-  const lambdaTemplateLocation = `${__dirname}/../../templates/${templateType}Template.js`;
+  const lambdaTemplateLocation = `${__dirname}/../../templates/lambdaTemplates/${templateType}Template.js`;
   const lambdaTemplate = await readFile(lambdaTemplateLocation, 'utf8');
   const lambdaTemplateWithRegion = lambdaTemplate.replace('userRegion', userRegion);
   return includeComments ? lambdaTemplateWithRegion : stripComments(lambdaTemplateWithRegion);
@@ -40,6 +40,8 @@ const createLocalLambdaFile = async (
   createInvokerTemplate,
   createDbScanTemplate,
   createDbPutTemplate,
+  createDbGetTemplate,
+  createDbDeleteTemplate,
   includeComments,
 ) => {
   let templateType;
@@ -48,6 +50,10 @@ const createLocalLambdaFile = async (
     templateType = 'invokerLambda';
   } else if (createDbScanTemplate) {
     templateType = 'dbScanLambda';
+  } else if (createDbGetTemplate) {
+    templateType = 'dbGetLambda';
+  } else if (createDbDeleteTemplate) {
+    templateType = 'dbDeleteLambda';
   } else if (createDbPutTemplate) {
     templateType = 'dbPutLambda';
   } else {

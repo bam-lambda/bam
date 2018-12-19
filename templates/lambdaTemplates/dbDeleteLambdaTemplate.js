@@ -15,7 +15,7 @@ const AWS = require('aws-sdk');
 exports.handler = async (event) => {
   const region = 'userRegion';
   const docClient = new AWS.DynamoDB.DocumentClient({ region });
-  const asyncPut = promisify(docClient.put.bind(docClient));
+  const asyncDelete = promisify(docClient.delete.bind(docClient));
 
   const { pathParameters, queryStringParameters, httpMethod } = event;
 
@@ -25,25 +25,17 @@ exports.handler = async (event) => {
   // example use of queryStringParameters to obtain value for "name" parameter
   // const name = queryStringParameters ? queryStringParameters.name : 'no name'
 
-  const putParams = {
-    Item: {
-      // partition key attribute
-      // this is the only required attribute
-      // replace "id" with the name of the key you are adding
-      // data type of value must be string, number, boolean, null, array, object
-      // "str" | 10 | true | false | null | [1, "a"] | {a: "b"}
-      id: 1,
-      // second attribute (only the partition key attribute is required)
-      // replace "attribute2" with the name of the key you are adding
-      attribute2: 'a string',
-      // third attribute (only the partition key attribute is required)
-      // replace "attribute3" with the name of the key you are adding
-      attribute3: true,
-    },
+  const deleteParams = {
+    // TODO: change the name of your table
     TableName: 'myTable',
+    Key: {
+      // TODO: change "attributeName" to the name of the partition key
+      // and change "value" to the value of the partition key you are getting
+      attributeName: 'value',
+    },
   };
 
-  await asyncPut(putParams);
+  await asyncDelete(deleteParams);
 
   const response = {};
 
@@ -57,7 +49,7 @@ exports.handler = async (event) => {
     // content-type headers should be set to text/html
     response.headers = { 'content-type': 'text/html' };
     // what the page will show
-    const html = '<p>Text that will be displayed on the page when endpoint is visited</p>';
+    const html = '<p>Deleted!</p>';
     response.body = html;
   } else if (httpMethod === 'POST') {
     response.statusCode = 201;

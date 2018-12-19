@@ -13,6 +13,8 @@ module.exports = async function create(lambdaName, options) {
   const createInvokerTemplate = checkForOptionType(options, 'invoke');
   const createDbPutTemplate = checkForOptionType(options, 'dbput');
   const createDbScanTemplate = checkForOptionType(options, 'dbscan');
+  const createDbGetTemplate = checkForOptionType(options, 'dbget');
+  const createDbDeleteTemplate = checkForOptionType(options, 'dbdelete');
   const includeComments = checkForOptionType(options, 'verbose');
 
   if (invalidLambdaMsg) {
@@ -33,6 +35,8 @@ module.exports = async function create(lambdaName, options) {
       createInvokerTemplate,
       createDbScanTemplate,
       createDbPutTemplate,
+      createDbGetTemplate,
+      createDbDeleteTemplate,
       includeComments,
     );
   }

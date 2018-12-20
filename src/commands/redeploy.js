@@ -145,9 +145,14 @@ module.exports = async function redeploy(resourceName, path, options) {
   const updateApiGateway = async () => {
     const apiExistsInLocalLibrary = !!(api.restApiId);
     const userIsRemovingMethods = api.removeMethods.length > 0;
+    const apiNeedsDeployment = (
+      apiExistsInLocalLibrary
+      || userIsAddingMethods
+      || userIsAddingEndpoint)
+      && !apiExistsOnAws;
     let data;
 
-    if ((apiExistsInLocalLibrary || userIsAddingMethods || userIsAddingEndpoint) && !apiExistsOnAws) {
+    if (apiNeedsDeployment) {
       data = await deployApi(resourceName, path, api.addMethods, stageName);
     } else if (userIsAddingMethods || userIsRemovingMethods) {
       await deployIntegrations(api.resources, api.existingMethods);
@@ -175,11 +180,15 @@ module.exports = async function redeploy(resourceName, path, options) {
   // redployment sequence starts here:
   const invalidLambdaMsg = await validateLambdaReDeployment(resourceName);
   const invalidDirMsg = await validateLambdaDirReDeployment(resourceName);
-  const { deployDir, invalidMsg, aborted } = await deploymentType(resourceName, invalidLambdaMsg, invalidDirMsg);
+  const { deployDir, invalidMsg, aborted } = await deploymentType(
+    resourceName, invalidLambdaMsg, invalidDirMsg,
+  );
+
   if (aborted) {
     bamWarn(msgAfterAction('lambda', resourceName, 'aborted', 'update has been'));
     return;
   }
+
   if (invalidMsg) {
     bamWarn(invalidMsg);
     return;

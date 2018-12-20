@@ -25,8 +25,8 @@ module.exports = async function bamBam(asyncFunc, {
     }
   );
 
-  const retry = async (errorCode) => {
-    if (firstTooManyRequestsException(errorCode, retryCounter)) logAwsDelayMsg();
+  const retry = async (errCode) => {
+    if (firstTooManyRequestsException(errCode, retryCounter)) logAwsDelayMsg();
     const optionalParamsObj = withIncrementedCounter();
     await delay(interval);
     const data = await bamBam(asyncFunc, optionalParamsObj);
@@ -36,12 +36,13 @@ module.exports = async function bamBam(asyncFunc, {
   try {
     const data = await asyncFunc(...asyncFuncParams);
     return data;
-  } catch (e) {
-    const errorCode = e.code;
+  } catch (err) {
+    const errorCode = err.code;
     if (errorCode === retryError) {
       const data = await retry(errorCode);
       return data;
     }
-    throw(e);
+
+    throw (err);
   }
 };

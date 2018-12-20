@@ -15,7 +15,7 @@ const homedir = os.homedir();
     let resourceName;
     let options = {};
     if (args) ({ resourceName, options } = handleArgs(args, command));
-    const shouldContinue = await catchSetupAndConfig(homedir, command, options);
+    const shouldContinue = await catchSetupAndConfig(homedir, command);
     if (!shouldContinue) return;
 
     await executeCommand(command, resourceName, options, homedir);

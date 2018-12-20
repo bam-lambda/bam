@@ -19,7 +19,7 @@ const homedir = os.homedir();
     if (!shouldContinue) return;
 
     await executeCommand(command, resourceName, options, homedir);
-  } catch(err) {
+  } catch (err) {
     bamSpinner.stop();
     bamError(err);
   }

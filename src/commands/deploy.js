@@ -47,7 +47,9 @@ module.exports = async function deploy(resourceName, path, options) {
 
   const invalidLambdaMsg = await validateLambdaDeployment(resourceName);
   const invalidDirMsg = await validateLambdaDirDeployment(resourceName);
-  const { deployDir, invalidMsg, aborted } = await deploymentType(resourceName, invalidLambdaMsg, invalidDirMsg);
+  const { deployDir, invalidMsg, aborted } = await deploymentType(
+    resourceName, invalidLambdaMsg, invalidDirMsg,
+  );
   if (aborted) {
     bamWarn(msgAfterAction('lambda', resourceName, 'aborted', 'creation has been'));
     return;
@@ -76,9 +78,9 @@ module.exports = async function deploy(resourceName, path, options) {
   try {
     const asyncFuncParams = [resourceName, path, roleName, deployDir];
     const lambdaData = await bamBam(deployLambda, { asyncFuncParams });
-    
+
     if (lambdaData) await writeLambda(lambdaData, path);
-    if (deployLambdaOnly) {    
+    if (deployLambdaOnly) {
       await deleteStagingDirForLambda(resourceName, path);
       return;
     }

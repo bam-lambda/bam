@@ -34,7 +34,7 @@ const commands = [
 ];
 const commandIsNotValid = command => !commands.includes(command);
 
-module.exports = async function catchSetupAndConfig(path, command, options) {
+module.exports = async function catchSetupAndConfig(path, command) {
   if (commandIsNotValid(command) || ['help', 'version', 'create'].includes(command)) return true;
 
   const awsConfigExistsWithRegionSet = getRegion();

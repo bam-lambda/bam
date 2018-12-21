@@ -47,6 +47,7 @@ BAM! commands conform to the following structure:
 ```
 bam <commandName> [<resourceName>] [--<flag>]
 ```
+---
 
 ### `bam config`
 *updates default settings*

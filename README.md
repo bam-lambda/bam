@@ -39,6 +39,7 @@ BAM! requires that you have an account with AWS and you have set up an AWS CLI c
 ``` bash
 npm install -g bam-lambda
 ```
+---
 
 ## Commands
 

@@ -28,7 +28,7 @@ module.exports = {
   create: {
     description: 'creates local file (or directory) based on template',
     options: [
-      { name: 'html', description: 'creates local directory containing index.html, main.css, and [resourceName].js' },
+      { name: 'html', description: 'creates local directory containing index.html, application.js, main.css, and [resourceName].js' },
       { name: 'invoker', description: 'creates local file/directory templated to invoke another lambda' },
       { name: 'db', description: 'creates local file/directory templated to work with a DynamoDB table' },
       { name: 'verbose', description: 'creates template with instructional comments' },

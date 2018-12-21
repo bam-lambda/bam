@@ -52,7 +52,7 @@ npm install -g bam-lambda
 
 ##### Flags
 * *`--invoker`*: creates a local file/directory with lambda templated to invoke another lambda
-* *`--html`*: creates local directory containing index.html, main.css, and [resourceName].js
+* *`--html`*: creates local directory containing index.html, application.js, main.css, and [resourceName].js
 * *`--db`*: creates local file/directory templated to work with a DynamoDB table
 * *`--verbose`*: creates template with instructional comments
 

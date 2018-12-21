@@ -42,6 +42,11 @@ npm install -g bam-lambda
 
 ## Commands
 
+BAM! commands conform to the following structure:
+```
+bam <commandName> [<resourceName>] [--<flag>]
+```
+
 ### `bam config`
 *updates default settings*
 

@@ -15,7 +15,7 @@ const {
 const stripComments = template => (
   template.split('\n').filter(line => (
     line.includes('description') || !line.includes('//')
-  )).slice(2)
+  )).slice(1)
     .join('\n')
     .split('\n\n\n')
     .join('\n')

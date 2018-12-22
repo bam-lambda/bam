@@ -22,7 +22,7 @@ Thanks for trying out BAM!  We hope you'll like it! 💥
 
 **[Jocie Moore](http://www.jociemoore.com)** *Software Engineer* San Francisco, CA
 
-**[Jason Overby](http://jasonoverby.com)** *Software Engineer* Portland, OR
+**[Jason Overby](http://www.jasonoverby.com)** *Software Engineer* Portland, OR
 
 ## Getting Started
 

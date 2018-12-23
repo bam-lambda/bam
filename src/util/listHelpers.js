@@ -1,6 +1,7 @@
 const {
   asyncListFunctions,
   asyncListTables,
+  asyncGetResources,
 } = require('../aws/awsFunctions');
 
 const {
@@ -10,10 +11,18 @@ const {
   vertPadding,
 } = require('../util/logger');
 
+const { doesApiExist } = require('../aws/doesResourceExist');
+
 const friendlyDataTypes = {
   S: 'string',
   N: 'number',
   B: 'binary',
+};
+
+const getMethodsFromAws = async (restApiId) => {
+  const resources = (await asyncGetResources({ restApiId })).items;
+  const rootResource = resources.find(resource => resource.path === '/');
+  return Object.keys(rootResource.resourceMethods);
 };
 
 const getLambdaNamesFromAws = async () => {
@@ -44,9 +53,13 @@ const formatBamFunctionsList = async (funcName, lambdas, apis, region) => {
 
     if (Object.keys(apis[region]).length > 0) {
       const apiObj = apis[region][funcName];
-      if (apiObj) {
+      const { restApiId } = apiObj;
+      const apiExistsOnAws = await doesApiExist(restApiId);
+
+      if (apiObj && apiExistsOnAws) {
+        const methods = await getMethodsFromAws(restApiId);
         const endpointStr = `${indentFurthest}${bamText('endpoint:')} ${apiObj.endpoint}`;
-        const methodsStr = Object.keys(apiObj.methodPermissionIds).join(', ');
+        const methodsStr = methods.join(', ');
         const httpMethodsStr = `${indentFurthest}${bamText('http methods:')} ${methodsStr}`;
         fields.push(endpointStr);
         fields.push(httpMethodsStr);

@@ -52,7 +52,7 @@ npm install -g bam-lambda
 
 ##### Flags
 * *`--invoker`*: creates a local file/directory with lambda templated to invoke another lambda
-* *`--html`*: creates local directory containing index.html, main.css, and [resourceName].js
+* *`--html`*: creates local directory containing index.html, application.js, main.css, and [resourceName].js
 * *`--db`*: creates local file/directory templated to work with a DynamoDB table
 * *`--verbose`*: creates template with instructional comments
 
@@ -78,7 +78,7 @@ npm install -g bam-lambda
 * *`--methods`*: specifies HTTP method(s) for the endpoint
 * *`--rmMethods`*: specifies a HTTP method or methods to remove from endpoint
 * *`--addEndpoint`*: connects endpoint to lambda
-* * `--revokeDb`*: changes role associated with lambda to role specified in user config
+* *`--revokeDb`*: changes role associated with lambda to role specified in user config
 
 ---
 
@@ -86,8 +86,7 @@ npm install -g bam-lambda
 *deletes existing lambda + endpoint*
 ##### Flags
 * *`--dbtable`*: deletes DynamoDB table
-* *`--apiOnly`*: deletes endpoint only
-* *`--lambaOnly`*: deletes lambda only
+* *`--endpointOnly`*: deletes endpoint only
 
 ---
 

@@ -21,7 +21,9 @@ const asyncLambdaDeleteFunction = promisify(lambda.deleteFunction.bind(lambda));
 const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
 const asyncGetFunction = promisify(lambda.getFunction.bind(lambda));
 const asyncLambdaUpdateFunctionCode = promisify(lambda.updateFunctionCode.bind(lambda));
-const asyncLambdaUpdateFunctionConfiguration = promisify(lambda.updateFunctionConfiguration.bind(lambda));
+const asyncLambdaUpdateFunctionConfiguration = promisify(
+  lambda.updateFunctionConfiguration.bind(lambda),
+);
 const asyncListFunctions = promisify(lambda.listFunctions.bind(lambda));
 
 // api

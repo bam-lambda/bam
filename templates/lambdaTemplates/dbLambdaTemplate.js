@@ -1,11 +1,12 @@
 // Welcome to your BAM! lambda!
 
+// TODO: describe your lambda below:
+// description:
+
+
 // IMPORTANT!! to interact with DynamoDB, your lambda must have permissions
 // if you aren't using a custom role, be sure to deploy this lambda
 // using the --permitDb flag to ensure it has appropriate permissions
-
-// TODO: describe your lambda below:
-// description:
 
 const { promisify } = require('util');
 const AWS = require('aws-sdk');

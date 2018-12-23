@@ -3,6 +3,8 @@
 // TODO: describe your lambda below:
 // description:
 
+
+
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const fs = require('fs');
@@ -59,6 +61,9 @@ exports.handler = async (event) => {
     // main.css from the rootDir directory
     // note: main.css must be in rootDir directory to be accessible here
     const css = await readFile(`${rootDir}/main.css`, 'utf8');
+    // application.js from the rootDir directory
+    // note: application.js must be in rootDir directory to be accessible here
+    const js = await readFile(`${rootDir}/application.js`, 'utf8');
 
     const replacePlaceHolder = (nameOfPlaceHolder, newText, replaceAll = false) => {
       if (replaceAll) {
@@ -69,9 +74,12 @@ exports.handler = async (event) => {
       }
     };
 
-    // since there is no DOM, there should be an empty style tag in your
+    // there should be an empty style tag in your
     // html file that you fill with the contents of your css file
     replacePlaceHolder('<style></style>', `<style>${css}</style>`);
+    // there should be an empty script tag in your
+    // html file that you fill with the contents of your js file
+    replacePlaceHolder('<script></script>', `<script>${js}</script>`);
     replacePlaceHolder('Placeholder', payloadFromInvokedLambda);
 
     // what the page will show

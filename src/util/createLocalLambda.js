@@ -15,7 +15,7 @@ const {
 const stripComments = template => (
   template.split('\n').filter(line => (
     line.includes('description') || !line.includes('//')
-  )).slice(2)
+  )).slice(1)
     .join('\n')
     .split('\n\n\n')
     .join('\n')
@@ -57,6 +57,7 @@ module.exports = async function createLocalLambda(
     await mkdir(lambdaName);
     await copyFile(`${__dirname}/../../templates/indexTemplate.html`, `${cwd}/${lambdaName}/index.html`);
     await copyFile(`${__dirname}/../../templates/mainTemplate.css`, `${cwd}/${lambdaName}/main.css`);
+    await copyFile(`${__dirname}/../../templates/applicationTemplate.js`, `${cwd}/${lambdaName}/application.js`);
   }
 
   const template = await getTemplate(templateType, includeComments);

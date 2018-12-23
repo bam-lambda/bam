@@ -143,11 +143,10 @@ module.exports = async function redeploy(resourceName, path, options) {
   };
 
   const updateApiGateway = async () => {
-    const apiExistsInLocalLibrary = !!(api.restApiId);
     const userIsRemovingMethods = api.removeMethods.length > 0;
     let data;
 
-    if ((apiExistsInLocalLibrary || userIsAddingMethods || userIsAddingEndpoint) && !apiExistsOnAws) {
+    if ((userIsAddingMethods || userIsAddingEndpoint) && !apiExistsOnAws) {
       data = await deployApi(resourceName, path, api.addMethods, stageName);
     } else if (userIsAddingMethods || userIsRemovingMethods) {
       await deployIntegrations(api.resources, api.existingMethods);

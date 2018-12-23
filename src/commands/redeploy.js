@@ -143,13 +143,8 @@ module.exports = async function redeploy(resourceName, path, options) {
   };
 
   const updateApiGateway = async () => {
-    const apiExistsInLocalLibrary = !!(api.restApiId);
     const userIsRemovingMethods = api.removeMethods.length > 0;
-    const apiNeedsDeployment = (
-      apiExistsInLocalLibrary
-      || userIsAddingMethods
-      || userIsAddingEndpoint)
-      && !apiExistsOnAws;
+    const apiNeedsDeployment = (userIsAddingMethods || userIsAddingEndpoint) && !apiExistsOnAws;
     let data;
 
     if (apiNeedsDeployment) {

@@ -17,16 +17,16 @@ const stripComments = template => (
     line.includes('description') || !line.includes('//')
   )).slice(1)
     .join('\n')
-    .split('\n\n\n')
-    .join('\n')
 );
+
+const removeExcessBlankLines = template => template.split('\n\n\n').join('\n\n');
 
 const getTemplate = async (templateType, includeComments) => {
   const userRegion = await asyncGetRegion();
   const lambdaTemplateLocation = `${__dirname}/../../templates/lambdaTemplates/${templateType}Template.js`;
   const lambdaTemplate = await readFile(lambdaTemplateLocation, 'utf8');
   const lambdaTemplateWithRegion = lambdaTemplate.replace('userRegion', userRegion);
-  return includeComments ? lambdaTemplateWithRegion : stripComments(lambdaTemplateWithRegion);
+  return removeExcessBlankLines(includeComments ? lambdaTemplateWithRegion : stripComments(lambdaTemplateWithRegion));
 };
 
 const writeTemplateLocally = async (lambdaName, template, withinDir) => {

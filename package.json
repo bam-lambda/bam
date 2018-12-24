@@ -1,6 +1,6 @@
 {
   "name": "bam-lambda",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "main": "index.js",
   "repository": "https://github.com/bam-lambda/bam.git",
   "author": "bam-lambda",

@@ -22,7 +22,7 @@ Thanks for trying out BAM!  We hope you'll like it! 💥
 
 **[Jocie Moore](http://www.jociemoore.com)** *Software Engineer* San Francisco, CA
 
-**[Jason Overby](http://jasonoverby.com)** *Software Engineer* Portland, OR
+**[Jason Overby](http://www.jasonoverby.com)** *Software Engineer* Portland, OR
 
 ## Getting Started
 
@@ -39,8 +39,15 @@ BAM! requires that you have an account with AWS and you have set up an AWS CLI c
 ``` bash
 npm install -g bam-lambda
 ```
+---
 
 ## Commands
+
+BAM! commands conform to the following structure:
+```
+bam <commandName> [<resourceName>] [--<flag>]
+```
+---
 
 ### `bam config`
 *updates default settings*

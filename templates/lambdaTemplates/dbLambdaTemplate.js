@@ -3,7 +3,6 @@
 // TODO: describe your lambda below:
 // description:
 
-
 // IMPORTANT!! to interact with DynamoDB, your lambda must have permissions
 // if you aren't using a custom role, be sure to deploy this lambda
 // using the --permitDb flag to ensure it has appropriate permissions
@@ -27,7 +26,7 @@ exports.handler = async (event) => {
   const pathParams = pathParameters ? pathParameters.proxy : '';
 
   // example use of queryStringParameters to obtain value for "name" parameter
-  // const name = queryStringParameters ? queryStringParameters.name : 'no name'
+  // const name = queryStringParameters ? queryStringParameters.name : 'no name';
 
   const paragraphize = arr => (
     arr.reduce((itemsArr, item) => {

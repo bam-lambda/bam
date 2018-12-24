@@ -40,9 +40,9 @@ exports.handler = async (event) => {
     // TODO: replace "myTable" with the name of your table
     TableName: 'myTable',
     Key: {
-      // TODO: replace "attributeName" with the name of the table's partition key
-      // and replace "value" with the value of the partition key
-      attributeName: 'value',
+      // TODO: replace id with the name of the table's partition key
+      // and replace 1 with the value of the partition key
+      id: 1,
     },
   };
 
@@ -57,9 +57,9 @@ exports.handler = async (event) => {
     // TODO: replace "myTable" with the name of your table
     TableName: 'myTable',
     Key: {
-      // TODO: replace "attributeName" with the name of the table's partition key
-      // and replace "value" with the value of the partition key
-      attributeName: 'value',
+      // TODO: replace id with the name of the table's partition key
+      // and replace 1 with the value of the partition key
+      id: 1,
     },
   };
 

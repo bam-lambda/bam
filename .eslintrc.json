@@ -3,5 +3,8 @@
     "env": {
       "jest": true
     },
-    "rules": {}
+    "rules": {
+      "consistent-return": 0,
+      "no-await-in-loop": 0
+    }
 }

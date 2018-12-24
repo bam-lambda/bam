@@ -53,10 +53,15 @@ const formatBamFunctionsList = async (funcName, lambdas, apis, region) => {
 
     if (Object.keys(apis[region]).length > 0) {
       const apiObj = apis[region][funcName];
-      const { restApiId } = apiObj;
-      const apiExistsOnAws = await doesApiExist(restApiId);
+      let restApiId;
+      let apiExistsOnAws;
 
-      if (apiObj && apiExistsOnAws) {
+      if (apiObj) {
+        ({ restApiId } = apiObj);
+        apiExistsOnAws = await doesApiExist(restApiId);
+      }
+
+      if (apiExistsOnAws) {
         const methods = await getMethodsFromAws(restApiId);
         const endpointStr = `${indentFurthest}${bamText('endpoint:')} ${apiObj.endpoint}`;
         const methodsStr = methods.join(', ');

@@ -87,9 +87,21 @@ module.exports = async function updateHttpMethods({
         rootStatementId = existingMethodPermissionIds[httpMethod].rootPermissionId;
         greedyStatementId = existingMethodPermissionIds[httpMethod].greedyPermissionId;
 
-        await deleteApiGatewayIntegration(resourceName, httpMethod, rootResourceId, restApiId, rootStatementId);
+        await deleteApiGatewayIntegration(
+          resourceName,
+          httpMethod,
+          rootResourceId,
+          restApiId,
+          rootStatementId,
+        );
 
-        await deleteApiGatewayIntegration(resourceName, httpMethod, greedyPathResourceId, restApiId, greedyStatementId);
+        await deleteApiGatewayIntegration(
+          resourceName,
+          httpMethod,
+          greedyPathResourceId,
+          restApiId,
+          greedyStatementId,
+        );
       }
     }
   };

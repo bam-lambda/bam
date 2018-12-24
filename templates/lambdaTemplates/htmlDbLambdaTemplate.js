@@ -3,7 +3,6 @@
 // TODO: describe your lambda below:
 // description:
 
-
 // IMPORTANT!! to interact with DynamoDB, your lambda must have permissions
 // if you aren't using a custom role, be sure to deploy this lambda
 // using the --permitDb flag to ensure it has appropriate permissions
@@ -28,7 +27,7 @@ exports.handler = async (event) => {
   const pathParams = pathParameters ? pathParameters.proxy : '';
 
   // example use of queryStringParameters to obtain value for "name" parameter
-  // const name = queryStringParameters ? queryStringParameters.name : 'no name'
+  // const name = queryStringParameters ? queryStringParameters.name : 'no name';
 
   const paragraphize = arr => (
     arr.reduce((itemsArr, item) => {
@@ -42,9 +41,9 @@ exports.handler = async (event) => {
     // TODO: replace "myTable" with the name of your table
     TableName: 'myTable',
     Key: {
-      // TODO: replace "attributeName" with the name of the table's partition key
-      // and replace "value" with the value of the partition key
-      attributeName: 'value',
+      // TODO: replace id with the name of the table's partition key
+      // and replace 1 with the value of the partition key
+      id: 1,
     },
   };
 
@@ -59,9 +58,9 @@ exports.handler = async (event) => {
     // TODO: replace "myTable" with the name of your table
     TableName: 'myTable',
     Key: {
-      // TODO: replace "attributeName" with the name of the table's partition key
-      // and replace "value" with the value of the partition key
-      attributeName: 'value',
+      // TODO: replace id with the name of the table's partition key
+      // and replace 1 with the value of the partition key
+      id: 1,
     },
   };
 

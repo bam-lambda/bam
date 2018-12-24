@@ -4,7 +4,6 @@
 // description:
 
 
-
 const fs = require('fs');
 const { promisify } = require('util');
 // all require statements for npm packages should be above this line
@@ -17,7 +16,7 @@ exports.handler = async (event) => {
   const pathParams = pathParameters ? pathParameters.proxy : '';
 
   // example use of queryStringParameters to obtain value for "name" parameter
-  // const name = queryStringParameters ? queryStringParameters.name : 'no name'
+  // const name = queryStringParameters ? queryStringParameters.name : 'no name';
 
   const response = {};
 

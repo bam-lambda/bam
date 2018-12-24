@@ -4,7 +4,6 @@
 // description:
 
 
-
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const fs = require('fs');
@@ -23,7 +22,7 @@ exports.handler = async (event) => {
   const pathParams = pathParameters ? pathParameters.proxy : '';
 
   // example use of queryStringParameters to obtain value for "name" parameter
-  // const name = queryStringParameters ? queryStringParameters.name : 'no name'
+  // const name = queryStringParameters ? queryStringParameters.name : 'no name';
 
   const params = {
     FunctionName: '', // name of the lambda this function will invoke

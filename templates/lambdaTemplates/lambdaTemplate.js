@@ -3,7 +3,6 @@
 // TODO: describe your lambda below:
 // description:
 
-
 // all require statements for npm packages should be above this line
 
 // handler is the name of the function being exported; it's best to leave as the default
@@ -14,7 +13,7 @@ exports.handler = async (event) => {
   const pathParams = pathParameters ? pathParameters.proxy : '';
 
   // example use of queryStringParameters to obtain value for "name" parameter
-  // const name = queryStringParameters ? queryStringParameters.name : 'no name'
+  // const name = queryStringParameters ? queryStringParameters.name : 'no name';
 
   const html = '<p>Text that will be displayed on the page when endpoint is visited</p>';
   const response = {};

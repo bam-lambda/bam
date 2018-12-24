@@ -5,6 +5,6 @@ const { bamLog } = require('../util/logger');
 const homedir = os.homedir();
 
 module.exports = async function config() {
-  await getUserDefaults(homedir);
-  bamLog('User configurations have been updated');
+  const data = await getUserDefaults(homedir);
+  if (data) bamLog('User configurations have been updated');
 };

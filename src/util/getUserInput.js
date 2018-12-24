@@ -3,10 +3,11 @@ const readline = require('readline');
 const { bamText, bamWarn } = require('./logger');
 
 const asyncValidate = async (asyncCallback, validator, feedback, question, defaultAnswer, quitStr = 'q') => {
-  while (true) {
+  let validAnswer;
+  while (!validAnswer) {
     const result = await asyncCallback(question, defaultAnswer);
     if (result === quitStr) return undefined;
-    const validAnswer = await validator(result);
+    validAnswer = await validator(result);
     if (validAnswer) {
       return result;
     }

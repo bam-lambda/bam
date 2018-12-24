@@ -4,7 +4,6 @@
 // description:
 
 
-
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 // all require statements for npm packages should be above this line

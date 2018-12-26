@@ -153,3 +153,13 @@ DynamoDB tables deployed from this machine using BAM!:
 *displays version*
 
 ---------------
+
+## Additional Resources:
+*[AWS Console](https://aws.amazon.com/console/)
+*[AWS CLI](https://aws.amazon.com/cli/)
+*[What is AWS Lambda?](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
+*[What is AWS API Gateway](https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html)
+*[What is DynamoDB?](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html)
+*[AWS Lambda SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html)
+*[AWS API Gateway SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/APIGateway.html)
+*[AWS DynamoDB Document Client SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html)

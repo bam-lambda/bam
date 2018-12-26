@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/bam-lambda.svg?maxAge=2592000?style=plastic)](https://www.npmjs.com/package/bam-lambda)
 [![license](https://img.shields.io/npm/l/bam-lambda.svg)](https://www.npmjs.com/package/bam-lambda)
 
-**BAM!** is a serverless framework that makes it quick (hence, the name) and easy to get small applications up & running using Node.js and Amazon Web Services (AWS). It is optimized for the deployment of AWS Lambda functions integrated with AWS API Gateway endpoints, but also allows for the creation of DynamoDB tables, which can help persist data between lambda invocations.
+**BAM!** is a serverless framework that makes it quick (hence, the name) and easy to get small applications up & running using Node.js and Amazon Web Services (AWS). It is optimized for the deployment of AWS Lambda functions integrated with Amazon API Gateway endpoints, but also allows for the creation of Amazon DynamoDB tables, which can help persist data between lambda invocations.
 
 As long as you meet the prerequisites (see below), there is no need to perform any configuration; BAM! presumes some configuration details by default and uses [AWS STS](https://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html) to pull in your account number.  That said, there is an option to update your default configuration if you'd like to do that.
 
@@ -161,5 +161,5 @@ DynamoDB tables deployed from this machine using BAM!:
 * [What is Amazon API Gateway?](https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html)
 * [What is Amazon DynamoDB?](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html)
 * [AWS Lambda SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html)
-* [AWS API Gateway SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/APIGateway.html)
-* [AWS DynamoDB Document Client SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html)
+* [Amazon API Gateway SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/APIGateway.html)
+* [Amazon DynamoDB Document Client SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html)

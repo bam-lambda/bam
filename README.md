@@ -49,62 +49,60 @@ bam <commandName> [<resourceName>] [--<flag>]
 ```
 
 For all commands, BAM! will look for `[<resourceName>]` in your current directory.  This can be either a file called `[<resourceName>].js` or a folder called `[<resourceName>]` containing a file called `[<resourceName>].js`.
+
 ---
 
-### `bam config`
+#### `bam config`
 *updates default settings*
 
 ---
 
-### `bam create [name]`
+#### `bam create [name]`
 *creates local file (or directory) based on template*
 
-##### Flags
-* *`--invoker`*: creates a local file/directory with lambda templated to invoke another lambda
-* *`--html`*: creates local directory containing index.html, application.js, main.css, and [resourceName].js
-* *`--db`*: creates local file/directory templated to work with a DynamoDB table
-* *`--verbose`*: creates template with instructional comments
+*`--invoker`*: creates a local file/directory with lambda templated to invoke another lambda
+*`--html`*: creates local directory containing index.html, application.js, main.css, and [resourceName].js
+*`--db`*: creates local file/directory templated to work with a DynamoDB table
+*`--verbose`*: creates template with instructional comments
 
 ---
 
-### `bam deploy [name]`
+#### `bam deploy [name]`
 *deploys lambda + endpoint*
 
-##### Flags
-* *`--role`*: specifies role for this deployment
-* *`--permitDb`*: adds policy with scan, put, get, delete DynamoDB permissions
-* *`--methods`*: specifies HTTP method(s) for the endpoint
-* *`--lambdaOnly`*: deploys the lambda without an endpoint
+*`--role`*: specifies role for this deployment
+*`--permitDb`*: adds policy with scan, put, get, delete DynamoDB permissions
+*`--methods`*: specifies HTTP method(s) for the endpoint
+*`--lambdaOnly`*: deploys the lambda without an endpoint
 
 ---
 
-### `bam redeploy [name]`
+#### `bam redeploy [name]`
 *updates existing lambda and endpoint*
 
-##### Flags
-* *`--role`*: specifies role for this deployment
-* *`--permitDb`*: adds policy with scan, put, get, delete DynamoDB permissions
-* *`--methods`*: specifies HTTP method(s) for the endpoint
-* *`--rmMethods`*: specifies a HTTP method or methods to remove from endpoint
-* *`--addEndpoint`*: connects endpoint to lambda
-* *`--revokeDb`*: changes role associated with lambda to role specified in user config
+*`--role`*: specifies role for this deployment
+*`--permitDb`*: adds policy with scan, put, get, delete DynamoDB permissions
+*`--methods`*: specifies HTTP method(s) for the endpoint
+*`--rmMethods`*: specifies a HTTP method or methods to remove from endpoint
+*`--addEndpoint`*: connects endpoint to lambda
+*`--revokeDb`*: changes role associated with lambda to role specified in user config
 
 ---
 
-### `bam delete [name]`
+#### `bam delete [name]`
 *deletes existing lambda + endpoint*
-##### Flags
-* *`--dbtable`*: deletes DynamoDB table
-* *`--endpointOnly`*: deletes endpoint only
+
+*`--dbtable`*: deletes DynamoDB table
+*`--endpointOnly`*: deletes endpoint only
 
 ---
 
-### `bam get [name]`
+#### `bam get [name]`
   *pulls lambda code from AWS into a local directory*
 
 ---
 
-### `bam list`
+#### `bam list`
 *lists lambdas, endpoints, and dbtables*
 
 ```
@@ -131,27 +129,26 @@ DynamoDB tables deployed from this machine using BAM!:
     partition key: id (number)
     sort key: name (string)
 ```
-##### Flags
-  * *`--dbtables`*: lists only DynamoDB tables created with BAM!
-  * *`--lambdas`*: lists only lambdas and associated endpoints
+
+*`--dbtables`*: lists only DynamoDB tables created with BAM!
+*`--lambdas`*: lists only lambdas and associated endpoints
 
 ---
 
-### `bam dbtable [name]`
+#### `bam dbtable [name]`
 *creates a DynamoDB table `[tableName]` on AWS*
 
 ---
 
-### `bam --man|help|h`
+#### `bam --man|help|h`
 *documentation of commands*
 
-##### Flags
-  * *`--[commandName]`*: logs a description of the command options
-  * *`--all`*: logs descriptions of all command options
+*`--[commandName]`*: logs a description of the command options
+*`--all`*: logs descriptions of all command options
 
 ---
 
-### `bam --version|v`
+#### `bam --version|v`
 *displays version*
 
 ---------------

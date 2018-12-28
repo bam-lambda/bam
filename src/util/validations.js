@@ -27,6 +27,13 @@ const lambdaFileExistsWithinDir = async (name) => {
   return lambdaFileExists;
 };
 
+const lambdaFileOrDirExistsInCwd = async (name) => {
+  const lambdaFileExists = await exists(`${cwd}/${name}.js`);
+  const lambdaDirExists = await exists(`${cwd}/${name}`);
+
+  return lambdaFileExists || lambdaDirExists;
+};
+
 const lambdaExistsInCwd = async (name) => {
   const lambdaFileExists = await exists(`${cwd}/${name}.js`);
   return lambdaFileExists;
@@ -232,7 +239,7 @@ const validateLambdaRetrieval = async (name) => {
       feedbackType: 'invalidSyntax',
       affirmative: false,
     }, {
-      validation: lambdaExistsInCwd,
+      validation: lambdaFileOrDirExistsInCwd,
       feedbackType: 'nameIsTaken',
       affirmative: true,
     }, {

@@ -47,6 +47,8 @@ BAM! commands conform to the following structure:
 ```
 bam <commandName> [<resourceName>] [--<flag>]
 ```
+
+For all commands, BAM! will look for `[<resourceName>]` in your current directory.  This can be either a file called `[<resourceName>].js` or a folder called `[<resourceName>]` containing a file called `[<resourceName>].js`.
 ---
 
 ### `bam config`

@@ -28,14 +28,10 @@ const lambdaFileExistsWithinDir = async (name) => {
 };
 
 const lambdaFileOrDirExistsInCwd = async (name) => {
-  let lambdaFileExists = await exists(`${cwd}/${name}.js`);
+  const lambdaFileExists = await exists(`${cwd}/${name}.js`);
   const lambdaDirExists = await exists(`${cwd}/${name}`);
 
-  if (lambdaDirExists && !lambdaFileExists) {
-    lambdaFileExists = await exists(`${cwd}/${name}/${name}.js`);
-  }
-
-  return lambdaFileExists;
+  return lambdaFileExists || lambdaDirExists;
 };
 
 const lambdaExistsInCwd = async (name) => {

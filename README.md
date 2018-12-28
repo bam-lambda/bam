@@ -45,19 +45,17 @@ npm install -g bam-lambda
 
 BAM! commands conform to the following structure:
 ```
-bam <commandName> [<resourceName>] [--<flag>]
+bam <commandName> [<name>] [--<flag>]
 ```
 
-For all commands, BAM! will look for `[<resourceName>]` in your current directory.  This can be either a file called `[<resourceName>].js` or a folder called `[<resourceName>]` containing a file called `[<resourceName>].js`.
+For all commands, BAM! will look for `<name>` in your current directory.  This can be either a file called `<name>.js` or a folder called `<name>` containing a file called `<name>.js`.
 
 ---
 
 #### `bam config`
 *updates default settings*
 
----
-
-#### `bam create [name]`
+#### `bam create <name>`
 *creates local file (or directory) based on template*
 
 *`--invoker`*: creates a local file/directory with lambda templated to invoke another lambda
@@ -65,9 +63,7 @@ For all commands, BAM! will look for `[<resourceName>]` in your current director
 *`--db`*: creates local file/directory templated to work with a DynamoDB table
 *`--verbose`*: creates template with instructional comments
 
----
-
-#### `bam deploy [name]`
+#### `bam deploy <name>`
 *deploys lambda + endpoint*
 
 *`--role`*: specifies role for this deployment
@@ -75,9 +71,7 @@ For all commands, BAM! will look for `[<resourceName>]` in your current director
 *`--methods`*: specifies HTTP method(s) for the endpoint
 *`--lambdaOnly`*: deploys the lambda without an endpoint
 
----
-
-#### `bam redeploy [name]`
+#### `bam redeploy <name>`
 *updates existing lambda and endpoint*
 
 *`--role`*: specifies role for this deployment
@@ -87,20 +81,14 @@ For all commands, BAM! will look for `[<resourceName>]` in your current director
 *`--addEndpoint`*: connects endpoint to lambda
 *`--revokeDb`*: changes role associated with lambda to role specified in user config
 
----
-
-#### `bam delete [name]`
+#### `bam delete <name>`
 *deletes existing lambda + endpoint*
 
 *`--dbtable`*: deletes DynamoDB table
 *`--endpointOnly`*: deletes endpoint only
 
----
-
-#### `bam get [name]`
+#### `bam get <name>`
   *pulls lambda code from AWS into a local directory*
-
----
 
 #### `bam list`
 *lists lambdas, endpoints, and dbtables*
@@ -133,20 +121,14 @@ DynamoDB tables deployed from this machine using BAM!:
 *`--dbtables`*: lists only DynamoDB tables created with BAM!
 *`--lambdas`*: lists only lambdas and associated endpoints
 
----
-
-#### `bam dbtable [name]`
+#### `bam dbtable <name>`
 *creates a DynamoDB table `[tableName]` on AWS*
-
----
 
 #### `bam --man|help|h`
 *documentation of commands*
 
-*`--[commandName]`*: logs a description of the command options
+*`--<commandName>`*: logs a description of the command options
 *`--all`*: logs descriptions of all command options
-
----
 
 #### `bam --version|v`
 *displays version*

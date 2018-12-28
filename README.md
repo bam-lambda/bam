@@ -48,7 +48,7 @@ BAM! commands conform to the following structure:
 bam <commandName> [<name>] [--<flag>]
 ```
 
-For all commands, BAM! will look for `<name>` in your current directory.  This can be either a file called `<name>.js` or a folder called `<name>` containing a file called `<name>.js`.
+For all commands, BAM! will look for `<name>` in your current directory.  This can be either a file called `<name>.js` or a directory called `<name>` containing a file called `<name>.js`.
 
 ---
 

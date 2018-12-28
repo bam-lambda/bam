@@ -55,6 +55,8 @@ For all commands, BAM! will look for `<name>` in your current directory.  This c
 #### `bam config`
 *updates default settings*
 
+---
+
 #### `bam create <name>`
 *creates local file (or directory) based on template*
 
@@ -63,6 +65,8 @@ For all commands, BAM! will look for `<name>` in your current directory.  This c
 *`--db`*: creates local file/directory templated to work with a DynamoDB table
 *`--verbose`*: creates template with instructional comments
 
+---
+
 #### `bam deploy <name>`
 *deploys lambda + endpoint*
 
@@ -70,6 +74,8 @@ For all commands, BAM! will look for `<name>` in your current directory.  This c
 *`--permitDb`*: adds policy with scan, put, get, delete DynamoDB permissions
 *`--methods`*: specifies HTTP method(s) for the endpoint
 *`--lambdaOnly`*: deploys the lambda without an endpoint
+
+---
 
 #### `bam redeploy <name>`
 *updates existing lambda and endpoint*
@@ -81,14 +87,20 @@ For all commands, BAM! will look for `<name>` in your current directory.  This c
 *`--addEndpoint`*: connects endpoint to lambda
 *`--revokeDb`*: changes role associated with lambda to role specified in user config
 
+---
+
 #### `bam delete <name>`
 *deletes existing lambda + endpoint*
 
 *`--dbtable`*: deletes DynamoDB table
 *`--endpointOnly`*: deletes endpoint only
 
+---
+
 #### `bam get <name>`
   *pulls lambda code from AWS into a local directory*
+
+---
 
 #### `bam list`
 *lists lambdas, endpoints, and dbtables*
@@ -121,14 +133,20 @@ DynamoDB tables deployed from this machine using BAM!:
 *`--dbtables`*: lists only DynamoDB tables created with BAM!
 *`--lambdas`*: lists only lambdas and associated endpoints
 
+---
+
 #### `bam dbtable <name>`
 *creates a DynamoDB table `[tableName]` on AWS*
+
+---
 
 #### `bam --man|help|h`
 *documentation of commands*
 
 *`--<commandName>`*: logs a description of the command options
 *`--all`*: logs descriptions of all command options
+
+---
 
 #### `bam --version|v`
 *displays version*

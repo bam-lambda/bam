@@ -1,6 +1,7 @@
 const { msgAfterAction } = require('./logger');
 const { distinctElements } = require('./fileUtils');
 
+const validNodeRuntimes = ['nodejs10.x'];
 const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'ANY'];
 const validMethodsStr = `${validMethods.slice(0, -2).join(', ')}, and ${validMethods.slice(-1)}`;
 const pluralizeMethodsMsg = msg => msg.replace('Method', 'Methods')
@@ -34,6 +35,21 @@ const getCannotRemoveMethodMadeInConsoleMsg = (removeMethods, existingMethods) =
   if (nonexistentMethods.length > 1) msg = pluralizeMethodsMsg(msg);
 
   return `${msg}.\nConsider using "bam list" to see which methods can be removed.`;
+};
+
+const getInvalidRuntimeMsg = (runtime) => {
+  const totalValidRuntimes = validNodeRuntimes.length;
+  let validNodeRuntimesStr;
+
+  if (totalValidRuntimes == 2) {
+    validNodeRuntimesStr = `"${validNodeRuntimes.join('" or "')}"`
+  } else if (totalValidRuntimes > 2) {
+    validNodeRuntimesStr = `"${validNodeRuntimes.slice(0, -1).join('", "')}", or "${validNodeRuntimes.slice(-1)}"`;
+  } else {
+    validNodeRuntimesStr = `"${validNodeRuntimes[0]}"`;
+  }
+
+  return `${msgAfterAction('runtime', runtime, 'invalid', 'is')}. Please use ${validNodeRuntimesStr}.`;
 };
 
 const customizeLambdaWarnings = (name) => {
@@ -78,9 +94,17 @@ const customizeRoleWarnings = name => (
   }
 );
 
+const customizeConfigWarnings = runtime => (
+  {
+    nodeRuntimeRequired: `${msgAfterAction('runtime', runtime, 'invalid', 'is')}. BAM! only supports Node runtimes.`,
+    invalidNodeRuntime: getInvalidRuntimeMsg(runtime),
+  }
+);
+
 module.exports = {
   customizeLambdaWarnings,
   customizeApiWarnings,
   customizeTableWarnings,
   customizeRoleWarnings,
+  customizeConfigWarnings,
 };

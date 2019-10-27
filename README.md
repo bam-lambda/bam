@@ -86,6 +86,7 @@ bam <commandName> [<resourceName>] [--<flag>]
 * *`--rmMethods`*: specifies a HTTP method or methods to remove from endpoint
 * *`--addEndpoint`*: connects endpoint to lambda
 * *`--revokeDb`*: changes role associated with lambda to role specified in user config
+* *`--runtime`*: changes Node runtime of the lambda
 
 ---
 
@@ -116,11 +117,11 @@ Lambdas and endpoints deployed from this machine using BAM!:
     description: a description of the lambda
     endpoint:: http://associatedEndpoint/bam
     http methods: GET, POST, DELETE
-    
+
 Other lambdas on AWS
   anotherLambda
   yetAnotherLambda
-  
+
 DynamoDB tables deployed from this machine using BAM!:
   nameOfTable1
     partition key: id (number)

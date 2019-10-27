@@ -41,7 +41,7 @@ const getInvalidRuntimeMsg = (runtime) => {
   const totalValidRuntimes = validNodeRuntimes.length;
   let validNodeRuntimesStr;
 
-  if (totalValidRuntimes == 2) {
+  if (totalValidRuntimes === 2) {
     validNodeRuntimesStr = `"${validNodeRuntimes.join('" or "')}"`
   } else if (totalValidRuntimes > 2) {
     validNodeRuntimesStr = `"${validNodeRuntimes.slice(0, -1).join('", "')}", or "${validNodeRuntimes.slice(-1)}"`;

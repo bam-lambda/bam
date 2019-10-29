@@ -49,7 +49,7 @@ const getInvalidRuntimeMsg = (runtime) => {
     validNodeRuntimesStr = `"${validNodeRuntimes[0]}"`;
   }
 
-  return `${msgAfterAction('runtime', runtime, 'invalid', 'is')}. Please use ${validNodeRuntimesStr}.`;
+  return `${msgAfterAction('runtime', runtime, 'invalid', 'is')}. Please update to ${validNodeRuntimesStr} using the "runtime" option. Ex: bam redeploy myLambda --runtime nodejs10.x`;
 };
 
 const customizeLambdaWarnings = (name) => {

@@ -2,6 +2,7 @@ const updateLambda = require('../aws/updateLambda');
 const deployApi = require('../aws/deployApi');
 const { doesApiExist } = require('../aws/doesResourceExist');
 const updateHttpMethods = require('../aws/updateHttpMethods');
+const getLambdaConfig = require('../aws/getLambdaConfig');
 const bamBam = require('../util/bamBam');
 const { asyncGetRegion } = require('../util/getRegion');
 const getOption = require('../util/getOption');
@@ -94,16 +95,17 @@ module.exports = async function redeploy(resourceName, path, options) {
   }
 
   const runtimeOption = getOption(options, 'runtime');
-  const newRuntime = options[runtimeOption] && options[runtimeOption][0];
-  let runtime;
+  let runtime = (options[runtimeOption] && options[runtimeOption][0]);
 
-  if (newRuntime) {
-    const invalidRuntimeMsg = await validateNodeRuntime(newRuntime)
-    if (invalidRuntimeMsg) {
-      bamWarn(invalidRuntimeMsg);
-      return;
-    }
-    runtime = newRuntime;
+  if (!runtime) {
+    const lambdaConfig = await getLambdaConfig(resourceName);
+    runtime = lambdaConfig.Runtime;
+  }
+
+  const invalidRuntimeMsg = await validateNodeRuntime(runtime);
+  if (invalidRuntimeMsg) {
+    bamWarn(invalidRuntimeMsg);
+    return;
   }
 
   const resolveHttpMethodsFromOptions = () => {

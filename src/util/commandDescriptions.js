@@ -22,7 +22,7 @@ module.exports = {
       { name: 'rmmethods', description: 'specifies HTTP method(s) to be removed from the API Gateway' },
       { name: 'revokeDb', description: 'changes role associated with lambda to role specified in user config' },
       { name: 'addEndpoint', description: 'connects endpoint (if none exists) to lamdba' },
-      // TODO: add runtime option
+      { name: 'runtime', description: 'changes Node runtime of the lambda'},
     ],
     hasResource: true,
   },

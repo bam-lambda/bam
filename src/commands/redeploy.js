@@ -94,14 +94,14 @@ module.exports = async function redeploy(resourceName, path, options) {
     roleName = userRole;
   }
 
-  const runtimeOption = getOption(options, 'runtime');
-  let runtime = (options[runtimeOption] && options[runtimeOption][0]);
-
-  if (!runtime) {
+  const getCurrentRuntime = async () => {
     const lambdaConfig = await getLambdaConfig(resourceName);
-    runtime = lambdaConfig.Runtime;
-  }
+    return lambdaConfig.Runtime;
+  };
 
+  const runtimeOption = getOption(options, 'runtime');
+  const newRuntime = (options[runtimeOption] && options[runtimeOption][0]);
+  const runtime = newRuntime || await getCurrentRuntime();
   const invalidRuntimeMsg = await validateNodeRuntime(runtime);
   if (invalidRuntimeMsg) {
     bamWarn(invalidRuntimeMsg);

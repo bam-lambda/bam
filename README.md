@@ -29,7 +29,7 @@ Thanks for trying out BAM!  We hope you'll like it! 💥
 ### Prerequisites
 * AWS account
 * AWS CLI
-* Node.js >= 8.10
+* Node.js >= 10
 * NPM
 
 BAM! requires that you have an account with AWS and you have set up an AWS CLI configuration on your local machine.  If you have not already done so, please visit [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) for instructions.  BAM! will use the default profile and region you have specified within that profile when interacting with AWS services.

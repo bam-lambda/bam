@@ -1,5 +1,5 @@
 const { asyncLambdaUpdateFunctionConfiguration } = require('./awsFunctions');
-const getLambda = require('./getLambda');
+const getLambdaConfig = require('./getLambdaConfig');
 const { bamError } = require('../util/logger');
 const { asyncGetRegion } = require('../util/getRegion');
 const getDescription = require('../util/getDescription');
@@ -10,26 +10,14 @@ const {
   writeLambda,
 } = require('../util/fileUtils');
 
-const getConfig = async (lambdaName) => {
-  let role, runtime;
-
-  try {
-    const data = await getLambda(lambdaName);
-    role = data.Configuration.Role;
-    runtime = data.Configuration.Runtime;
-  } catch (err) {
-    bamError(err);
-  }
-
-  return [role, runtime];
-};
-
 module.exports = async function updateLambdaConfig(lambdaName, path, roleName, runtime) {
   const config = await readConfig(path);
   const { accountNumber } = config;
   const region = await asyncGetRegion();
   const description = await getDescription(lambdaName, path);
-  const [ currentRoleArn, currentRuntime ] = await getConfig(lambdaName);
+  const lambdaConfig = await getLambdaConfig(lambdaName);
+  const currentRoleArn = lambdaConfig.Role;
+  const currentRuntime = lambdaConfig.Runtime;
 
   const lambdas = await readLambdasLibrary(path);
   const lambda = lambdas[region][lambdaName];

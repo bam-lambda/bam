@@ -96,11 +96,11 @@ const removeMethodsDeployedPreviouslyWithBam = async ({
   return result.length === 0;
 };
 
-const isANodeRuntime = async (name) => {
+const isANodeRuntime = (name) => {
   return name.includes('node');
 };
 
-const runtimeIsValid = async (name) => {
+const runtimeIsValid = (name) => {
   const validNodeRuntimes = ['nodejs10.x'];
   return validNodeRuntimes.includes(name);
 };

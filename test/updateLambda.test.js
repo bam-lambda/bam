@@ -124,6 +124,7 @@ describe('bam redeploy lambda', () => {
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
 
     try {
+      await delay(30000)
       const preResponse = await asyncHttpsGet(endpoint);
       preResponse.setEncoding('utf8');
       preResponse.on('data', (response) => {
@@ -194,7 +195,7 @@ describe('bam redeploy lambda', () => {
     let responseGet;
     let responseDelete;
     try {
-      await delay(60000);
+      await delay(30000);
       responseGet = await asyncHttpsGet(endpoint);
       responsePost = await asyncHttpsRequest(postOptions);
       responsePut = await asyncHttpsRequest(putOptions);
@@ -250,7 +251,7 @@ describe('bam redeploy lambda', () => {
     let responseGet;
     let responseDelete;
     try {
-      await delay(60000);
+      await delay(30000);
       responseGet = await asyncHttpsGet(endpoint);
       responsePost = await asyncHttpsRequest(postOptions);
       responsePut = await asyncHttpsRequest(putOptions);

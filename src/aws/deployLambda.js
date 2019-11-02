@@ -67,7 +67,7 @@ module.exports = async function deployLambda(lambdaName, path, roleName, dir) {
       FunctionName: lambdaName,
       Handler: 'index.handler',
       Role: `arn:aws:iam::${accountNumber}:role/${role}`,
-      Runtime: 'nodejs8.10',
+      Runtime: 'nodejs10.x',
       Description: description,
     };
 

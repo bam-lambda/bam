@@ -31,11 +31,7 @@ const {
   deleteStagingDirForLambda,
 } = require('../util/fileUtils');
 
-const {
-  msgAfterAction,
-  bamLog,
-  bamWarn,
-} = require('../util/logger');
+const { msgAfterAction, bamLog, bamWarn } = require('../util/logger');
 
 const deploymentType = require('../util/deploymentType');
 
@@ -55,7 +51,11 @@ module.exports = async function redeploy(resourceName, path, options) {
 
   const getApiId = async () => {
     const apis = await readApisLibrary(path);
-    return apis[region] && apis[region][resourceName] && apis[region][resourceName].restApiId;
+    return (
+      apis[region] &&
+      apis[region][resourceName] &&
+      apis[region][resourceName].restApiId
+    );
   };
 
   api.restApiId = await getApiId();
@@ -101,13 +101,15 @@ module.exports = async function redeploy(resourceName, path, options) {
     let existingMethods = [];
 
     addMethods = addMethods
-      ? distinctElements(addMethods.map(m => m.toUpperCase())) : [];
+      ? distinctElements(addMethods.map((m) => m.toUpperCase()))
+      : [];
 
     removeMethods = removeMethods
-      ? distinctElements(removeMethods.map(m => m.toUpperCase())) : [];
+      ? distinctElements(removeMethods.map((m) => m.toUpperCase()))
+      : [];
 
     if (api.resources.length > 0) {
-      const resource = api.resources.find(res => res.path === '/');
+      const resource = api.resources.find((res) => res.path === '/');
       existingMethods = Object.keys(resource.resourceMethods || {});
     }
 
@@ -115,15 +117,17 @@ module.exports = async function redeploy(resourceName, path, options) {
       addMethods.push('GET');
     }
 
-    addMethods = addMethods.filter(m => !existingMethods.includes(m));
+    addMethods = addMethods.filter((m) => !existingMethods.includes(m));
     api.addMethods = addMethods;
     api.removeMethods = removeMethods;
     api.existingMethods = existingMethods;
   };
 
   const deployIntegrations = async () => {
-    const rootResource = api.resources.find(res => res.path === '/');
-    const greedyResource = api.resources.find(res => res.path === '/{proxy+}');
+    const rootResource = api.resources.find((res) => res.path === '/');
+    const greedyResource = api.resources.find(
+      (res) => res.path === '/{proxy+}',
+    );
     const updateParams = {
       rootResource,
       greedyResource,
@@ -144,7 +148,8 @@ module.exports = async function redeploy(resourceName, path, options) {
 
   const updateApiGateway = async () => {
     const userIsRemovingMethods = api.removeMethods.length > 0;
-    const apiNeedsDeployment = (userIsAddingMethods || userIsAddingEndpoint) && !apiExistsOnAws;
+    const apiNeedsDeployment =
+      (userIsAddingMethods || userIsAddingEndpoint) && !apiExistsOnAws;
     let data;
 
     if (apiNeedsDeployment) {
@@ -160,14 +165,26 @@ module.exports = async function redeploy(resourceName, path, options) {
     if (updatedApiData) {
       const { restApiId, endpoint } = updatedApiData;
       ({ methodPermissionIds } = updatedApiData);
-      await writeApi(endpoint, methodPermissionIds, resourceName, restApiId, path);
+      await writeApi(
+        endpoint,
+        methodPermissionIds,
+        resourceName,
+        restApiId,
+        path,
+      );
     } else if (apiExistsOnAws) {
       const apis = await readApisLibrary(path);
       const regionalApis = apis[region];
       const regionalApi = regionalApis[resourceName];
       const existingApis = regionalApi.methodPermissionIds;
-      regionalApi.methodPermissionIds = Object.assign({}, existingApis, methodPermissionIds);
-      api.removeMethods.forEach(method => delete regionalApi.methodPermissionIds[method]);
+      regionalApi.methodPermissionIds = Object.assign(
+        {},
+        existingApis,
+        methodPermissionIds,
+      );
+      api.removeMethods.forEach(
+        (method) => delete regionalApi.methodPermissionIds[method],
+      );
       await writeApisLibrary(path, apis);
     }
   };
@@ -176,11 +193,15 @@ module.exports = async function redeploy(resourceName, path, options) {
   const invalidLambdaMsg = await validateLambdaReDeployment(resourceName);
   const invalidDirMsg = await validateLambdaDirReDeployment(resourceName);
   const { deployDir, invalidMsg, aborted } = await deploymentType(
-    resourceName, invalidLambdaMsg, invalidDirMsg,
+    resourceName,
+    invalidLambdaMsg,
+    invalidDirMsg,
   );
 
   if (aborted) {
-    bamWarn(msgAfterAction('lambda', resourceName, 'aborted', 'update has been'));
+    bamWarn(
+      msgAfterAction('lambda', resourceName, 'aborted', 'update has been'),
+    );
     return;
   }
 
@@ -210,7 +231,8 @@ module.exports = async function redeploy(resourceName, path, options) {
 
   const localLambda = (await readLambdasLibrary(path))[region][resourceName];
   if (!localLambda) {
-    const lambdaData = (await asyncGetFunction({ FunctionName: resourceName })).Configuration;
+    const lambdaData = (await asyncGetFunction({ FunctionName: resourceName }))
+      .Configuration;
     writeLambda(lambdaData, path);
   }
 

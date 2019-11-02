@@ -4,7 +4,7 @@ const getOptions = (flags) => {
     .join(' ')
     .split('--')
     .slice(1)
-    .map(elements => elements.trim());
+    .map((elements) => elements.trim());
 
   formattedOptions.forEach((optionStr) => {
     const [key, ...values] = optionStr.split(' ');
@@ -22,7 +22,7 @@ const commandsWithResource = [
   'delete',
   'dbtable',
 ];
-const commandWithResource = command => commandsWithResource.includes(command);
+const commandWithResource = (command) => commandsWithResource.includes(command);
 
 module.exports = function handleArgs(args, command) {
   let options;

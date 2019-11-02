@@ -1,7 +1,4 @@
-const {
-  log,
-  vertPadding,
-} = require('../util/logger');
+const { log, vertPadding } = require('../util/logger');
 
 const {
   getOptionsCommands,
@@ -25,10 +22,14 @@ module.exports = function help(optionsObj) {
 
   const optionsCommands = getOptionsCommands(optionsObj);
   if (optionsCommands) {
-    const optionsMsg = optionsCommands.map(formatCommandOptions).join(vertPadding);
+    const optionsMsg = optionsCommands
+      .map(formatCommandOptions)
+      .join(vertPadding);
     logOptions(optionsCommands, optionsMsg);
   } else {
-    log('Run "bam help" with a flag for any command to see its options (i.e. "bam help --create")');
+    log(
+      'Run "bam help" with a flag for any command to see its options (i.e. "bam help --create")',
+    );
     log('Run "bam help --all" to see options for all commands\n');
   }
 };

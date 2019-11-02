@@ -2,7 +2,14 @@ const readline = require('readline');
 
 const { bamText, bamWarn } = require('./logger');
 
-const asyncValidate = async (asyncCallback, validator, feedback, question, defaultAnswer, quitStr = 'q') => {
+const asyncValidate = async (
+  asyncCallback,
+  validator,
+  feedback,
+  question,
+  defaultAnswer,
+  quitStr = 'q',
+) => {
   let validAnswer;
   while (!validAnswer) {
     const result = await asyncCallback(question, defaultAnswer);
@@ -23,22 +30,23 @@ module.exports = async function getUserInput(prompts) {
   });
 
   // returns a pending prompt promise to handle single attempt at a question
-  const pendingPrompt = (question, defaultAnswer) => (
+  const pendingPrompt = (question, defaultAnswer) =>
     new Promise((resolve) => {
       rl.question(bamText(question), resolve);
       rl.write(defaultAnswer);
-    })
-  );
+    });
 
   for (let i = 0; i < prompts.length; i += 1) {
-    const {
-      question,
+    const { question, validator, feedback, defaultAnswer } = prompts[i];
+    const answer = await asyncValidate(
+      pendingPrompt,
       validator,
       feedback,
+      question,
       defaultAnswer,
-    } = prompts[i];
-    const answer = await asyncValidate(pendingPrompt, validator, feedback, question, defaultAnswer);
-    if (answer === undefined) { // did not receive answer - user quit early
+    );
+    if (answer === undefined) {
+      // did not receive answer - user quit early
       rl.close();
       return undefined;
     }

@@ -7,7 +7,7 @@ const catchSetupAndConfig = require('../src/util/catchSetupAndConfig');
 const bamSpinner = require('../src/util/spinner');
 const executeCommand = require('../src/commands/executeCommand');
 
-const [,, command, ...args] = process.argv;
+const [, , command, ...args] = process.argv;
 const homedir = os.homedir();
 
 (async () => {

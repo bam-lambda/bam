@@ -1,5 +1,11 @@
-const { doesRoleExist, doesPolicyExist } = require('../src/aws/doesResourceExist');
-const { createBamRole, createDatabaseBamRole } = require('../src/aws/createRoles');
+const {
+  doesRoleExist,
+  doesPolicyExist,
+} = require('../src/aws/doesResourceExist');
+const {
+  createBamRole,
+  createDatabaseBamRole,
+} = require('../src/aws/createRoles');
 const configTemplate = require('../templates/configTemplate');
 
 const {
@@ -21,7 +27,8 @@ const accountNumber = process.env.AWS_ID;
 const roleName = 'testBamRole';
 const databaseBamRole = 'testDatabaseBamRole';
 const databasePolicyARN = `arn:aws:iam::${accountNumber}:policy/testDatabaseBamRolePolicy`;
-const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
+const testPolicyARN =
+  'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const otherTestPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 const path = './test';
 const bamPath = getBamPath(path);
@@ -47,7 +54,10 @@ describe('createBamRole', async () => {
 
     afterEach(async () => {
       await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
-      await asyncDetachPolicy({ PolicyArn: otherTestPolicyARN, RoleName: roleName });
+      await asyncDetachPolicy({
+        PolicyArn: otherTestPolicyARN,
+        RoleName: roleName,
+      });
       await asyncDeleteRole({ RoleName: roleName });
     });
 
@@ -85,8 +95,14 @@ describe('createDatabaseBamRole', () => {
   });
 
   afterEach(async () => {
-    await asyncDetachPolicy({ PolicyArn: databasePolicyARN, RoleName: databaseBamRole });
-    await asyncDetachPolicy({ PolicyArn: otherTestPolicyARN, RoleName: databaseBamRole });
+    await asyncDetachPolicy({
+      PolicyArn: databasePolicyARN,
+      RoleName: databaseBamRole,
+    });
+    await asyncDetachPolicy({
+      PolicyArn: otherTestPolicyARN,
+      RoleName: databaseBamRole,
+    });
     await asyncDeletePolicy({ PolicyArn: databasePolicyARN });
     await asyncDeleteRole({ RoleName: databaseBamRole });
     await promisifiedRimraf(bamPath);

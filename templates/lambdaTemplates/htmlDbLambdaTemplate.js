@@ -29,13 +29,16 @@ exports.handler = async (event) => {
   // example use of queryStringParameters to obtain value for "name" parameter
   // const name = queryStringParameters ? queryStringParameters.name : 'no name';
 
-  const paragraphize = arr => (
-    arr.reduce((itemsArr, item) => {
-      const keys = Object.keys(item);
-      const paragraphs = keys.map(key => `<p>${key}: ${item[key]}</p>`).join('\n');
-      return itemsArr.concat([paragraphs]);
-    }, []).join('\n')
-  );
+  const paragraphize = (arr) =>
+    arr
+      .reduce((itemsArr, item) => {
+        const keys = Object.keys(item);
+        const paragraphs = keys
+          .map((key) => `<p>${key}: ${item[key]}</p>`)
+          .join('\n');
+        return itemsArr.concat([paragraphs]);
+      }, [])
+      .join('\n');
 
   const deleteParams = {
     // TODO: replace "myTable" with the name of your table
@@ -121,7 +124,11 @@ exports.handler = async (event) => {
     // note: application.js must be in rootDir directory to be accessible here
     const js = await readFile(`${rootDir}/application.js`, 'utf8');
 
-    const replacePlaceHolder = (nameOfPlaceHolder, newText, replaceAll = false) => {
+    const replacePlaceHolder = (
+      nameOfPlaceHolder,
+      newText,
+      replaceAll = false,
+    ) => {
       if (replaceAll) {
         const regex = new RegExp(nameOfPlaceHolder, 'g');
         html = html.replace(regex, newText);
@@ -136,7 +143,10 @@ exports.handler = async (event) => {
     // there should be an empty script tag in your
     // html file that you fill with the contents of your js file
     replacePlaceHolder('<script></script>', `<script>${js}</script>`);
-    replacePlaceHolder('Placeholder', `<h1>items</h1>${items}<h2>item</h2>${item}`);
+    replacePlaceHolder(
+      'Placeholder',
+      `<h1>items</h1>${items}<h2>item</h2>${item}`,
+    );
 
     // what the page will show
     response.body = html;

@@ -5,12 +5,7 @@ const bamSpinner = require('../util/spinner');
 const { unzipper } = require('../util/zipper');
 const { validateLambdaRetrieval } = require('../util/validations');
 
-const {
-  msgAfterAction,
-  bamLog,
-  bamWarn,
-  bamError,
-} = require('../util/logger');
+const { msgAfterAction, bamLog, bamWarn, bamError } = require('../util/logger');
 
 const {
   createWriteStream,
@@ -30,7 +25,10 @@ const addLambdaFolderToCwd = async (lambdaName, location) => {
       response.pipe(file);
       file.on('finish', async () => {
         await unzipper(lambdaName);
-        await rename(`${cwd}/${lambdaName}/index.js`, `${cwd}/${lambdaName}/${lambdaName}.js`);
+        await rename(
+          `${cwd}/${lambdaName}/index.js`,
+          `${cwd}/${lambdaName}/${lambdaName}.js`,
+        );
         await unlink(`${cwd}/${lambdaName}/${zipFileName}`);
         res();
       });

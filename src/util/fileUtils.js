@@ -13,17 +13,16 @@ const rename = promisify(fs.rename);
 const readdir = promisify(fs.readdir);
 const mkdir = promisify(fs.mkdir);
 const { createWriteStream } = fs;
-const getBamPath = path => `${path}/.bam`;
-const getStagingPath = path => `${getBamPath(path)}/staging`;
+const getBamPath = (path) => `${path}/.bam`;
+const getStagingPath = (path) => `${getBamPath(path)}/staging`;
 
-const exists = async path => (
+const exists = async (path) =>
   new Promise((res) => {
     fs.stat(path, (err) => {
       if (err === null) res(true);
       res(false);
     });
-  })
-);
+  });
 
 const readConfig = async (path) => {
   const bamPath = getBamPath(path);
@@ -90,7 +89,13 @@ const writeLambda = async (data, path) => {
   await writeLambdasLibrary(path, lambdas);
 };
 
-const writeApi = async (endpoint, methodPermissionIds, resourceName, restApiId, path) => {
+const writeApi = async (
+  endpoint,
+  methodPermissionIds,
+  resourceName,
+  restApiId,
+  path,
+) => {
   const region = await asyncGetRegion();
   const lambdas = await readLambdasLibrary(path);
   const apis = await readApisLibrary(path);
@@ -156,7 +161,7 @@ const createJSONFile = async (fileName, path, json) => {
   await writeFile(`${path}/${fileName}.json`, configStr);
 };
 
-const promisifiedRimraf = dir => new Promise(res => rimraf(dir, res));
+const promisifiedRimraf = (dir) => new Promise((res) => rimraf(dir, res));
 
 const distinctElements = (arr) => {
   const present = {};

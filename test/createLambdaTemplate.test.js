@@ -14,7 +14,8 @@ describe('bam create lambda', async () => {
   });
 
   test('file is not created when name is too long', async () => {
-    const longLambdaName = 'ffdasfkkajflajfkljdfkljakfljdkfljaklfjklafjklsjfkaljfkajfkdsjfklajf';
+    const longLambdaName =
+      'ffdasfkkajflajfkljdfkljakfljdkfljaklfjklafjklsjfkaljfkajfkdsjfklajf';
     await create(longLambdaName, path);
     const template = await exists(`${cwd}/${longLambdaName}.js`);
     expect(template).toBe(false);

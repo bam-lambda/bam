@@ -13,14 +13,12 @@ const {
   asyncAttachPolicy,
 } = require('./awsFunctions');
 
-const {
-  msgAfterAction,
-  bamLog,
-  bamError,
-} = require('../util/logger');
+const { msgAfterAction, bamLog, bamError } = require('../util/logger');
 
-const AWSLambdaBasicExecutionRolePolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
-const AWSLambdaRolePolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
+const AWSLambdaBasicExecutionRolePolicyARN =
+  'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
+const AWSLambdaRolePolicyARN =
+  'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 
 const rolePolicy = {
   Version: '2012-10-17',
@@ -35,19 +33,15 @@ const rolePolicy = {
   ],
 };
 
-const getAttachParams = (roleName, policyArn) => (
-  {
-    RoleName: roleName,
-    PolicyArn: policyArn,
-  }
-);
+const getAttachParams = (roleName, policyArn) => ({
+  RoleName: roleName,
+  PolicyArn: policyArn,
+});
 
-const getRoleParams = roleName => (
-  {
-    RoleName: roleName,
-    AssumeRolePolicyDocument: JSON.stringify(rolePolicy),
-  }
-);
+const getRoleParams = (roleName) => ({
+  RoleName: roleName,
+  AssumeRolePolicyDocument: JSON.stringify(rolePolicy),
+});
 
 const createRole = async (roleName) => {
   const roleParams = getRoleParams(roleName);
@@ -59,11 +53,17 @@ const createRole = async (roleName) => {
   }
 };
 
-const createDatabaseBamRolePolicy = async (databasePolicyName, databasePolicyArn) => {
+const createDatabaseBamRolePolicy = async (
+  databasePolicyName,
+  databasePolicyArn,
+) => {
   const doesDatabasePolicyExist = await doesPolicyExist(databasePolicyArn);
 
   if (!doesDatabasePolicyExist) {
-    const policyDocumentJSON = await readFile(`${__dirname}/../../templates/databaseBamRolePolicy.json`, 'utf8');
+    const policyDocumentJSON = await readFile(
+      `${__dirname}/../../templates/databaseBamRolePolicy.json`,
+      'utf8',
+    );
     const policyDocument = JSON.stringify(JSON.parse(policyDocumentJSON));
 
     const policyParams = {

@@ -3,7 +3,6 @@
 // TODO: describe your lambda below:
 // description:
 
-
 const AWS = require('aws-sdk');
 const { promisify } = require('util');
 const fs = require('fs');
@@ -64,7 +63,11 @@ exports.handler = async (event) => {
     // note: application.js must be in rootDir directory to be accessible here
     const js = await readFile(`${rootDir}/application.js`, 'utf8');
 
-    const replacePlaceHolder = (nameOfPlaceHolder, newText, replaceAll = false) => {
+    const replacePlaceHolder = (
+      nameOfPlaceHolder,
+      newText,
+      replaceAll = false,
+    ) => {
       if (replaceAll) {
         const regex = new RegExp(nameOfPlaceHolder, 'g');
         html = html.replace(regex, newText);

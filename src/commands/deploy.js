@@ -4,11 +4,7 @@ const checkForOptionType = require('../util/checkForOptionType');
 const getOption = require('../util/getOption');
 const bamBam = require('../util/bamBam');
 
-const {
-  bamWarn,
-  bamError,
-  msgAfterAction,
-} = require('../util/logger');
+const { bamWarn, bamError, msgAfterAction } = require('../util/logger');
 
 const {
   validateLambdaDeployment,
@@ -48,10 +44,14 @@ module.exports = async function deploy(resourceName, path, options) {
   const invalidLambdaMsg = await validateLambdaDeployment(resourceName);
   const invalidDirMsg = await validateLambdaDirDeployment(resourceName);
   const { deployDir, invalidMsg, aborted } = await deploymentType(
-    resourceName, invalidLambdaMsg, invalidDirMsg,
+    resourceName,
+    invalidLambdaMsg,
+    invalidDirMsg,
   );
   if (aborted) {
-    bamWarn(msgAfterAction('lambda', resourceName, 'aborted', 'creation has been'));
+    bamWarn(
+      msgAfterAction('lambda', resourceName, 'aborted', 'creation has been'),
+    );
     return;
   }
   if (invalidMsg) {
@@ -61,7 +61,7 @@ module.exports = async function deploy(resourceName, path, options) {
 
   const methodOption = getOption(options, 'method');
   const methods = options[methodOption];
-  const httpMethods = methods ? methods.map(m => m.toUpperCase()) : ['GET'];
+  const httpMethods = methods ? methods.map((m) => m.toUpperCase()) : ['GET'];
 
   const validateMethodsParams = {
     addMethods: httpMethods,
@@ -85,11 +85,12 @@ module.exports = async function deploy(resourceName, path, options) {
       return;
     }
 
-    const {
-      restApiId,
-      endpoint,
-      methodPermissionIds,
-    } = await deployApi(resourceName, path, httpMethods, stage);
+    const { restApiId, endpoint, methodPermissionIds } = await deployApi(
+      resourceName,
+      path,
+      httpMethods,
+      stage,
+    );
 
     const writeParams = [
       endpoint,

@@ -42,7 +42,8 @@ module.exports = async function updateLambdaConfig(lambdaName, path, roleName) {
   }
 
   const currentRoleArn = await getRole(lambdaName);
-  const roleIsBeingUpdated = updatedRoleArn && currentRoleArn !== updatedRoleArn;
+  const roleIsBeingUpdated =
+    updatedRoleArn && currentRoleArn !== updatedRoleArn;
   if (roleIsBeingUpdated || descriptionIsBeingUpdated) {
     const configParams = {
       FunctionName: lambdaName,
@@ -51,7 +52,9 @@ module.exports = async function updateLambdaConfig(lambdaName, path, roleName) {
 
     if (roleIsBeingUpdated) configParams.Role = updatedRoleArn;
 
-    const lambdaData = await asyncLambdaUpdateFunctionConfiguration(configParams);
+    const lambdaData = await asyncLambdaUpdateFunctionConfiguration(
+      configParams,
+    );
     if (descriptionIsBeingUpdated) await writeLambda(lambdaData, path);
   }
 };

@@ -28,13 +28,16 @@ exports.handler = async (event) => {
   // example use of queryStringParameters to obtain value for "name" parameter
   // const name = queryStringParameters ? queryStringParameters.name : 'no name';
 
-  const paragraphize = arr => (
-    arr.reduce((itemsArr, item) => {
-      const keys = Object.keys(item);
-      const paragraphs = keys.map(key => `<p>${key}: ${item[key]}</p>`).join('\n');
-      return itemsArr.concat([paragraphs]);
-    }, []).join('\n')
-  );
+  const paragraphize = (arr) =>
+    arr
+      .reduce((itemsArr, item) => {
+        const keys = Object.keys(item);
+        const paragraphs = keys
+          .map((key) => `<p>${key}: ${item[key]}</p>`)
+          .join('\n');
+        return itemsArr.concat([paragraphs]);
+      }, [])
+      .join('\n');
 
   const deleteParams = {
     // TODO: replace "myTable" with the name of your table

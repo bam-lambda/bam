@@ -11,12 +11,15 @@ const config = require('./config');
 
 const { bamWarn } = require('../util/logger');
 
-const commandIsBlank = cmd => cmd === undefined || cmd === '';
-const commandIsHelp = cmd => (
-  cmd === 'help' || cmd === '-h' || cmd === 'man'
-);
+const commandIsBlank = (cmd) => cmd === undefined || cmd === '';
+const commandIsHelp = (cmd) => cmd === 'help' || cmd === '-h' || cmd === 'man';
 
-module.exports = async function executeCommand(command, resourceName, options, homedir) {
+module.exports = async function executeCommand(
+  command,
+  resourceName,
+  options,
+  homedir,
+) {
   if (command === 'create') {
     await create(resourceName, options);
   } else if (command === 'deploy') {

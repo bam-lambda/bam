@@ -15,7 +15,8 @@ exports.handler = async (event) => {
   // example use of queryStringParameters to obtain value for "name" parameter
   // const name = queryStringParameters ? queryStringParameters.name : 'no name';
 
-  const html = '<p>Text that will be displayed on the page when endpoint is visited</p>';
+  const html =
+    '<p>Text that will be displayed on the page when endpoint is visited</p>';
   const response = {};
 
   // it's only necessary to handle the methods you have created

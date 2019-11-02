@@ -19,7 +19,9 @@ module.exports = async function updateHttpMethods({
   const rootPath = '/';
 
   const greedyPathResourceId = greedyResource.id;
-  const greedyPathExistingMethods = Object.keys(greedyResource.resourceMethods || {});
+  const greedyPathExistingMethods = Object.keys(
+    greedyResource.resourceMethods || {},
+  );
   const greedyPath = '/*';
 
   const methodPermissionIds = {};
@@ -27,8 +29,12 @@ module.exports = async function updateHttpMethods({
   let filteredRemoveMethods;
 
   const removeMethodsBeingAddedAndRemovedAtSameTime = () => {
-    filteredAddMethods = addMethods.filter(method => !removeMethods.includes(method));
-    filteredRemoveMethods = removeMethods.filter(method => !addMethods.includes(method));
+    filteredAddMethods = addMethods.filter(
+      (method) => !removeMethods.includes(method),
+    );
+    filteredRemoveMethods = removeMethods.filter(
+      (method) => !addMethods.includes(method),
+    );
   };
 
   const addHttpMethodIntegrations = async () => {
@@ -84,8 +90,10 @@ module.exports = async function updateHttpMethods({
       let greedyStatementId;
 
       if (Object.keys(existingMethodPermissionIds).includes(httpMethod)) {
-        rootStatementId = existingMethodPermissionIds[httpMethod].rootPermissionId;
-        greedyStatementId = existingMethodPermissionIds[httpMethod].greedyPermissionId;
+        rootStatementId =
+          existingMethodPermissionIds[httpMethod].rootPermissionId;
+        greedyStatementId =
+          existingMethodPermissionIds[httpMethod].greedyPermissionId;
 
         await deleteApiGatewayIntegration(
           resourceName,

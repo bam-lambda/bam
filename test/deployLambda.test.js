@@ -24,7 +24,8 @@ const {
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
-const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
+const testPolicyARN =
+  'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const otherTestPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 const path = './test';
 const bamPath = getBamPath(path);
@@ -45,7 +46,10 @@ describe('bam deploy lambda', () => {
     await deleteLambda(lambdaName, path);
     await promisifiedRimraf(bamPath);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
-    await asyncDetachPolicy({ PolicyArn: otherTestPolicyARN, RoleName: roleName });
+    await asyncDetachPolicy({
+      PolicyArn: otherTestPolicyARN,
+      RoleName: roleName,
+    });
     await asyncDeleteRole({ RoleName: roleName });
   });
 
@@ -53,7 +57,9 @@ describe('bam deploy lambda', () => {
     const testLambdaFile = await readFile('./test/templates/testLambda.js');
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
     await deployLambda(lambdaName, path);
-    const zipFile = await exists(`${stagingPath}/${lambdaName}/${lambdaName}.zip`);
+    const zipFile = await exists(
+      `${stagingPath}/${lambdaName}/${lambdaName}.zip`,
+    );
     await unlink(`${cwd}/${lambdaName}.js`);
     expect(zipFile).toBe(true);
   });

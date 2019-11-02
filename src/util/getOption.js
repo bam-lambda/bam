@@ -5,7 +5,9 @@ module.exports = function getOption(options, optionType) {
     const lowercaseOption = option.toLowerCase();
     const lowercaseOptionType = optionType.toLowerCase();
 
-    return lowercaseOption === lowercaseOptionType
-      || lowercaseOption === `${lowercaseOptionType}s`;
+    return (
+      lowercaseOption === lowercaseOptionType ||
+      lowercaseOption === `${lowercaseOptionType}s`
+    );
   });
 };

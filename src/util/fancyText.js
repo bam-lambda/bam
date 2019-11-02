@@ -23,7 +23,10 @@ const resetStyledText = () => {
 };
 
 const getStyledText = (text, ...styles) => {
-  const stylesStr = styles.reduce((result, style) => `${result}${textStyles[style]}`, '');
+  const stylesStr = styles.reduce(
+    (result, style) => `${result}${textStyles[style]}`,
+    '',
+  );
   return `${stylesStr}${text}${textStyles.reset}`;
 };
 

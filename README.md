@@ -86,6 +86,7 @@ bam <commandName> [<resourceName>] [--<flag>]
 * *`--rmMethods`*: specifies a HTTP method or methods to remove from endpoint
 * *`--addEndpoint`*: connects endpoint to lambda
 * *`--revokeDb`*: changes role associated with lambda to role specified in user config
+* *`--runtime`*: changes Node runtime of the lambda
 
 ---
 

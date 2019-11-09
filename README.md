@@ -162,3 +162,8 @@ DynamoDB tables deployed from this machine using BAM!:
 * [AWS Lambda SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html)
 * [Amazon API Gateway SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/APIGateway.html)
 * [Amazon DynamoDB Document Client SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html)
+
+## Release Notes
+#### Version 3.0.0 (November 9, 2019)
+* Updated the Node runtime to `nodejs10.x` for newly created lambda functions because Node 8.x is reaching EOL on December 31, 2019 (https://github.com/nodejs/Release).
+* Added a `--runtime` flag to the redeploy command so that previously created lambda functions can be updated and therefore continued to be maintained after 2019.

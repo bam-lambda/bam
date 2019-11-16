@@ -29,7 +29,7 @@ Thanks for trying out BAM!  We hope you'll like it! 💥
 ### Prerequisites
 * AWS account
 * AWS CLI
-* Node.js >= 8.10
+* Node.js >= 10
 * NPM
 
 BAM! requires that you have an account with AWS and you have set up an AWS CLI configuration on your local machine.  If you have not already done so, please visit [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) for instructions.  BAM! will use the default profile and region you have specified within that profile when interacting with AWS services.
@@ -86,7 +86,7 @@ For all commands, BAM! will look for `<name>` in your current directory.  This c
 *`--rmMethods`*: specifies a HTTP method or methods to remove from endpoint
 *`--addEndpoint`*: connects endpoint to lambda
 *`--revokeDb`*: changes role associated with lambda to role specified in user config
-
+*`--runtime`*: changes Node runtime of the lambda
 ---
 
 #### `bam delete <name>`
@@ -116,11 +116,11 @@ Lambdas and endpoints deployed from this machine using BAM!:
     description: a description of the lambda
     endpoint:: http://associatedEndpoint/bam
     http methods: GET, POST, DELETE
-    
+
 Other lambdas on AWS
   anotherLambda
   yetAnotherLambda
-  
+
 DynamoDB tables deployed from this machine using BAM!:
   nameOfTable1
     partition key: id (number)
@@ -153,7 +153,7 @@ DynamoDB tables deployed from this machine using BAM!:
 
 ---------------
 
-## Additional Resources:
+## Additional Resources
 * [AWS Console](https://aws.amazon.com/console/)
 * [AWS CLI](https://aws.amazon.com/cli/)
 * [What is AWS Lambda?](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
@@ -162,3 +162,8 @@ DynamoDB tables deployed from this machine using BAM!:
 * [AWS Lambda SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html)
 * [Amazon API Gateway SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/APIGateway.html)
 * [Amazon DynamoDB Document Client SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html)
+
+## Release Notes
+#### Version 3.0.0 (November 9, 2019)
+* Updated the Node runtime to `nodejs10.x` for newly created lambda functions because Node 8.x is reaching EOL on December 31, 2019 (https://github.com/nodejs/Release).
+* Added a `--runtime` flag to the redeploy command so that previously created lambda functions can be updated and therefore continued to be maintained after 2019.

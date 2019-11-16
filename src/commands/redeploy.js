@@ -2,6 +2,7 @@ const updateLambda = require('../aws/updateLambda');
 const deployApi = require('../aws/deployApi');
 const { doesApiExist } = require('../aws/doesResourceExist');
 const updateHttpMethods = require('../aws/updateHttpMethods');
+const getLambdaConfig = require('../aws/getLambdaConfig');
 const bamBam = require('../util/bamBam');
 const { asyncGetRegion } = require('../util/getRegion');
 const getOption = require('../util/getOption');
@@ -18,6 +19,7 @@ const {
   validateLambdaReDeployment,
   validateLambdaDirReDeployment,
   validateRoleAssumption,
+  validateNodeRuntime,
 } = require('../util/validations');
 
 const {
@@ -90,6 +92,20 @@ module.exports = async function redeploy(resourceName, path, options) {
       return;
     }
     roleName = userRole;
+  }
+
+  const getCurrentRuntime = async () => {
+    const lambdaConfig = await getLambdaConfig(resourceName);
+    return lambdaConfig.Runtime;
+  };
+
+  const runtimeOption = getOption(options, 'runtime');
+  const newRuntime = (options[runtimeOption] && options[runtimeOption][0]);
+  const runtime = newRuntime || await getCurrentRuntime();
+  const invalidRuntimeMsg = await validateNodeRuntime(runtime);
+  if (invalidRuntimeMsg) {
+    bamWarn(invalidRuntimeMsg);
+    return;
   }
 
   const resolveHttpMethodsFromOptions = () => {
@@ -214,7 +230,7 @@ module.exports = async function redeploy(resourceName, path, options) {
     writeLambda(lambdaData, path);
   }
 
-  const asyncFuncParams = [resourceName, path, roleName, deployDir];
+  const asyncFuncParams = [resourceName, path, roleName, deployDir, runtime];
   const lambdaUpdateSuccess = await bamBam(updateLambda, { asyncFuncParams });
 
   if (lambdaUpdateSuccess) {

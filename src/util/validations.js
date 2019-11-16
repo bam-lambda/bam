@@ -17,6 +17,7 @@ const {
   customizeApiWarnings,
   customizeTableWarnings,
   customizeRoleWarnings,
+  customizeConfigWarnings,
 } = require('./validationMessages');
 
 const cwd = process.cwd();
@@ -100,6 +101,15 @@ const removeMethodsDeployedPreviouslyWithBam = async ({
   const existingBamMethods = api ? Object.keys(api.methodPermissionIds) : [];
   const result = filteredRemoveMethods.filter(m => !existingBamMethods.includes(m));
   return result.length === 0;
+};
+
+const isANodeRuntime = (name) => {
+  return name.includes('node');
+};
+
+const runtimeIsValid = (name) => {
+  const validNodeRuntimes = ['nodejs10.x'];
+  return validNodeRuntimes.includes(name);
 };
 
 const validateResource = async (resourceData, validations, customWarnings) => {
@@ -298,8 +308,24 @@ const validateApiMethods = async (resourceData) => {
       affirmative: true,
     },
   ];
-
   const status = await validateResource(resourceData, validations, customizeApiWarnings);
+  return status;
+};
+
+const validateNodeRuntime = async (name) => {
+  const validations = [
+    {
+      validation: isANodeRuntime,
+      feedbackType: 'nodeRuntimeRequired',
+      affirmative: false,
+    },
+    {
+      validation: runtimeIsValid,
+      feedbackType: 'invalidNodeRuntime',
+      affirmative: false,
+    }
+  ];
+  const status = await validateResource(name, validations, customizeConfigWarnings);
   return status;
 };
 
@@ -315,4 +341,5 @@ module.exports = {
   validateApiMethods,
   validateTableCreation,
   validateRoleAssumption,
+  validateNodeRuntime,
 };

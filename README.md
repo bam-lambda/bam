@@ -61,8 +61,11 @@ For all commands, BAM! will look for `<name>` in your current directory.  This c
 *creates local file (or directory) based on template*
 
 *`--invoker`*: creates a local file/directory with lambda templated to invoke another lambda
+
 *`--html`*: creates local directory containing index.html, application.js, main.css, and [resourceName].js
+
 *`--db`*: creates local file/directory templated to work with a DynamoDB table
+
 *`--verbose`*: creates template with instructional comments
 
 ---
@@ -71,8 +74,11 @@ For all commands, BAM! will look for `<name>` in your current directory.  This c
 *deploys lambda + endpoint*
 
 *`--role`*: specifies role for this deployment
+
 *`--permitDb`*: adds policy with scan, put, get, delete DynamoDB permissions
+
 *`--methods`*: specifies HTTP method(s) for the endpoint
+
 *`--lambdaOnly`*: deploys the lambda without an endpoint
 
 ---
@@ -81,18 +87,26 @@ For all commands, BAM! will look for `<name>` in your current directory.  This c
 *updates existing lambda and endpoint*
 
 *`--role`*: specifies role for this deployment
+
 *`--permitDb`*: adds policy with scan, put, get, delete DynamoDB permissions
+
 *`--methods`*: specifies HTTP method(s) for the endpoint
+
 *`--rmMethods`*: specifies a HTTP method or methods to remove from endpoint
+
 *`--addEndpoint`*: connects endpoint to lambda
+
 *`--revokeDb`*: changes role associated with lambda to role specified in user config
+
 *`--runtime`*: changes Node runtime of the lambda
+
 ---
 
 #### `bam delete <name>`
 *deletes existing lambda + endpoint*
 
 *`--dbtable`*: deletes DynamoDB table
+
 *`--endpointOnly`*: deletes endpoint only
 
 ---
@@ -131,6 +145,7 @@ DynamoDB tables deployed from this machine using BAM!:
 ```
 
 *`--dbtables`*: lists only DynamoDB tables created with BAM!
+
 *`--lambdas`*: lists only lambdas and associated endpoints
 
 ---
@@ -144,6 +159,7 @@ DynamoDB tables deployed from this machine using BAM!:
 *documentation of commands*
 
 *`--<commandName>`*: logs a description of the command options
+
 *`--all`*: logs descriptions of all command options
 
 ---
@@ -164,6 +180,6 @@ DynamoDB tables deployed from this machine using BAM!:
 * [Amazon DynamoDB Document Client SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html)
 
 ## Release Notes
-#### Version 3.0.0 (November 9, 2019)
+#### Version 3.0.0 (November 16, 2019)
 * Updated the Node runtime to `nodejs10.x` for newly created lambda functions because Node 8.x is reaching EOL on December 31, 2019 (https://github.com/nodejs/Release).
 * Added a `--runtime` flag to the redeploy command so that previously created lambda functions can be updated and therefore continued to be maintained after 2019.

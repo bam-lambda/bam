@@ -56,7 +56,7 @@ const isPolicyAttached = async (roleName, policyArn) => {
   try {
     const data = await asyncListAttachedRolePolicies({ RoleName: roleName });
     const attachedPolicies = data.AttachedPolicies;
-    return attachedPolicies.any(obj => obj.PolicyArn === policyArn);
+    return attachedPolicies.any((obj) => obj.PolicyArn === policyArn);
   } catch (err) {
     return false;
   }

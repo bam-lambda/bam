@@ -1,6 +1,9 @@
 const deployLambda = require('../src/aws/deployLambda');
 const deployApi = require('../src/aws/deployApi');
-const { doesLambdaExist, doesApiExist } = require('../src/aws/doesResourceExist');
+const {
+  doesLambdaExist,
+  doesApiExist,
+} = require('../src/aws/doesResourceExist');
 const { createBamRole } = require('../src/aws/createRoles');
 const destroy = require('../src/commands/destroy');
 const setupBamDirAndFiles = require('../src/util/setupBamDirAndFiles');
@@ -27,7 +30,8 @@ const {
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
-const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
+const testPolicyARN =
+  'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const otherTestPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 const path = './test';
 const bamPath = getBamPath(path);
@@ -47,11 +51,12 @@ describe('bam delete lambda', () => {
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
     const lambdaData = await deployLambda(lambdaName, path, roleName);
 
-    const {
-      restApiId,
-      endpoint,
-      methodPermissionIds,
-    } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const { restApiId, endpoint, methodPermissionIds } = await deployApi(
+      lambdaName,
+      path,
+      httpMethods,
+      stageName,
+    );
 
     await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
@@ -61,7 +66,10 @@ describe('bam delete lambda', () => {
     await promisifiedRimraf(bamPath);
     await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
-    await asyncDetachPolicy({ PolicyArn: otherTestPolicyARN, RoleName: roleName });
+    await asyncDetachPolicy({
+      PolicyArn: otherTestPolicyARN,
+      RoleName: roleName,
+    });
     await asyncDeleteRole({ RoleName: roleName });
   });
 

@@ -1,7 +1,14 @@
-const { lambdaExistsInCwd, lambdaFileExistsWithinDir } = require('./validations');
+const {
+  lambdaExistsInCwd,
+  lambdaFileExistsWithinDir,
+} = require('./validations');
 const getUserInput = require('./getUserInput');
 
-module.exports = async function deploymentType(resourceName, invalidLambdaMsg, invalidDirMsg) {
+module.exports = async function deploymentType(
+  resourceName,
+  invalidLambdaMsg,
+  invalidDirMsg,
+) {
   const fileExists = await lambdaExistsInCwd(resourceName);
   const dirExists = await lambdaFileExistsWithinDir(resourceName);
   const bothExist = fileExists && dirExists;
@@ -23,7 +30,7 @@ module.exports = async function deploymentType(resourceName, invalidLambdaMsg, i
       prompt += '\nDo you wish to deploy it? (y|n) ';
       proceed = {
         question: prompt,
-        validator: response => (/^(y|n)$/i.test(response)),
+        validator: (response) => /^(y|n)$/i.test(response),
         feedback: 'response should be either "y" or "n"',
         defaultAnswer: '',
       };
@@ -35,7 +42,7 @@ module.exports = async function deploymentType(resourceName, invalidLambdaMsg, i
       prompt += '\nWhich would you like to deploy? (file|dir) ';
       proceed = {
         question: prompt,
-        validator: response => (/^(file|dir)$/i.test(response)),
+        validator: (response) => /^(file|dir)$/i.test(response),
         feedback: 'response should be either "file" or "dir"',
         defaultAnswer: '',
       };

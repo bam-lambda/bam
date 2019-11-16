@@ -1,14 +1,9 @@
-const {
-  getStyledText,
-  bamText,
-  indent,
-  indentFurther,
-} = require('./logger');
+const { getStyledText, bamText, indent, indentFurther } = require('./logger');
 
 const commandDescriptions = require('./commandDescriptions');
 
 const lineLengthBeforeDescription = 30;
-const getSpaces = num => ' '.repeat(num);
+const getSpaces = (num) => ' '.repeat(num);
 
 const formatCommands = (command) => {
   const commandObj = commandDescriptions[command];
@@ -28,27 +23,30 @@ const formatCommands = (command) => {
   return formattedStr;
 };
 
-const formatOption = option => (
-  `${indentFurther}${getStyledText(option.name, 'green')}: ${option.description}`
-);
+const formatOption = (option) =>
+  `${indentFurther}${getStyledText(option.name, 'green')}: ${
+    option.description
+  }`;
 
 const formatCommandOptions = (command) => {
   const { options } = commandDescriptions[command];
-  return `${indent}${bamText(command)}: \n${options.map(formatOption).join('\n')}`;
+  return `${indent}${bamText(command)}: \n${options
+    .map(formatOption)
+    .join('\n')}`;
 };
 
 const commands = Object.keys(commandDescriptions).sort();
 
 const getOptions = (optionsArr) => {
-  const commandsWithOptions = commands.filter(command => (
-    commandDescriptions[command].options.length > 0
-  ));
+  const commandsWithOptions = commands.filter(
+    (command) => commandDescriptions[command].options.length > 0,
+  );
 
   return optionsArr.includes('all')
     ? commandsWithOptions
-    : optionsArr.filter(option => (
-      commandsWithOptions.includes(option.toLowerCase())
-    ));
+    : optionsArr.filter((option) =>
+        commandsWithOptions.includes(option.toLowerCase()),
+      );
 };
 
 const getOptionsCommands = (optionsObj) => {

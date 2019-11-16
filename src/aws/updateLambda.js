@@ -19,13 +19,17 @@ const cwd = process.cwd();
 module.exports = async function updateLambda(lambdaName, path, roleName, dir, runtime) {
   const stagingPath = getStagingPath(path);
   const renameLambdaFileToIndexJs = async () => {
-    await rename(`${stagingPath}/${lambdaName}/${lambdaName}.js`,
-      `${stagingPath}/${lambdaName}/index.js`);
+    await rename(
+      `${stagingPath}/${lambdaName}/${lambdaName}.js`,
+      `${stagingPath}/${lambdaName}/index.js`,
+    );
   };
 
   const createDeploymentPackageFromDir = async () => {
     await copyDir(`${cwd}/${lambdaName}`, `${stagingPath}/${lambdaName}`);
-    const lambdaNameJSExists = await exists(`${stagingPath}/${lambdaName}/${lambdaName}.js`);
+    const lambdaNameJSExists = await exists(
+      `${stagingPath}/${lambdaName}/${lambdaName}.js`,
+    );
     if (lambdaNameJSExists) await renameLambdaFileToIndexJs();
   };
 
@@ -34,7 +38,10 @@ module.exports = async function updateLambda(lambdaName, path, roleName, dir, ru
       await createDeploymentPackageFromDir();
     } else {
       await createDirectory(`${lambdaName}`, stagingPath);
-      await copyFile(`${cwd}/${lambdaName}.js`, `${stagingPath}/${lambdaName}/index.js`);
+      await copyFile(
+        `${cwd}/${lambdaName}.js`,
+        `${stagingPath}/${lambdaName}/index.js`,
+      );
     }
   };
 

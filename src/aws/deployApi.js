@@ -12,13 +12,14 @@ const {
   asyncCreateDeployment,
 } = require('./awsFunctions');
 
-const {
-  bamLog,
-  msgAfterAction,
-  bamError,
-} = require('../util/logger');
+const { bamLog, msgAfterAction, bamError } = require('../util/logger');
 
-module.exports = async function deployApi(resourceName, path, httpMethods, stageName) {
+module.exports = async function deployApi(
+  resourceName,
+  path,
+  httpMethods,
+  stageName,
+) {
   const region = await asyncGetRegion();
   bamSpinner.start();
 
@@ -37,7 +38,9 @@ module.exports = async function deployApi(resourceName, path, httpMethods, stage
     };
 
     // create greedy path resource to allow path params
-    const greedyPathResourceId = (await asyncCreateResource(createResourceParams)).id;
+    const greedyPathResourceId = (await asyncCreateResource(
+      createResourceParams,
+    )).id;
 
     const methodPermissionIds = {};
     for (let i = 0; i < httpMethods.length; i += 1) {

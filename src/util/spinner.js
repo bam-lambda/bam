@@ -2,10 +2,7 @@ const restoreCursor = require('restore-cursor');
 
 const { resetStyledText } = require('./fancyText');
 
-const {
-  resetCursorPosition,
-  hideCursorAndWriteBamText,
-} = require('./logger');
+const { resetCursorPosition, hideCursorAndWriteBamText } = require('./logger');
 
 const bamSpinner = (() => {
   restoreCursor();
@@ -38,6 +35,5 @@ const bamSpinner = (() => {
     },
   };
 })();
-
 
 module.exports = bamSpinner;

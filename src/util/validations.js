@@ -6,11 +6,7 @@ const {
   doesRoleExist,
 } = require('../aws/doesResourceExist');
 
-const {
-  exists,
-  readFile,
-  readApisLibrary,
-} = require('../util/fileUtils');
+const { exists, readFile, readApisLibrary } = require('../util/fileUtils');
 
 const {
   customizeLambdaWarnings,
@@ -42,7 +38,7 @@ const lambdaExistsInCwd = async (name) => {
 
 const lambdaHasValidName = (name) => {
   if (!name) return false;
-  return (/^[a-zA-Z0-9\-_]+$/).test(name) && name.length < 64;
+  return /^[a-zA-Z0-9\-_]+$/.test(name) && name.length < 64;
 };
 
 const lambdaIsValidLambda = async (name) => {
@@ -64,7 +60,7 @@ const lambdaExistsOnAws = async (name) => {
 
 const tableHasValidName = (name) => {
   if (!name) return false;
-  return (/^[a-zA-Z0-9\-_.]{3,255}$/).test(name);
+  return /^[a-zA-Z0-9\-_.]{3,255}$/.test(name);
 };
 
 const tableExistsOnAws = async (name) => {
@@ -80,11 +76,17 @@ const roleExistsOnAws = async (name) => {
 const methodsAreValid = ({ addMethods = [], removeMethods = [] } = {}) => {
   const methods = addMethods.concat(removeMethods);
   const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'ANY'];
-  return methods.every(method => validMethods.includes(method));
+  return methods.every((method) => validMethods.includes(method));
 };
 
-const removingLastMethod = ({ addMethods = [], removeMethods = [], existingMethods = [] } = {}) => {
-  const result = existingMethods.concat(addMethods).filter(m => !removeMethods.includes(m));
+const removingLastMethod = ({
+  addMethods = [],
+  removeMethods = [],
+  existingMethods = [],
+} = {}) => {
+  const result = existingMethods
+    .concat(addMethods)
+    .filter((m) => !removeMethods.includes(m));
   return result.length === 0;
 };
 
@@ -94,12 +96,16 @@ const removeMethodsDeployedPreviouslyWithBam = async ({
   resourceName,
   path,
 }) => {
-  const filteredRemoveMethods = removeMethods.filter(m => !addMethods.includes(m));
+  const filteredRemoveMethods = removeMethods.filter(
+    (m) => !addMethods.includes(m),
+  );
   const region = await asyncGetRegion();
   const apis = await readApisLibrary(path);
   const api = apis[region][resourceName];
   const existingBamMethods = api ? Object.keys(api.methodPermissionIds) : [];
-  const result = filteredRemoveMethods.filter(m => !existingBamMethods.includes(m));
+  const result = filteredRemoveMethods.filter(
+    (m) => !existingBamMethods.includes(m),
+  );
   return result.length === 0;
 };
 
@@ -136,21 +142,28 @@ const validateLambdaDeployment = async (name) => {
       validation: lambdaHasValidName,
       feedbackType: 'invalidSyntax',
       affirmative: false,
-    }, {
+    },
+    {
       validation: lambdaExistsInCwd,
       feedbackType: 'doesNotExistInCwd',
       affirmative: false,
-    }, {
+    },
+    {
       validation: lambdaExistsOnAws,
       feedbackType: 'alreadyExistsOnAws',
       affirmative: true,
-    }, {
+    },
+    {
       validation: lambdaIsValidLambda,
       feedbackType: 'invalidLambda',
       affirmative: false,
     },
   ];
-  const status = await validateResource(name, validations, customizeLambdaWarnings);
+  const status = await validateResource(
+    name,
+    validations,
+    customizeLambdaWarnings,
+  );
   return status;
 };
 
@@ -160,21 +173,28 @@ const validateLambdaDirDeployment = async (name) => {
       validation: lambdaHasValidName,
       feedbackType: 'invalidSyntax',
       affirmative: false,
-    }, {
+    },
+    {
       validation: lambdaFileExistsWithinDir,
       feedbackType: 'doesNotExistInCwd',
       affirmative: false,
-    }, {
+    },
+    {
       validation: lambdaExistsOnAws,
       feedbackType: 'alreadyExistsOnAws',
       affirmative: true,
-    }, {
+    },
+    {
       validation: dirIsValidLambda,
       feedbackType: 'invalidLambda',
       affirmative: false,
     },
   ];
-  const status = await validateResource(name, validations, customizeLambdaWarnings);
+  const status = await validateResource(
+    name,
+    validations,
+    customizeLambdaWarnings,
+  );
   return status;
 };
 
@@ -184,21 +204,28 @@ const validateLambdaReDeployment = async (name) => {
       validation: lambdaHasValidName,
       feedbackType: 'invalidSyntax',
       affirmative: false,
-    }, {
+    },
+    {
       validation: lambdaExistsInCwd,
       feedbackType: 'doesNotExistInCwd',
       affirmative: false,
-    }, {
+    },
+    {
       validation: lambdaExistsOnAws,
       feedbackType: 'useDeployInstead',
       affirmative: false,
-    }, {
+    },
+    {
       validation: lambdaIsValidLambda,
       feedbackType: 'invalidLambda',
       affirmative: false,
     },
   ];
-  const status = await validateResource(name, validations, customizeLambdaWarnings);
+  const status = await validateResource(
+    name,
+    validations,
+    customizeLambdaWarnings,
+  );
   return status;
 };
 
@@ -208,21 +235,28 @@ const validateLambdaDirReDeployment = async (name) => {
       validation: lambdaHasValidName,
       feedbackType: 'invalidSyntax',
       affirmative: false,
-    }, {
+    },
+    {
       validation: lambdaFileExistsWithinDir,
       feedbackType: 'doesNotExistInCwd',
       affirmative: false,
-    }, {
+    },
+    {
       validation: lambdaExistsOnAws,
       feedbackType: 'useDeployInstead',
       affirmative: false,
-    }, {
+    },
+    {
       validation: dirIsValidLambda,
       feedbackType: 'invalidLambda',
       affirmative: false,
     },
   ];
-  const status = await validateResource(name, validations, customizeLambdaWarnings);
+  const status = await validateResource(
+    name,
+    validations,
+    customizeLambdaWarnings,
+  );
   return status;
 };
 
@@ -232,13 +266,18 @@ const validateLambdaCreation = async (name) => {
       validation: lambdaExistsInCwd,
       feedbackType: 'nameIsTaken',
       affirmative: true,
-    }, {
+    },
+    {
       validation: lambdaHasValidName,
       feedbackType: 'invalidSyntax',
       affirmative: false,
     },
   ];
-  const status = await validateResource(name, validations, customizeLambdaWarnings);
+  const status = await validateResource(
+    name,
+    validations,
+    customizeLambdaWarnings,
+  );
   return status;
 };
 
@@ -248,17 +287,23 @@ const validateLambdaRetrieval = async (name) => {
       validation: lambdaHasValidName,
       feedbackType: 'invalidSyntax',
       affirmative: false,
-    }, {
+    },
+    {
       validation: lambdaFileOrDirExistsInCwd,
       feedbackType: 'nameIsTaken',
       affirmative: true,
-    }, {
+    },
+    {
       validation: lambdaExistsOnAws,
       feedbackType: 'doesNotExistOnAws',
       affirmative: false,
     },
   ];
-  const status = await validateResource(name, validations, customizeLambdaWarnings);
+  const status = await validateResource(
+    name,
+    validations,
+    customizeLambdaWarnings,
+  );
   return status;
 };
 
@@ -268,13 +313,18 @@ const validateTableCreation = async (name) => {
       validation: tableHasValidName,
       feedbackType: 'invalidTableNameSyntax',
       affirmative: false,
-    }, {
+    },
+    {
       validation: tableExistsOnAws,
       feedbackType: 'tableDoesExistOnAws',
       affirmative: true,
     },
   ];
-  const status = await validateResource(name, validations, customizeTableWarnings);
+  const status = await validateResource(
+    name,
+    validations,
+    customizeTableWarnings,
+  );
   return status;
 };
 
@@ -286,7 +336,11 @@ const validateRoleAssumption = async (name) => {
       affirmative: false,
     },
   ];
-  const status = await validateResource(name, validations, customizeRoleWarnings);
+  const status = await validateResource(
+    name,
+    validations,
+    customizeRoleWarnings,
+  );
   return status;
 };
 
@@ -308,7 +362,12 @@ const validateApiMethods = async (resourceData) => {
       affirmative: true,
     },
   ];
-  const status = await validateResource(resourceData, validations, customizeApiWarnings);
+
+  const status = await validateResource(
+    resourceData,
+    validations,
+    customizeApiWarnings,
+  );
   return status;
 };
 

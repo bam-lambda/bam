@@ -28,7 +28,8 @@ const {
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
-const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
+const testPolicyARN =
+  'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const otherTestPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 const path = './test';
 const bamPath = getBamPath(path);
@@ -36,13 +37,12 @@ const cwd = process.cwd();
 const stageName = 'bam';
 const httpMethods = ['GET'];
 
-const asyncHttpsGet = endpoint => (
+const asyncHttpsGet = (endpoint) =>
   new Promise((resolve) => {
     https.get(endpoint, resolve);
-  })
-);
+  });
 
-const asyncHttpsRequest = opts => (
+const asyncHttpsRequest = (opts) =>
   new Promise((resolve, reject) => {
     const request = https.request(opts, (response) => {
       resolve(response);
@@ -53,8 +53,7 @@ const asyncHttpsRequest = opts => (
     });
 
     request.end();
-  })
-);
+  });
 
 describe('bam redeploy lambda', () => {
   beforeEach(async () => {
@@ -73,25 +72,34 @@ describe('bam redeploy lambda', () => {
     await promisifiedRimraf(bamPath);
     await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
-    await asyncDetachPolicy({ PolicyArn: otherTestPolicyARN, RoleName: roleName });
+    await asyncDetachPolicy({
+      PolicyArn: otherTestPolicyARN,
+      RoleName: roleName,
+    });
     await asyncDeleteRole({ RoleName: roleName });
   });
 
   test('Response still 200 from same url after changing lambda', async () => {
     let responseStatus;
     const lambdaData = await deployLambda(lambdaName, path, roleName);
-    const {
-      restApiId,
-      endpoint,
-      methodPermissionIds,
-    } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const { restApiId, endpoint, methodPermissionIds } = await deployApi(
+      lambdaName,
+      path,
+      httpMethods,
+      stageName,
+    );
 
     await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
-    const testLambdaWithDependenciesFile = await readFile('./test/templates/testLambdaWithDependencies.js');
+    const testLambdaWithDependenciesFile = await readFile(
+      './test/templates/testLambdaWithDependencies.js',
+    );
 
     try {
-      await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
+      await writeFile(
+        `${cwd}/${lambdaName}.js`,
+        testLambdaWithDependenciesFile,
+      );
       await redeploy(lambdaName, path, {});
       const response = await asyncHttpsGet(endpoint);
       responseStatus = response.statusCode;
@@ -105,11 +113,12 @@ describe('bam redeploy lambda', () => {
   test('Response contains different body before and after redeployment', async () => {
     let responseBody;
     const lambdaData = await deployLambda(lambdaName, path, roleName);
-    const {
-      restApiId,
-      endpoint,
-      methodPermissionIds,
-    } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const { restApiId, endpoint, methodPermissionIds } = await deployApi(
+      lambdaName,
+      path,
+      httpMethods,
+      stageName,
+    );
 
     await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
@@ -123,8 +132,13 @@ describe('bam redeploy lambda', () => {
         expect(responseBody).toMatch('<h1>This is a test</h1>');
       });
 
-      const testLambdaWithDependenciesFile = await readFile('./test/templates/testLambdaWithDependencies.js');
-      await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
+      const testLambdaWithDependenciesFile = await readFile(
+        './test/templates/testLambdaWithDependencies.js',
+      );
+      await writeFile(
+        `${cwd}/${lambdaName}.js`,
+        testLambdaWithDependenciesFile,
+      );
       await redeploy(lambdaName, path, {});
 
       const postResponse = await asyncHttpsGet(endpoint);
@@ -141,14 +155,17 @@ describe('bam redeploy lambda', () => {
   });
 
   test('Different requests return corresponding status codes', async () => {
-    const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
+    const testLambdaWithMultipleMethods = await readFile(
+      `${path}/templates/testLambdaWithMultipleMethods.js`,
+    );
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
     const lambdaData = await deployLambda(lambdaName, path, roleName);
-    const {
-      restApiId,
-      endpoint,
-      methodPermissionIds,
-    } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const { restApiId, endpoint, methodPermissionIds } = await deployApi(
+      lambdaName,
+      path,
+      httpMethods,
+      stageName,
+    );
 
     await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
@@ -194,14 +211,17 @@ describe('bam redeploy lambda', () => {
   });
 
   test('httpMethod ANY supports all method types', async () => {
-    const testLambdaWithMultipleMethods = await readFile(`${path}/templates/testLambdaWithMultipleMethods.js`);
+    const testLambdaWithMultipleMethods = await readFile(
+      `${path}/templates/testLambdaWithMultipleMethods.js`,
+    );
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithMultipleMethods);
     const lambdaData = await deployLambda(lambdaName, path, roleName);
-    const {
-      restApiId,
-      endpoint,
-      methodPermissionIds,
-    } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const { restApiId, endpoint, methodPermissionIds } = await deployApi(
+      lambdaName,
+      path,
+      httpMethods,
+      stageName,
+    );
 
     await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);

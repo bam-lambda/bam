@@ -13,6 +13,9 @@ module.exports = async function deleteApiGatewayIntegration(
     restApiId,
   };
 
-  await asyncRemovePermission({ FunctionName: resourceName, StatementId: statementId });
+  await asyncRemovePermission({
+    FunctionName: resourceName,
+    StatementId: statementId,
+  });
   await asyncDeleteMethod(deleteParams);
 };

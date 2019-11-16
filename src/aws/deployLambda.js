@@ -5,11 +5,7 @@ const bamBam = require('../util/bamBam');
 const bamSpinner = require('../util/spinner');
 const getDescription = require('../util/getDescription');
 
-const {
-  bamLog,
-  bamWarn,
-  msgAfterAction,
-} = require('../util/logger');
+const { bamLog, bamWarn, msgAfterAction } = require('../util/logger');
 const {
   createDirectory,
   readConfig,
@@ -23,7 +19,6 @@ const {
 
 const cwd = process.cwd();
 
-
 module.exports = async function deployLambda(lambdaName, path, roleName, dir) {
   const stagingPath = getStagingPath(path);
   const config = await readConfig(path);
@@ -31,13 +26,17 @@ module.exports = async function deployLambda(lambdaName, path, roleName, dir) {
   const role = roleName || config.role;
 
   const renameLambdaFileToIndexJs = async () => {
-    await rename(`${stagingPath}/${lambdaName}/${lambdaName}.js`,
-      `${stagingPath}/${lambdaName}/index.js`);
+    await rename(
+      `${stagingPath}/${lambdaName}/${lambdaName}.js`,
+      `${stagingPath}/${lambdaName}/index.js`,
+    );
   };
 
   const createDeploymentPackageFromDir = async () => {
     await copyDir(`${cwd}/${lambdaName}`, `${stagingPath}/${lambdaName}`);
-    const lambdaNameJSExists = await exists(`${stagingPath}/${lambdaName}/${lambdaName}.js`);
+    const lambdaNameJSExists = await exists(
+      `${stagingPath}/${lambdaName}/${lambdaName}.js`,
+    );
     if (lambdaNameJSExists) await renameLambdaFileToIndexJs();
   };
 
@@ -46,7 +45,10 @@ module.exports = async function deployLambda(lambdaName, path, roleName, dir) {
       await createDeploymentPackageFromDir();
     } else {
       await createDirectory(lambdaName, stagingPath);
-      await copyFile(`${cwd}/${lambdaName}.js`, `${stagingPath}/${lambdaName}/index.js`);
+      await copyFile(
+        `${cwd}/${lambdaName}.js`,
+        `${stagingPath}/${lambdaName}/index.js`,
+      );
     }
   };
 

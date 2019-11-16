@@ -28,7 +28,8 @@ const {
 
 const roleName = 'testBamRole';
 const lambdaName = 'testBamLambda';
-const testPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
+const testPolicyARN =
+  'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole';
 const otherTestPolicyARN = 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole';
 const path = './test';
 const bamPath = getBamPath(path);
@@ -36,13 +37,12 @@ const cwd = process.cwd();
 const stageName = 'bam';
 const httpMethods = ['GET'];
 
-const asyncHttpsGet = endpoint => (
+const asyncHttpsGet = (endpoint) =>
   new Promise((resolve) => {
     https.get(endpoint, resolve);
-  })
-);
+  });
 
-const asyncHttpsPost = opts => (
+const asyncHttpsPost = (opts) =>
   new Promise((resolve, reject) => {
     const request = https.request(opts, (response) => {
       resolve(response);
@@ -53,8 +53,7 @@ const asyncHttpsPost = opts => (
     });
 
     request.end();
-  })
-);
+  });
 
 describe('bam deploy api', () => {
   beforeEach(async () => {
@@ -73,7 +72,10 @@ describe('bam deploy api', () => {
     await promisifiedRimraf(bamPath);
     await unlink(`${cwd}/${lambdaName}.js`);
     await asyncDetachPolicy({ PolicyArn: testPolicyARN, RoleName: roleName });
-    await asyncDetachPolicy({ PolicyArn: otherTestPolicyARN, RoleName: roleName });
+    await asyncDetachPolicy({
+      PolicyArn: otherTestPolicyARN,
+      RoleName: roleName,
+    });
     await asyncDeleteRole({ RoleName: roleName });
     await delay(30000);
   });
@@ -82,11 +84,12 @@ describe('bam deploy api', () => {
     let responseStatus;
     const lambdaData = await deployLambda(lambdaName, path, roleName);
 
-    const {
-      restApiId,
-      endpoint,
-      methodPermissionIds,
-    } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const { restApiId, endpoint, methodPermissionIds } = await deployApi(
+      lambdaName,
+      path,
+      httpMethods,
+      stageName,
+    );
 
     await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
@@ -104,11 +107,12 @@ describe('bam deploy api', () => {
 
   test('Api endpoint exists on AWS', async () => {
     const lambdaData = await deployLambda(lambdaName, path, roleName);
-    const {
-      restApiId,
-      endpoint,
-      methodPermissionIds,
-    } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const { restApiId, endpoint, methodPermissionIds } = await deployApi(
+      lambdaName,
+      path,
+      httpMethods,
+      stageName,
+    );
 
     await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
@@ -118,14 +122,17 @@ describe('bam deploy api', () => {
   });
 
   test('Response contains query param in body', async () => {
-    const testLambdaWithQueryParams = await readFile(`${path}/templates/testLambdaWithQueryParams.js`);
+    const testLambdaWithQueryParams = await readFile(
+      `${path}/templates/testLambdaWithQueryParams.js`,
+    );
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithQueryParams);
     const lambdaData = await deployLambda(lambdaName, path, roleName);
-    const {
-      restApiId,
-      endpoint,
-      methodPermissionIds,
-    } = await deployApi(lambdaName, path, httpMethods, stageName);
+    const { restApiId, endpoint, methodPermissionIds } = await deployApi(
+      lambdaName,
+      path,
+      httpMethods,
+      stageName,
+    );
 
     await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
@@ -146,14 +153,17 @@ describe('bam deploy api', () => {
   });
 
   test('POST request returns 201 status code', async () => {
-    const testLambdaForPostMethod = await readFile(`${path}/templates/testLambdaForPostMethod.js`);
+    const testLambdaForPostMethod = await readFile(
+      `${path}/templates/testLambdaForPostMethod.js`,
+    );
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaForPostMethod);
     const lambdaData = await deployLambda(lambdaName, path, roleName);
-    const {
-      restApiId,
-      endpoint,
-      methodPermissionIds,
-    } = await deployApi(lambdaName, path, ['POST'], stageName);
+    const { restApiId, endpoint, methodPermissionIds } = await deployApi(
+      lambdaName,
+      path,
+      ['POST'],
+      stageName,
+    );
 
     await writeLambda(lambdaData, path);
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);

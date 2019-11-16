@@ -20,7 +20,9 @@ const asyncRemovePermission = promisify(lambda.removePermission.bind(lambda));
 const asyncLambdaDeleteFunction = promisify(lambda.deleteFunction.bind(lambda));
 const asyncLambdaCreateFunction = promisify(lambda.createFunction.bind(lambda));
 const asyncGetFunction = promisify(lambda.getFunction.bind(lambda));
-const asyncLambdaUpdateFunctionCode = promisify(lambda.updateFunctionCode.bind(lambda));
+const asyncLambdaUpdateFunctionCode = promisify(
+  lambda.updateFunctionCode.bind(lambda),
+);
 const asyncLambdaUpdateFunctionConfiguration = promisify(
   lambda.updateFunctionConfiguration.bind(lambda),
 );
@@ -53,7 +55,9 @@ const asyncDeletePolicy = promisify(iam.deletePolicy.bind(iam));
 const asyncListRolePolicies = promisify(iam.listAttachedRolePolicies.bind(iam));
 const asyncGetPolicy = promisify(iam.getPolicy.bind(iam));
 const asyncGetRole = promisify(iam.getRole.bind(iam));
-const asyncListAttachedRolePolicies = promisify(iam.listAttachedRolePolicies.bind(iam));
+const asyncListAttachedRolePolicies = promisify(
+  iam.listAttachedRolePolicies.bind(iam),
+);
 
 module.exports = {
   asyncGetCallerIdentity,

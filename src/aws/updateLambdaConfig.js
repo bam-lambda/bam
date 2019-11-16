@@ -27,8 +27,14 @@ module.exports = async function updateLambdaConfig(lambdaName, path, roleName, r
   const descriptionIsBeingUpdated = currentDescription !== description;
 
   let updatedRoleArn;
-  if (roleName) updatedRoleArn = `arn:aws:iam::${accountNumber}:role/${roleName}`;
-  const roleIsBeingUpdated = updatedRoleArn && currentRoleArn !== updatedRoleArn;
+
+  if (roleName) {
+    updatedRoleArn = `arn:aws:iam::${accountNumber}:role/${roleName}`;
+  }
+
+  const currentRoleArn = await getRole(lambdaName);
+  const roleIsBeingUpdated =
+    updatedRoleArn && currentRoleArn !== updatedRoleArn;
 
   const runtimeIsBeingUpdated = currentRuntime !== runtime;
 
@@ -41,7 +47,9 @@ module.exports = async function updateLambdaConfig(lambdaName, path, roleName, r
     if (roleIsBeingUpdated) configParams.Role = updatedRoleArn;
     if (runtimeIsBeingUpdated) configParams.Runtime = runtime;
 
-    const lambdaData = await asyncLambdaUpdateFunctionConfiguration(configParams);
+    const lambdaData = await asyncLambdaUpdateFunctionConfiguration(
+      configParams,
+    );
     if (descriptionIsBeingUpdated) await writeLambda(lambdaData, path);
   }
 };

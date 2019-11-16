@@ -1,11 +1,7 @@
 const checkForOptionType = require('../util/checkForOptionType');
 const { asyncGetRegion } = require('../util/getRegion');
 
-const {
-  log,
-  logInColor,
-  indent,
-} = require('../util/logger');
+const { log, logInColor, indent } = require('../util/logger');
 
 const {
   getAwsFunctionsList,
@@ -23,10 +19,15 @@ const {
 
 const logBamFunctions = (bamFunctionsList) => {
   if (bamFunctionsList.length > 0) {
-    logInColor(`${indent}Lambdas and endpoints deployed from this machine using BAM!:`, 'green');
+    logInColor(
+      `${indent}Lambdas and endpoints deployed from this machine using BAM!:`,
+      'green',
+    );
     log(`${bamFunctionsList}\n`);
   } else {
-    log(`${indent}There are no lambdas on AWS that have been deployed with BAM!\n`);
+    log(
+      `${indent}There are no lambdas on AWS that have been deployed with BAM!\n`,
+    );
   }
 };
 
@@ -39,7 +40,10 @@ const logAwsFunctions = (awsFunctionsList) => {
 
 const logBamTables = (bamTablesList) => {
   if (bamTablesList.length > 0) {
-    logInColor(`${indent}DynamoDB tables deployed from this machine using BAM!:`, 'green');
+    logInColor(
+      `${indent}DynamoDB tables deployed from this machine using BAM!:`,
+      'green',
+    );
     log(`${bamTablesList}\n`);
   } else {
     log(`${indent}No tables on AWS have been deployed from this machine\n`);
@@ -55,8 +59,8 @@ module.exports = async function list(path, options) {
   const lambdasFileExists = await exists(`${bamPath}/lambdas.json`);
   const apisFileExists = await exists(`${bamPath}/apis.json`);
   if (lambdasFileExists && apisFileExists) {
-    lambdas = await readLambdasLibrary(path) || {};
-    apis = await readApisLibrary(path) || {};
+    lambdas = (await readLambdasLibrary(path)) || {};
+    apis = (await readApisLibrary(path)) || {};
     bamFunctionsList = await getBamFunctionsList(path, lambdas, apis, region);
   }
   const awsFunctionsList = await getAwsFunctionsList(path, lambdas, region);

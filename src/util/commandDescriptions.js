@@ -1,5 +1,6 @@
 const roleDesc = 'specifies role for this deployment';
-const permitDbDesc = 'adds policy with scan, put, get, delete DynamoDB permissions';
+const permitDbDesc =
+  'adds policy with scan, put, get, delete DynamoDB permissions';
 const methodsDesc = 'specifies HTTP method(s) for the endpoint';
 
 module.exports = {
@@ -19,9 +20,20 @@ module.exports = {
       { name: 'role', description: roleDesc },
       { name: 'permitDb', description: permitDbDesc },
       { name: 'methods', description: methodsDesc },
-      { name: 'rmmethods', description: 'specifies HTTP method(s) to be removed from the API Gateway' },
-      { name: 'revokeDb', description: 'changes role associated with lambda to role specified in user config' },
-      { name: 'addEndpoint', description: 'connects endpoint (if none exists) to lamdba' },
+      {
+        name: 'rmmethods',
+        description:
+          'specifies HTTP method(s) to be removed from the API Gateway',
+      },
+      {
+        name: 'revokeDb',
+        description:
+          'changes role associated with lambda to role specified in user config',
+      },
+      {
+        name: 'addEndpoint',
+        description: 'connects endpoint (if none exists) to lamdba',
+      },
       { name: 'runtime', description: 'changes Node runtime of the lambda'},
     ],
     hasResource: true,
@@ -29,10 +41,25 @@ module.exports = {
   create: {
     description: 'creates local file (or directory) based on template',
     options: [
-      { name: 'html', description: 'creates local directory containing index.html, application.js, main.css, and [resourceName].js' },
-      { name: 'invoker', description: 'creates local file/directory templated to invoke another lambda' },
-      { name: 'db', description: 'creates local file/directory templated to work with a DynamoDB table' },
-      { name: 'verbose', description: 'creates template with instructional comments' },
+      {
+        name: 'html',
+        description:
+          'creates local directory containing index.html, application.js, main.css, and [resourceName].js',
+      },
+      {
+        name: 'invoker',
+        description:
+          'creates local file/directory templated to invoke another lambda',
+      },
+      {
+        name: 'db',
+        description:
+          'creates local file/directory templated to work with a DynamoDB table',
+      },
+      {
+        name: 'verbose',
+        description: 'creates template with instructional comments',
+      },
     ],
     hasResource: true,
   },
@@ -57,8 +84,14 @@ module.exports = {
   list: {
     description: 'lists lambdas and tables deployed with BAM!',
     options: [
-      { name: 'dbtables', description: 'lists only DynamoDB tables created with BAM!' },
-      { name: 'lambdas', description: 'lists only lambdas and associated endpoints' },
+      {
+        name: 'dbtables',
+        description: 'lists only DynamoDB tables created with BAM!',
+      },
+      {
+        name: 'lambdas',
+        description: 'lists only lambdas and associated endpoints',
+      },
     ],
     hasResource: false,
   },

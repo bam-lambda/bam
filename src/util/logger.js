@@ -18,20 +18,27 @@ const indentFurther = padding(4);
 const indentFurthest = padding(6);
 const vertPadding = padding(2, '\n');
 
-const bamText = text => getStyledText(text, ...bamTextStyles);
-const bamWarnText = text => getStyledText(text, warningColor);
-const bamErrorText = text => getStyledText(text, errorColor);
+const bamText = (text) => getStyledText(text, ...bamTextStyles);
+const bamWarnText = (text) => getStyledText(text, warningColor);
+const bamErrorText = (text) => getStyledText(text, errorColor);
 
 const logInColor = (text, color) => log(getStyledText(text, color));
-const bamWrite = text => stdout.write(bamText(text));
-const bamLog = text => log(bamText(text));
-const bamWarn = text => log(bamWarnText(text));
-const bamError = text => log(bamErrorText(text));
-const captitalize = str => `${str[0].toUpperCase()}${str.slice(1)}`;
+const bamWrite = (text) => stdout.write(bamText(text));
+const bamLog = (text) => log(bamText(text));
+const bamWarn = (text) => log(bamWarnText(text));
+const bamError = (text) => log(bamErrorText(text));
+const captitalize = (str) => `${str[0].toUpperCase()}${str.slice(1)}`;
 
-const msgAfterAction = (resourceType, resourceName, action, modification = 'has been') => {
+const msgAfterAction = (
+  resourceType,
+  resourceName,
+  action,
+  modification = 'has been',
+) => {
   let msg = action === 'created' ? '💥  ' : '';
-  msg += `${captitalize(resourceType)}: "${resourceName}" ${modification} ${action}`;
+  msg += `${captitalize(
+    resourceType,
+  )}: "${resourceName}" ${modification} ${action}`;
   return msg;
 };
 

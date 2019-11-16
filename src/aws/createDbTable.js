@@ -1,13 +1,13 @@
 const bamSpinner = require('../util/spinner');
 const { asyncCreateTable } = require('./awsFunctions');
 
-const {
-  bamError,
-  bamLog,
-  msgAfterAction,
-} = require('../util/logger');
+const { bamError, bamLog, msgAfterAction } = require('../util/logger');
 
-module.exports = async function createDbTable(tableName, partitionKey, sortKey) {
+module.exports = async function createDbTable(
+  tableName,
+  partitionKey,
+  sortKey,
+) {
   bamSpinner.start();
 
   const provisionedThroughput = {

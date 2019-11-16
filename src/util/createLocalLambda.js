@@ -1,38 +1,41 @@
 const { asyncGetRegion } = require('./getRegion');
 
-const {
-  readFile,
-  writeFile,
-  copyFile,
-  mkdir,
-} = require('./fileUtils');
+const { readFile, writeFile, copyFile, mkdir } = require('./fileUtils');
 
-const {
-  bamLog,
-  msgAfterAction,
-} = require('../util/logger');
+const { bamLog, msgAfterAction } = require('../util/logger');
 
-const stripComments = template => (
-  template.split('\n').filter(line => (
-    line.includes('description') || !line.includes('//')
-  )).slice(1)
-    .join('\n')
-);
+const stripComments = (template) =>
+  template
+    .split('\n')
+    .filter((line) => line.includes('description') || !line.includes('//'))
+    .slice(1)
+    .join('\n');
 
-const removeExcessBlankLines = template => template.split('\n\n\n').join('\n\n');
+const removeExcessBlankLines = (template) =>
+  template.split('\n\n\n').join('\n\n');
 
 const getTemplate = async (templateType, includeComments) => {
   const userRegion = await asyncGetRegion();
   const lambdaTemplateLocation = `${__dirname}/../../templates/lambdaTemplates/${templateType}Template.js`;
   const lambdaTemplate = await readFile(lambdaTemplateLocation, 'utf8');
-  const lambdaTemplateWithRegion = lambdaTemplate.replace('userRegion', userRegion);
-  return removeExcessBlankLines(includeComments ? lambdaTemplateWithRegion : stripComments(lambdaTemplateWithRegion));
+  const lambdaTemplateWithRegion = lambdaTemplate.replace(
+    'userRegion',
+    userRegion,
+  );
+  return removeExcessBlankLines(
+    includeComments
+      ? lambdaTemplateWithRegion
+      : stripComments(lambdaTemplateWithRegion),
+  );
 };
 
 const writeTemplateLocally = async (lambdaName, template, withinDir) => {
   const cwd = process.cwd();
 
-  await writeFile(`${cwd}/${withinDir ? `${lambdaName}/` : ''}${lambdaName}.js`, template);
+  await writeFile(
+    `${cwd}/${withinDir ? `${lambdaName}/` : ''}${lambdaName}.js`,
+    template,
+  );
 };
 
 module.exports = async function createLocalLambda(
@@ -55,9 +58,18 @@ module.exports = async function createLocalLambda(
 
   if (createHtmlTemplate) {
     await mkdir(lambdaName);
-    await copyFile(`${__dirname}/../../templates/indexTemplate.html`, `${cwd}/${lambdaName}/index.html`);
-    await copyFile(`${__dirname}/../../templates/mainTemplate.css`, `${cwd}/${lambdaName}/main.css`);
-    await copyFile(`${__dirname}/../../templates/applicationTemplate.js`, `${cwd}/${lambdaName}/application.js`);
+    await copyFile(
+      `${__dirname}/../../templates/indexTemplate.html`,
+      `${cwd}/${lambdaName}/index.html`,
+    );
+    await copyFile(
+      `${__dirname}/../../templates/mainTemplate.css`,
+      `${cwd}/${lambdaName}/main.css`,
+    );
+    await copyFile(
+      `${__dirname}/../../templates/applicationTemplate.js`,
+      `${cwd}/${lambdaName}/application.js`,
+    );
   }
 
   const template = await getTemplate(templateType, includeComments);

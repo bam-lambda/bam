@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/bam-lambda.svg?maxAge=2592000?style=plastic)](https://www.npmjs.com/package/bam-lambda)
 [![license](https://img.shields.io/npm/l/bam-lambda.svg)](https://www.npmjs.com/package/bam-lambda)
 
-**BAM!** is a serverless framework that makes it quick (hence, the name) and easy to get small applications up & running using Node.js and Amazon Web Services (AWS). It is optimized for the deployment of AWS Lambda functions integrated with AWS API Gateway endpoints, but also allows for the creation of DynamoDB tables, which can help persist data between lambda invocations.
+**BAM!** is a serverless framework that makes it quick (hence, the name) and easy to get small applications up & running using Node.js and Amazon Web Services (AWS). It is optimized for the deployment of AWS Lambda functions integrated with Amazon API Gateway endpoints, but also allows for the creation of Amazon DynamoDB tables, which can help persist data between lambda invocations.
 
 As long as you meet the prerequisites (see below), there is no need to perform any configuration; BAM! presumes some configuration details by default and uses [AWS STS](https://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html) to pull in your account number.  That said, there is an option to update your default configuration if you'd like to do that.
 
@@ -45,65 +45,64 @@ npm install -g bam-lambda
 
 BAM! commands conform to the following structure:
 ```
-bam <commandName> [<resourceName>] [--<flag>]
+bam <commandName> [<name>] [--<flag>]
 ```
+
+For all commands, BAM! will look for `<name>` in your current directory.  This can be either a file called `<name>.js` or a directory called `<name>` containing a file called `<name>.js`.
+
 ---
 
-### `bam config`
+#### `bam config`
 *updates default settings*
 
 ---
 
-### `bam create [name]`
+#### `bam create <name>`
 *creates local file (or directory) based on template*
 
-##### Flags
-* *`--invoker`*: creates a local file/directory with lambda templated to invoke another lambda
-* *`--html`*: creates local directory containing index.html, application.js, main.css, and [resourceName].js
-* *`--db`*: creates local file/directory templated to work with a DynamoDB table
-* *`--verbose`*: creates template with instructional comments
+*`--invoker`*: creates a local file/directory with lambda templated to invoke another lambda
+*`--html`*: creates local directory containing index.html, application.js, main.css, and [resourceName].js
+*`--db`*: creates local file/directory templated to work with a DynamoDB table
+*`--verbose`*: creates template with instructional comments
 
 ---
 
-### `bam deploy [name]`
+#### `bam deploy <name>`
 *deploys lambda + endpoint*
 
-##### Flags
-* *`--role`*: specifies role for this deployment
-* *`--permitDb`*: adds policy with scan, put, get, delete DynamoDB permissions
-* *`--methods`*: specifies HTTP method(s) for the endpoint
-* *`--lambdaOnly`*: deploys the lambda without an endpoint
+*`--role`*: specifies role for this deployment
+*`--permitDb`*: adds policy with scan, put, get, delete DynamoDB permissions
+*`--methods`*: specifies HTTP method(s) for the endpoint
+*`--lambdaOnly`*: deploys the lambda without an endpoint
 
 ---
 
-### `bam redeploy [name]`
+#### `bam redeploy <name>`
 *updates existing lambda and endpoint*
 
-##### Flags
-* *`--role`*: specifies role for this deployment
-* *`--permitDb`*: adds policy with scan, put, get, delete DynamoDB permissions
-* *`--methods`*: specifies HTTP method(s) for the endpoint
-* *`--rmMethods`*: specifies a HTTP method or methods to remove from endpoint
-* *`--addEndpoint`*: connects endpoint to lambda
-* *`--revokeDb`*: changes role associated with lambda to role specified in user config
-* *`--runtime`*: changes Node runtime of the lambda
-
+*`--role`*: specifies role for this deployment
+*`--permitDb`*: adds policy with scan, put, get, delete DynamoDB permissions
+*`--methods`*: specifies HTTP method(s) for the endpoint
+*`--rmMethods`*: specifies a HTTP method or methods to remove from endpoint
+*`--addEndpoint`*: connects endpoint to lambda
+*`--revokeDb`*: changes role associated with lambda to role specified in user config
+*`--runtime`*: changes Node runtime of the lambda
 ---
 
-### `bam delete [name]`
+#### `bam delete <name>`
 *deletes existing lambda + endpoint*
-##### Flags
-* *`--dbtable`*: deletes DynamoDB table
-* *`--endpointOnly`*: deletes endpoint only
+
+*`--dbtable`*: deletes DynamoDB table
+*`--endpointOnly`*: deletes endpoint only
 
 ---
 
-### `bam get [name]`
+#### `bam get <name>`
   *pulls lambda code from AWS into a local directory*
 
 ---
 
-### `bam list`
+#### `bam list`
 *lists lambdas, endpoints, and dbtables*
 
 ```
@@ -130,27 +129,41 @@ DynamoDB tables deployed from this machine using BAM!:
     partition key: id (number)
     sort key: name (string)
 ```
-##### Flags
-  * *`--dbtables`*: lists only DynamoDB tables created with BAM!
-  * *`--lambdas`*: lists only lambdas and associated endpoints
+
+*`--dbtables`*: lists only DynamoDB tables created with BAM!
+*`--lambdas`*: lists only lambdas and associated endpoints
 
 ---
 
-### `bam dbtable [name]`
+#### `bam dbtable <name>`
 *creates a DynamoDB table `[tableName]` on AWS*
 
 ---
 
-### `bam --man|help|h`
+#### `bam --man|help|h`
 *documentation of commands*
 
-##### Flags
-  * *`--[commandName]`*: logs a description of the command options
-  * *`--all`*: logs descriptions of all command options
+*`--<commandName>`*: logs a description of the command options
+*`--all`*: logs descriptions of all command options
 
 ---
 
-### `bam --version|v`
+#### `bam --version|v`
 *displays version*
 
 ---------------
+
+## Additional Resources
+* [AWS Console](https://aws.amazon.com/console/)
+* [AWS CLI](https://aws.amazon.com/cli/)
+* [What is AWS Lambda?](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
+* [What is Amazon API Gateway?](https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html)
+* [What is Amazon DynamoDB?](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html)
+* [AWS Lambda SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html)
+* [Amazon API Gateway SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/APIGateway.html)
+* [Amazon DynamoDB Document Client SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html)
+
+## Release Notes
+#### Version 3.0.0 (November 9, 2019)
+* Updated the Node runtime to `nodejs10.x` for newly created lambda functions because Node 8.x is reaching EOL on December 31, 2019 (https://github.com/nodejs/Release).
+* Added a `--runtime` flag to the redeploy command so that previously created lambda functions can be updated and therefore continued to be maintained after 2019.

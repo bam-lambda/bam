@@ -16,7 +16,7 @@ const {
 
 const cwd = process.cwd();
 
-module.exports = async function updateLambda(lambdaName, path, roleName, dir) {
+module.exports = async function updateLambda(lambdaName, path, roleName, dir, runtime) {
   const stagingPath = getStagingPath(path);
   const renameLambdaFileToIndexJs = async () => {
     await rename(
@@ -52,7 +52,7 @@ module.exports = async function updateLambda(lambdaName, path, roleName, dir) {
   const zipContents = await readFile(zippedFileName);
 
   const updateAwsLambda = async () => {
-    await updateLambdaConfig(lambdaName, path, roleName);
+    await updateLambdaConfig(lambdaName, path, roleName, runtime);
     const codeParams = {
       FunctionName: lambdaName,
       ZipFile: zipContents,

@@ -124,7 +124,7 @@ describe('bam redeploy lambda', () => {
     await writeApi(endpoint, methodPermissionIds, lambdaName, restApiId, path);
 
     try {
-      await delay(30000)
+      await delay(30000);
       const preResponse = await asyncHttpsGet(endpoint);
       preResponse.setEncoding('utf8');
       preResponse.on('data', (response) => {

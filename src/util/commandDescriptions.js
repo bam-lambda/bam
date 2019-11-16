@@ -34,6 +34,7 @@ module.exports = {
         name: 'addEndpoint',
         description: 'connects endpoint (if none exists) to lamdba',
       },
+      { name: 'runtime', description: 'changes Node runtime of the lambda'},
     ],
     hasResource: true,
   },

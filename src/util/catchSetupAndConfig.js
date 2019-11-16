@@ -37,8 +37,9 @@ module.exports = async function catchSetupAndConfig(path, command) {
   if (
     commandIsNotValid(command) ||
     ['help', 'version', 'create'].includes(command)
-  )
+  ) {
     return true;
+  }
 
   const bamPath = getBamPath(path);
   const bamDirExists = await exists(bamPath);

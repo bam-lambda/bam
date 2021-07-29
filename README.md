@@ -29,7 +29,7 @@ Thanks for trying out BAM!  We hope you'll like it! 💥
 ### Prerequisites
 * AWS account
 * AWS CLI
-* Node.js >= 10
+* Node.js >= 14
 * NPM
 
 BAM! requires that you have an account with AWS and you have set up an AWS CLI configuration on your local machine.  If you have not already done so, please visit [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) for instructions.  BAM! will use the default profile and region you have specified within that profile when interacting with AWS services.
@@ -180,6 +180,10 @@ DynamoDB tables deployed from this machine using BAM!:
 * [Amazon DynamoDB Document Client SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html)
 
 ## Release Notes
-#### Version 3.0.0 (November 16, 2019)
+#### Version 4.0.0 (August 2021)
+* Updated default Node runtime to `nodejs14.x`.
+* Added `nodejs12.x` to valid runtimes for Lambda functions.
+* Removed `nodejs10.x` from valid runtimes for Lambda functions because Node 10.x will no longer be supported after July 30, 2021 (https://docs.aws.amazon.com/lambda/latest/dg/runtime-support-policy.html).
+#### Version 3.0.0 (November 2019)
 * Updated the Node runtime to `nodejs10.x` for newly created lambda functions because Node 8.x is reaching EOL on December 31, 2019 (https://github.com/nodejs/Release).
 * Added a `--runtime` flag to the redeploy command so that previously created lambda functions can be updated and therefore continued to be maintained after 2019.

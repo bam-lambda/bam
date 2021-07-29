@@ -76,7 +76,7 @@ describe('createBamRole', async () => {
 
 describe('createDatabaseBamRole', () => {
   beforeEach(async () => {
-    jest.setTimeout(10000);
+    jest.setTimeout(15000);
     await createDirectory('.bam', path);
     const config = configTemplate(roleName);
     config.accountNumber = process.env.AWS_ID;

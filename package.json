@@ -53,6 +53,6 @@
   },
   "preferGlobal": true,
   "engines": {
-    "node": ">=10"
+    "node": ">=14"
   }
 }

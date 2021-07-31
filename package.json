@@ -1,6 +1,6 @@
 {
   "name": "bam-lambda",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "main": "index.js",
   "repository": "https://github.com/bam-lambda/bam.git",
   "author": "bam-lambda",
@@ -53,6 +53,6 @@
   },
   "preferGlobal": true,
   "engines": {
-    "node": ">=10"
+    "node": ">=14"
   }
 }

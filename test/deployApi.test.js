@@ -66,7 +66,7 @@ describe('bam deploy api', () => {
     await writeConfig(path, config);
     await createBamRole(roleName);
     await writeFile(`${cwd}/${lambdaName}.js`, testLambdaFile);
-  });
+  }, 10000);
 
   afterEach(async () => {
     await destroy(lambdaName, path);

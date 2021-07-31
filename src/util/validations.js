@@ -108,7 +108,7 @@ const isANodeRuntime = (name) => {
 };
 
 const runtimeIsValid = (name) => {
-  const validNodeRuntimes = ['nodejs10.x'];
+  const validNodeRuntimes = ['nodejs12.x', 'nodejs14.x'];
   return validNodeRuntimes.includes(name);
 };
 

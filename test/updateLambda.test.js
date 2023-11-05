@@ -127,6 +127,7 @@ describe('bam redeploy lambda', () => {
       await writeFile(`${cwd}/${lambdaName}.js`, testLambdaWithDependenciesFile);
       await redeploy(lambdaName, path, {});
 
+      await delay(30000);
       const postResponse = await asyncHttpsGet(endpoint);
       postResponse.setEncoding('utf8');
       postResponse.on('data', (response) => {

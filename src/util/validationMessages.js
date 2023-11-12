@@ -1,7 +1,7 @@
 const { msgAfterAction } = require('./logger');
 const { distinctElements } = require('./fileUtils');
 
-const validNodeRuntimes = ['nodejs12.x', 'nodejs14.x'];
+const validNodeRuntimes = ['nodejs16.x', 'nodejs18.x'];
 const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'ANY'];
 const validMethodsStr = `${validMethods.slice(0, -2).join(', ')}, and ${validMethods.slice(-1)}`;
 const pluralizeMethodsMsg = msg => msg.replace('Method', 'Methods')
@@ -49,7 +49,7 @@ const getInvalidRuntimeMsg = (runtime) => {
     validNodeRuntimesStr = `"${validNodeRuntimes[0]}"`;
   }
 
-  return `${msgAfterAction('runtime', runtime, 'invalid', 'is')}. Please update to ${validNodeRuntimesStr} using the "runtime" option. Ex: bam redeploy myLambda --runtime nodejs14.x\nNOTE: This update may include breaking changes. Please refer to the Node documentation and make any necessary changes to your lambda function first.`;
+  return `${msgAfterAction('runtime', runtime, 'invalid', 'is')}. Please update to ${validNodeRuntimesStr} using the "runtime" option. Ex: bam redeploy myLambda --runtime nodejs18.x\nNOTE: This update may include breaking changes. Please refer to the Node documentation and make any necessary changes to your lambda function first.`;
 };
 
 const customizeLambdaWarnings = (name) => {

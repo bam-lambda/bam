@@ -183,7 +183,7 @@ DynamoDB tables deployed from this machine using BAM!:
 #### Version 5.0.0 (November 2023)
 * Updated default Node runtime to `nodejs18.x`.
 * Added `nodejs16.x` and `nodejs18.x` to valid runtimes for Lambda functions.
-* Removed `nodejs14.x` from valid runtimes for Lambda functions because it will no longer be supported after November 27, 2023 (https://docs.aws.amazon.com/lambda/latest/dg/runtime-support-policy.html).
+* Removed `nodejs12.x` and `nodejs14.x` from valid runtimes for Lambda functions because they are no longer supported (https://docs.aws.amazon.com/lambda/latest/dg/runtime-support-policy.html).
 #### Version 4.0.0 (August 2021)
 * Updated default Node runtime to `nodejs14.x`.
 * Added `nodejs12.x` to valid runtimes for Lambda functions.

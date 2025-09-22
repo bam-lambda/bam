@@ -29,7 +29,7 @@ Thanks for trying out BAM!  We hope you'll like it! 💥
 ### Prerequisites
 * AWS account
 * AWS CLI
-* Node.js >= 18
+* Node.js >= 22
 * NPM
 
 BAM! requires that you have an account with AWS and you have set up an AWS CLI configuration on your local machine.  If you have not already done so, please visit [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) for instructions.  BAM! will use the default profile and region you have specified within that profile when interacting with AWS services.
@@ -180,6 +180,10 @@ DynamoDB tables deployed from this machine using BAM!:
 * [Amazon DynamoDB Document Client SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html)
 
 ## Release Notes
+#### Version 6.0.0 (September 2025)
+* Updated default Node runtime to `nodejs22.x`.
+* Added `nodejs20.x` and `nodejs22.x` to valid runtimes for Lambda functions.
+* Removed `nodejs16.x` and `nodejs18.x` from valid runtimes for Lambda functions because they are no longer supported (https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html#runtimes-supported).
 #### Version 5.0.0 (November 2023)
 * Updated default Node runtime to `nodejs18.x`.
 * Added `nodejs16.x` and `nodejs18.x` to valid runtimes for Lambda functions.

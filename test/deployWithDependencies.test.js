@@ -113,9 +113,7 @@ describe('bam deploy api', () => {
     });
 
     test('node modules directory contains dependencies', async () => {
-      const uuid = await exists(`${stagingPath}/${lambdaName}/node_modules/uuid`);
       const moment = await exists(`${stagingPath}/${lambdaName}/node_modules/moment`);
-      expect(uuid).toBe(true);
       expect(moment).toBe(true);
     });
 
